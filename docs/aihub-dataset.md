@@ -153,12 +153,52 @@ export AIHUB_APIKEY='발급받은키'
 | 배 | 20.9 GB | chuhwang, singo |
 | 감귤 | 20.6 GB | hallabong, onjumilgam |
 
-### 3) 어디서 받을 것인가
+### 3) ⚠️ 반드시 국내에서 받아야 한다 — Colab 불가
 
-- 이 노트북 **C: 여유 28 GB** — ①②만 가능, ③은 불가.
-- **E: 외장하드** — 현재 미연결. 연결 시 ③ 가능하나 압축해제에 2~3배 여유 필요(≈300 GB).
-- **Colab (권장)** — `aihubshell`을 노트북 셀에서 그대로 실행해 Colab 디스크로 직접 받는다.
-  노트북 반납 일정과 무관하고 GPU 학습까지 한 자리에서 끝난다.
+Colab 에서 받으려다 확인한 사실:
+
+```
+Download failed with HTTP status 502.
+AI 허브는 해외에서의 데이터 다운로드를 제한하고 있습니다.
+```
+
+Colab 은 해외 서버라 **다운로드가 원천적으로 막힌다**. 따라서 순서를 나눈다.
+
+| 단계 | 장소 | 결과 |
+|---|---|---|
+| 수집 | **국내 PC** `tools/aihub_ingest.py` | 119 GB → 224px JPEG **약 900 MB** |
+| 업로드 | Google Drive | `onfarm_cv.zip` |
+| 학습 | Colab GPU | `notebooks/onfarm_train_colab.ipynb` |
+
+디스크는 걱정하지 않아도 된다. 수집 도구가 zip 을 **1개씩** 처리하고 즉시 지우므로
+최고 사용량은 원본 zip 1개(약 4 GB)뿐이다. 원본 1000×1000 PNG(832 KB)가
+224px JPEG(7.2 KB)로 **0.9%** 까지 줄어드는 것을 실측했다.
+
+```bash
+python tools/aihub_ingest.py --items all --key <APIKEY> --out data/onfarm_cv
+```
+
+### ⚠️ aihubshell 은 조용히 잘린 파일을 남긴다
+
+`aihubshell` 내부 `curl` 에 재시도 옵션이 없어, 전송이 끊겨도 오류 없이 "병합이 완료 되었습니다"로 끝난다.
+실측 사고 두 건: 444 MB 원천이 **13.5 MB** 로, 라벨 54개가 **21개** 로 잘린 채 성공처럼 보고됐다.
+
+`tools/aihub_ingest.py` 는 `curl --retry 8 --retry-all-errors` 로 받고
+tar 앞머리·zip 무결성을 직접 검증한다. 같은 파일을 재시도 옵션으로 받으니 444 MB 전량이 정상 수신됐다.
+
+### 원천 zip 내부 구조 (실측)
+
+평평한 PNG 목록이며 라벨 JSON 과 파일명이 그대로 대응한다. 별도 매칭 규칙이 필요 없다.
+
+```
+pear_singo_L.zip
+  ├─ pear_singo_L_25-100.png   ← 1000×1000, 약 832KB
+  └─ ...
+pear_singo_L.zip (라벨)
+  └─ pear_singo_L_25-100.json
+```
+
+검증셋 pear_singo_L 기준 **504/504 = 100% 매칭**.
 
 ## 학습 후 접합 지점
 
