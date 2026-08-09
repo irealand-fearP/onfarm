@@ -22,6 +22,7 @@ AI 허브는 해외 IP 다운로드를 차단한다 — Colab 에서 돌리면
 from __future__ import annotations
 
 import argparse
+import time
 import csv
 import io
 import json
@@ -63,7 +64,21 @@ MANIFEST_FIELDS = [
 ]
 
 
-def fetch(filekey: int, api_key: str, dest: Path) -> Path:
+def _live_size(path: Path) -> int:
+    """
+    Windows 는 열려 있는 파일의 크기를 디렉터리 항목에 바로 반영하지 않는다.
+    (그래서 받는 중에는 path.stat().st_size 가 0 으로 보인다)
+    공유 모드로 직접 열어 실제 크기를 읽는다.
+    """
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(0, 2)
+            return fh.tell()
+    except OSError:
+        return 0
+
+
+def fetch(filekey: int, api_key: str, dest: Path, label: str = "") -> list[Path]:
     """한 파일키를 받아 tar 를 푼 뒤 .part 를 병합해 zip 경로들을 돌려준다."""
     tar_path = dest / f"{filekey}.tar"
     cmd = [
@@ -72,9 +87,18 @@ def fetch(filekey: int, api_key: str, dest: Path) -> Path:
         "-o", str(tar_path), "-H", f"apikey:{api_key}",
         f"{DOWNLOAD_URL}?fileSn={filekey}",
     ]
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
-        raise RuntimeError(f"filekey {filekey} 내려받기 실패: {r.stderr.strip()[:300]}")
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    started = time.time()
+    while proc.poll() is None:
+        time.sleep(5)
+        mb = _live_size(tar_path) / 2**20
+        elapsed = time.time() - started
+        print(f"\r    {label}{filekey}: {mb:,.0f} MB  ({mb/max(elapsed,1):.1f} MB/s, {elapsed/60:.1f}분)",
+              end="", flush=True)
+    print()
+    if proc.returncode != 0:
+        err = (proc.stderr.read() if proc.stderr else "").strip()[:300]
+        raise RuntimeError(f"filekey {filekey} 내려받기 실패: {err}")
 
     head = tar_path.open("rb").read(300)
     if b"\xea\xb0\x80" in head or b"aihub" in head.lower() or tar_path.stat().st_size < 4096:
@@ -150,13 +174,13 @@ def main() -> int:
             print(f"── {item} ──")
             label_map: dict[str, dict] = {}
             for fk in FILEKEYS[item]["label"]:
-                label_map |= load_labels(fetch(fk, args.key, work))
+                label_map |= load_labels(fetch(fk, args.key, work, f"{item} 라벨 "))
                 shutil.rmtree(work / f"x{fk}", ignore_errors=True)
             print(f"  라벨 {len(label_map):,}건")
 
             saved = matched = 0
             for fk in FILEKEYS[item]["src"]:
-                zips = fetch(fk, args.key, work)
+                zips = fetch(fk, args.key, work, f"{item} ")
                 for z in zips:
                     split = "train" if "1.Training" in str(z) else "valid"
                     size_class = z.stem.rsplit("_", 1)[-1].upper()
