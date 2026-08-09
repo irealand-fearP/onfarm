@@ -36,6 +36,7 @@ from pathlib import Path
 
 from PIL import Image
 
+OUTER_RETRIES = 4
 DOWNLOAD_URL = "https://api.aihub.or.kr/down/0.6/149.do"
 
 # docs/aihub149_filetree.txt 에서 뽑은 실제 파일키 (원천 = 이미지, 라벨 = JSON)
@@ -87,18 +88,30 @@ def fetch(filekey: int, api_key: str, dest: Path, label: str = "") -> list[Path]
         "-o", str(tar_path), "-H", f"apikey:{api_key}",
         f"{DOWNLOAD_URL}?fileSn={filekey}",
     ]
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    started = time.time()
-    while proc.poll() is None:
-        time.sleep(5)
-        mb = _live_size(tar_path) / 2**20
-        elapsed = time.time() - started
-        print(f"\r    {label}{filekey}: {mb:,.0f} MB  ({mb/max(elapsed,1):.1f} MB/s, {elapsed/60:.1f}분)",
-              end="", flush=True)
-    print()
-    if proc.returncode != 0:
-        err = (proc.stderr.read() if proc.stderr else "").strip()[:300]
-        raise RuntimeError(f"filekey {filekey} 내려받기 실패: {err}")
+    # 몇 시간짜리 작업이라 회선이 끊기는 일이 실제로 일어난다
+    # (Connection was reset → DNS 실패). curl 내부 재시도만으로는 부족해 바깥에서도 다시 건다.
+    last_err = ""
+    for attempt in range(1, OUTER_RETRIES + 1):
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        started = time.time()
+        while proc.poll() is None:
+            time.sleep(5)
+            mb = _live_size(tar_path) / 2**20
+            elapsed = time.time() - started
+            print(f"\r    {label}{filekey}: {mb:,.0f} MB  ({mb/max(elapsed,1):.1f} MB/s, {elapsed/60:.1f}분)"
+                  + (f"  [재시도 {attempt}/{OUTER_RETRIES}]" if attempt > 1 else ""),
+                  end="", flush=True)
+        print()
+        if proc.returncode == 0:
+            break
+        last_err = (proc.stderr.read() if proc.stderr else "").strip()[:200]
+        tar_path.unlink(missing_ok=True)
+        if attempt < OUTER_RETRIES:
+            wait = 30 * attempt
+            print(f"    ! {filekey} 실패({last_err}) — {wait}초 뒤 재시도")
+            time.sleep(wait)
+    else:
+        raise RuntimeError(f"filekey {filekey} 내려받기 실패({OUTER_RETRIES}회): {last_err}")
 
     head = tar_path.open("rb").read(300)
     if b"\xea\xb0\x80" in head or b"aihub" in head.lower() or tar_path.stat().st_size < 4096:
@@ -165,8 +178,26 @@ def main() -> int:
         return 1
 
     args.out.mkdir(parents=True, exist_ok=True)
-    rows: list[dict] = []
     work = Path(tempfile.mkdtemp(prefix="aihub_"))
+
+    # 이어받기 — 회선이 끊겨 죽어도 이미 끝낸 파일키는 다시 받지 않는다.
+    state_path = args.out / ".ingest_state.json"
+    done: set[int] = set()
+    if state_path.exists():
+        done = set(json.loads(state_path.read_text(encoding="utf-8")).get("done", []))
+        print(f"이어받기: 이미 끝난 파일키 {len(done)}개 건너뜀")
+
+    manifest = args.out / "manifest.csv"
+    fresh = not manifest.exists()
+    mf = manifest.open("a", newline="", encoding="utf-8")
+    writer = csv.DictWriter(mf, fieldnames=MANIFEST_FIELDS)
+    if fresh:
+        writer.writeheader()
+
+    def mark_done(fk: int) -> None:
+        done.add(fk)
+        state_path.write_text(json.dumps({"done": sorted(done)}), encoding="utf-8")
+
     print(f"작업 폴더 {work}\n대상 {items}\n")
 
     try:
@@ -180,6 +211,10 @@ def main() -> int:
 
             saved = matched = 0
             for fk in FILEKEYS[item]["src"]:
+                if fk in done:
+                    print(f"  {fk}: 건너뜀(완료)")
+                    continue
+                rows: list[dict] = []
                 zips = fetch(fk, args.key, work, f"{item} ")
                 for z in zips:
                     split = "train" if "1.Training" in str(z) else "valid"
@@ -211,26 +246,28 @@ def main() -> int:
                                 "horizontality_angle": lab.get("horizontality_angle"),
                             })
                 shutil.rmtree(work / f"x{fk}", ignore_errors=True)
+                # 한 파일키를 끝낼 때마다 매니페스트를 붙이고 완료 표시를 남긴다.
+                writer.writerows(rows)
+                mf.flush()
+                mark_done(fk)
                 free = shutil.disk_usage(args.out.anchor or "/")[2] / 2**30
                 print(f"  {fk}: 누적 {saved:,}장 | 디스크 여유 {free:.0f}GB")
             print(f"  → {item} 완료: 라벨매칭 {matched:,} / 저장 {saved:,}\n")
     finally:
+        mf.close()
         shutil.rmtree(work, ignore_errors=True)
 
-    manifest = args.out / "manifest.csv"
-    with manifest.open("w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=MANIFEST_FIELDS)
-        w.writeheader()
-        w.writerows(rows)
+    # 매니페스트는 파일키마다 이어 붙였으므로 여기서는 최종 점검만 한다.
+    all_rows = list(csv.DictReader(manifest.open(encoding="utf-8")))
 
     # 개체 누출 확인 — 학습 전에 여기서 걸러야 한다
     groups = {"train": set(), "valid": set()}
-    for r in rows:
-        groups[r["split"]].add(r["group_no"])
+    for r in all_rows:
+        groups.setdefault(r["split"], set()).add(r["group_no"])
     overlap = groups["train"] & groups["valid"]
     total_mb = sum(f.stat().st_size for f in args.out.rglob("*.jpg")) / 2**20
 
-    print(f"매니페스트 {manifest}  ({len(rows):,}행)")
+    print(f"매니페스트 {manifest}  ({len(all_rows):,}행)")
     print(f"이미지 {len(list(args.out.rglob('*.jpg'))):,}장, {total_mb:,.0f} MB")
     print(f"train 개체 {len(groups['train']):,} / valid 개체 {len(groups['valid']):,}")
     if overlap:
