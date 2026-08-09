@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="사진 없음">
+  <rect width="400" height="400" fill="#f1ede5" />
+  <circle cx="200" cy="180" r="66" fill="#ded7c8" />
+  <path d="M120 300 q80 -70 160 0z" fill="#ded7c8" />
+  <text x="200" y="356" font-family="system-ui" font-size="22" fill="#a49b88" text-anchor="middle">사진 없음</text>
+</svg>

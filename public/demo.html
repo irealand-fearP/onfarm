@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 시연</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store">
+    <div class="mode-banner" id="modeBanner" hidden></div>
+    <header class="store-top">
+      <div class="row">
+        <a class="logo" href="/"><span class="dot"></span>ON-FARM 시연</a>
+        <a class="chip-link" href="/">매장으로</a>
+      </div>
+    </header>
+
+    <main class="store-main" style="max-width: 720px">
+      <section class="hero">
+        <h1>사진 한 장에서 주문까지, 3분</h1>
+        <p>로그인 없이 아래 순서대로 누르시면 전체 흐름이 그대로 돕니다.</p>
+      </section>
+
+      <div class="panel">
+        <h3>① 농민이 되어 보기</h3>
+        <p style="font-size: 14px; color: var(--muted); margin: 0 0 10px">
+          천안 성환 <b>김복순</b>님 계정으로 들어가 사진 한 장으로 상품을 올립니다.
+        </p>
+        <button class="btn" id="asFarmer">농민 화면으로 (김복순)</button>
+      </div>
+
+      <div class="panel">
+        <h3>② 소비자가 되어 보기</h3>
+        <p style="font-size: 14px; color: var(--muted); margin: 0 0 10px">
+          방금 올라온 상품이 매장 맨 위에 뜹니다. 그대로 주문까지 해봅니다.
+        </p>
+        <button class="btn" id="asConsumer">소비자 매장으로 (장바구니님)</button>
+      </div>
+
+      <div class="panel">
+        <h3>③ 거점 담당자가 되어 보기</h3>
+        <p style="font-size: 14px; color: var(--muted); margin: 0 0 10px">
+          주문된 상품의 실물 검수를 기록하고 배송 상태를 넘깁니다.
+        </p>
+        <button class="btn" id="asHub">거점 화면으로</button>
+      </div>
+
+      <div class="panel">
+        <h3>시연 준비</h3>
+        <p style="font-size: 14px; color: var(--muted); margin: 0 0 10px">
+          발표 직전 데이터를 처음 상태로 되돌립니다(로컬에서만 동작).
+        </p>
+        <button class="btn secondary" id="resetBtn">데모 데이터 초기화</button>
+      </div>
+
+      <div class="panel">
+        <h3>지금 이 서버의 AI 설정</h3>
+        <div class="trust-row"><span class="k">provider</span><span class="v" id="cfgProvider">-</span></div>
+        <div class="trust-row"><span class="k">이미지 외부 전송</span><span class="v" id="cfgOffline">-</span></div>
+        <div class="trust-row"><span class="k">데모(고정응답) 모드</span><span class="v" id="cfgDemo">-</span></div>
+        <p style="font-size: 13px; color: var(--muted); margin: 10px 0 0">
+          외부 API 키가 없으면 서버는 로컬 색·질감 규칙으로 판정합니다. 딥러닝 모델이 아니며, 화면에도 그대로 표기됩니다.
+        </p>
+      </div>
+    </main>
+
+    <script type="module">
+      import { $, api, mountModeBanner, toast } from '/js/api.js';
+
+      const cfg = await mountModeBanner('#modeBanner');
+      const full = await api('/api/config');
+      $('#cfgProvider').textContent = full.ai.provider;
+      $('#cfgOffline').textContent = full.ai.offline ? '없음(로컬 판정)' : '있음(외부 인식 API)';
+      $('#cfgDemo').textContent = full.ai.demoMode ? '켜짐 — 고정 응답' : '꺼짐';
+
+      const { accounts } = await api('/api/accounts');
+      const pick = (role, name) => accounts.find((a) => a.role === role && (!name || a.name === name)) ?? accounts.find((a) => a.role === role);
+
+      async function loginAs(account, to) {
+        if (!account) {
+          toast('계정을 찾지 못했습니다. 데모 데이터를 초기화해 주세요.');
+          return;
+        }
+        await api('/api/auth/login', { body: { userId: account.id } });
+        location.href = to;
+      }
+
+      $('#asFarmer').addEventListener('click', () => loginAs(pick('farmer', '김복순'), '/farmer'));
+      $('#asConsumer').addEventListener('click', () => loginAs(pick('consumer', '장바구니'), '/'));
+      $('#asHub').addEventListener('click', () => loginAs(pick('hub_operator'), '/hub'));
+
+      $('#resetBtn').addEventListener('click', async () => {
+        if (!confirm('현재 등록된 상품·주문을 모두 지우고 초기 상태로 되돌립니다. 계속할까요?')) return;
+        try {
+          await api('/api/demo/reset', { body: {} });
+          localStorage.removeItem('onfarm.cart.v1');
+          toast('초기화했습니다.');
+        } catch (err) {
+          toast(err.message);
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 장바구니</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store">
+    <header class="store-top">
+      <div class="row">
+        <a class="logo" href="/"><span class="dot"></span>ON-FARM</a>
+        <div class="top-actions"><a class="chip-link" href="/">계속 쇼핑</a></div>
+      </div>
+    </header>
+
+    <main class="store-main">
+      <div class="section-title"><h2>장바구니</h2><span id="who"></span></div>
+      <div id="items"></div>
+
+      <div class="panel" id="checkout" hidden>
+        <h3>받는 분</h3>
+        <label class="field"><span>이름</span><input id="rName" autocomplete="name" /></label>
+        <label class="field"><span>연락처</span><input id="rPhone" autocomplete="tel" placeholder="010-0000-0000" /></label>
+        <label class="field"><span>주소</span><input id="rAddress" autocomplete="street-address" /></label>
+        <label class="field"><span>요청사항 (선택)</span><input id="rMemo" /></label>
+        <p style="font-size: 13px; color: var(--muted); margin: 0">
+          MVP 데모입니다. 실제 결제·배송은 연동돼 있지 않으며 주문은 '결제완료' 상태로 기록됩니다.
+        </p>
+      </div>
+    </main>
+
+    <div class="buy-bar" id="bar" hidden>
+      <div class="total" id="total">0원</div>
+      <button class="btn" id="orderBtn">주문하기</button>
+    </div>
+
+    <script type="module">
+      import { $, api, el, imageOf, money, me, toast } from '/js/api.js';
+      import { clearCart, readCart, setQuantity } from '/js/cart.js';
+
+      const session = await me();
+      $('#who').textContent = session ? `${session.user.name}님` : '로그인 필요';
+      if (session?.user?.role === 'consumer') {
+        $('#rName').value = session.user.name;
+        $('#rPhone').value = session.user.phone ?? '';
+        $('#rAddress').value = '충남 천안시 동남구 ...';
+      }
+
+      async function render() {
+        const items = readCart();
+        const box = $('#items');
+        box.replaceChildren();
+        if (!items.length) {
+          box.append(el('p', { style: 'text-align:center;color:var(--muted);padding:40px 0', text: '장바구니가 비어 있습니다.' }));
+          $('#bar').hidden = true;
+          $('#checkout').hidden = true;
+          return;
+        }
+
+        let total = 0;
+        for (const item of items) {
+          let listing = null;
+          try {
+            listing = (await api(`/api/store/listings/${item.listingId}`)).listing;
+          } catch {
+            continue;
+          }
+          const amount = listing.unit_price * item.quantity;
+          total += amount;
+          box.append(
+            el('div', { class: 'panel', style: 'display:flex;gap:12px;align-items:center;margin-top:12px' }, [
+              el('img', { src: imageOf(listing), alt: '', style: 'width:76px;height:76px;border-radius:12px;object-fit:cover' }),
+              el('div', { style: 'flex:1' }, [
+                el('div', { style: 'font-weight:700;font-size:15px', text: listing.title }),
+                el('div', { style: 'font-size:13px;color:var(--muted)', text: `${listing.farm_name} · ${listing.sku_label}` }),
+                el('div', { style: 'font-weight:900;margin-top:4px', text: money(amount) }),
+              ]),
+              el('div', { class: 'inline-actions' }, [
+                el('button', { type: 'button', text: '−', onclick: () => { setQuantity(item.listingId, item.quantity - 1); render(); } }),
+                el('span', { style: 'min-width:28px;text-align:center;font-weight:800', text: String(item.quantity) }),
+                el('button', { type: 'button', text: '+', onclick: () => { setQuantity(item.listingId, Math.min(item.quantity + 1, listing.remaining_quantity)); render(); } }),
+              ]),
+            ]),
+          );
+        }
+
+        $('#total').textContent = money(total);
+        $('#bar').hidden = false;
+        $('#checkout').hidden = false;
+      }
+
+      await render();
+
+      $('#orderBtn').addEventListener('click', async () => {
+        const current = await me();
+        if (!current || current.user.role !== 'consumer') {
+          location.href = '/login?role=consumer&next=/store/cart';
+          return;
+        }
+        const btn = $('#orderBtn');
+        btn.disabled = true;
+        try {
+          const res = await api('/api/store/orders', {
+            body: {
+              lines: readCart().map((i) => ({ listingId: i.listingId, quantity: i.quantity })),
+              receiverName: $('#rName').value.trim(),
+              receiverPhone: $('#rPhone').value.trim(),
+              address: $('#rAddress').value.trim(),
+              memo: $('#rMemo').value.trim(),
+            },
+          });
+          clearCart();
+          location.href = `/store/orders?new=${encodeURIComponent(res.order.order_no)}`;
+        } catch (err) {
+          toast(err.message ?? '주문에 실패했습니다.');
+          btn.disabled = false;
+        }
+      });
+
+      if (new URLSearchParams(location.search).get('checkout')) {
+        $('#checkout')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    </script>
+  </body>
+</html>

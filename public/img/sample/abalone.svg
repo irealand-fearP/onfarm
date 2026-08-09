@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="전복 일러스트">
+  <rect width="400" height="400" fill="#e9eff2" />
+  <ellipse cx="200" cy="216" rx="130" ry="96" fill="#3f4f52" />
+  <ellipse cx="196" cy="208" rx="106" ry="76" fill="#5b6f6c" />
+  <g fill="#2f3c3e">
+    <circle cx="132" cy="188" r="9" /><circle cx="160" cy="168" r="8" /><circle cx="192" cy="158" r="7" /><circle cx="224" cy="160" r="6" />
+  </g>
+  <text x="200" y="336" font-family="system-ui" font-size="22" fill="#5c6a6d" text-anchor="middle">Phase 2 · 수산물</text>
+  <text x="200" y="368" font-family="system-ui" font-size="18" fill="#8d9799" text-anchor="middle">MVP 미포함</text>
+</svg>

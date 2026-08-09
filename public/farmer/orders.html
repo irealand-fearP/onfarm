@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 주문 확인</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/farmer.css" />
+  </head>
+  <body class="farmer">
+    <header class="farmer-top">
+      <a class="plain" href="/farmer">← 처음으로</a>
+      <div class="who">주문 확인</div>
+    </header>
+    <main class="farmer-main">
+      <div id="list"><p class="empty">불러오는 중…</p></div>
+      <p class="note">
+        주문이 들어오면 상품을 준비해 지역 거점에 갖다 놓으시면 됩니다. 포장·배송·정산은 거점과 플랫폼이 처리합니다.
+      </p>
+    </main>
+
+    <script type="module">
+      import { api, requireRole, money, el, $, inspectionLabel } from '/js/api.js';
+      import { speak } from '/js/speak.js';
+
+      await requireRole('farmer');
+      const { orders } = await api('/api/farmer/orders');
+      const box = $('#list');
+      box.replaceChildren();
+
+      if (!orders.length) {
+        box.append(el('p', { class: 'empty', text: '아직 들어온 주문이 없습니다.' }));
+      } else {
+        speak(`새 주문이 ${orders.length}건 있습니다.`);
+      }
+
+      for (const o of orders) {
+        box.append(
+          el('div', { class: 'card', style: 'margin-bottom:12px' }, [
+            el('div', { style: 'font-size:22px; font-weight:800', text: o.title }),
+            el('div', { class: 'kv' }, [
+              el('span', { class: 'k', text: '수량' }),
+              el('span', { class: 'v', text: `${o.quantity} × ${o.sku_label}` }),
+            ]),
+            el('div', { class: 'kv' }, [
+              el('span', { class: 'k', text: '금액' }),
+              el('span', { class: 'v', text: money(o.amount) }),
+            ]),
+            el('div', { class: 'kv' }, [
+              el('span', { class: 'k', text: '주문번호' }),
+              el('span', { class: 'v', text: o.order_no }),
+            ]),
+            el('div', { class: 'kv' }, [
+              el('span', { class: 'k', text: '지금 상태' }),
+              el('span', { class: 'v', text: inspectionLabel(o.inspection_status) }),
+            ]),
+          ]),
+        );
+      }
+    </script>
+  </body>
+</html>

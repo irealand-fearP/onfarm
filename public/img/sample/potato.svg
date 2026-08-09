@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="감자 일러스트">
+  <rect width="400" height="400" fill="#f1eee6" />
+  <ellipse cx="132" cy="272" rx="92" ry="70" fill="#b39568" />
+  <ellipse cx="278" cy="292" rx="86" ry="64" fill="#bda06f" />
+  <ellipse cx="204" cy="192" rx="106" ry="80" fill="#c9ad7c" />
+  <g fill="#a3854f" opacity="0.8">
+    <circle cx="170" cy="176" r="7" /><circle cx="232" cy="204" r="6" /><circle cx="200" cy="150" r="5" />
+  </g>
+  <text x="200" y="378" font-family="system-ui" font-size="20" fill="#948b76" text-anchor="middle">일러스트 · 실제 사진 아님</text>
+</svg>

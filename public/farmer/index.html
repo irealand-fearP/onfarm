@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1f7a3f" />
+    <title>ON-FARM · 판매 시작</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/farmer.css" />
+  </head>
+  <body class="farmer">
+    <div class="mode-banner" id="modeBanner" hidden></div>
+
+    <header class="farmer-top">
+      <div class="who" id="who">
+        불러오는 중…
+        <small id="whoSub"></small>
+      </div>
+      <a class="plain" href="/login">계정 바꾸기</a>
+    </header>
+
+    <main class="farmer-main">
+      <h1>오늘 딴 것,<br />사진 한 장이면 됩니다.</h1>
+      <p class="lead">가격도 설명도 쓰지 않습니다. 수량만 확인하시면 됩니다.</p>
+
+      <button class="hero-action" id="startBtn">
+        <span class="icon" aria-hidden="true">📷</span>
+        사진 찍고 판매하기
+        <span class="sub">눌러서 사진을 찍거나 고르세요</span>
+      </button>
+
+      <nav class="quick-grid">
+        <a href="/farmer/listings">
+          판매 중인 상품
+          <span class="count" id="cntListings">-</span>
+        </a>
+        <a href="/farmer/orders">
+          주문 확인
+          <span class="count" id="cntOrders">-</span>
+        </a>
+        <a href="/farmer/settlement">
+          정산 확인
+          <span class="count" id="cntSettle">-</span>
+        </a>
+        <a href="/">
+          내 상품 보기
+          <span class="count">소비자 화면</span>
+        </a>
+      </nav>
+
+      <p class="note">
+        AI가 사진을 보고 품목과 판매 단위를 찾아 드립니다. 표시되는 품질은 <b>참고 판정</b>이며,
+        최종 품질은 지역 거점의 실물 검수로 확정됩니다.
+      </p>
+    </main>
+
+    <script type="module">
+      import { api, requireRole, mountModeBanner, $ } from '/js/api.js';
+      import { speak } from '/js/speak.js';
+
+      mountModeBanner('#modeBanner');
+
+      const session = await requireRole('farmer');
+      if (session) {
+        $('#who').childNodes[0].textContent = `${session.user.name}님 `;
+        $('#whoSub').textContent = session.farm
+          ? `${session.farm.farm_name} · ${session.farm.region_sido} ${session.farm.region_sigungu}`
+          : '';
+
+        const [listings, orders, settle] = await Promise.all([
+          api('/api/farmer/listings').catch(() => ({ listings: [] })),
+          api('/api/farmer/orders').catch(() => ({ orders: [] })),
+          api('/api/farmer/settlements').catch(() => ({ summary: { pendingNet: 0 } })),
+        ]);
+        const active = listings.listings.filter((l) => l.status === 'active').length;
+        $('#cntListings').textContent = `${active}건`;
+        $('#cntOrders').textContent = `${orders.orders.length}건`;
+        $('#cntSettle').textContent = `${Number(settle.summary.pendingNet).toLocaleString('ko-KR')}원 예정`;
+      }
+
+      $('#startBtn').addEventListener('click', () => {
+        speak('사진을 찍어 주세요.');
+        location.href = '/farmer/sell';
+      });
+    </script>
+  </body>
+</html>

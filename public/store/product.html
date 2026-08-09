@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 상품</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store">
+    <header class="store-top">
+      <div class="row">
+        <a class="logo" href="/"><span class="dot"></span>ON-FARM</a>
+        <div class="top-actions">
+          <a class="chip-link" href="/store/cart">장바구니 <span id="cartCount">0</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main class="store-main" id="main">
+      <p style="text-align: center; color: var(--muted); padding: 40px 0">불러오는 중…</p>
+    </main>
+
+    <div class="buy-bar" id="buyBar" hidden>
+      <div class="total" id="barPrice"></div>
+      <button class="btn secondary" id="addCart">장바구니</button>
+      <button class="btn" id="buyNow">바로 구매</button>
+    </div>
+
+    <script type="module">
+      import { $, api, el, imageOf, money, INSPECTION_STEPS, inspectionLabel } from '/js/api.js';
+      import { addToCart, mountCartCount } from '/js/cart.js';
+
+      mountCartCount();
+      const id = Number(new URLSearchParams(location.search).get('id'));
+      const main = $('#main');
+
+      let listing = null;
+      try {
+        listing = (await api(`/api/store/listings/${id}`)).listing;
+      } catch {
+        main.replaceChildren(el('p', { style: 'text-align:center;padding:40px 0', text: '상품을 찾을 수 없습니다.' }));
+      }
+
+      if (listing) {
+        const ai = listing.ai_analysis ? JSON.parse(listing.ai_analysis) : null;
+        const region = `${listing.region_sido} ${listing.region_sigungu}${listing.region_detail ? ` ${listing.region_detail}` : ''}`;
+
+        const timeline = el(
+          'div',
+          { class: 'timeline' },
+          INSPECTION_STEPS.map(([key, label], idx) => {
+            const currentIdx = INSPECTION_STEPS.findIndex(([k]) => k === listing.inspection_status);
+            const cls = idx < currentIdx ? 'step done' : idx === currentIdx ? 'step now' : 'step';
+            return el('span', { class: cls, text: label });
+          }),
+        );
+
+        main.replaceChildren(
+          el('img', { class: 'detail-image', src: imageOf(listing), alt: listing.title }),
+          el('div', { class: 'panel' }, [
+            el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px' }, [
+              el('span', { class: 'badge badge-ai', text: `AI 확인: ${listing.product_name}` }),
+              el('span', { class: 'badge badge-hint', text: `AI 품질 참고: ${listing.quality_hint ?? '-'}` }),
+              el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) }),
+            ]),
+            el('h1', { style: 'margin:0 0 6px;font-size:22px;letter-spacing:-0.5px', text: listing.title }),
+            el('div', { style: 'font-size:15px;color:var(--muted)', text: `${region} · ${listing.farm_name}` }),
+            el('div', { style: 'font-size:28px;font-weight:900;margin-top:10px', text: money(listing.unit_price) }),
+            el('div', { style: 'font-size:14px;color:var(--muted)', text: `${listing.sku_label} · 남은 수량 ${listing.remaining_quantity}` }),
+            timeline,
+          ]),
+          el('div', { class: 'panel' }, [
+            el('h3', { text: '상품 소개 (AI 자동 생성)' }),
+            el('p', { style: 'white-space:pre-line;margin:0;font-size:15px;line-height:1.7', text: listing.description }),
+          ]),
+          el('div', { class: 'panel' }, [
+            el('h3', { text: '생산자 정보' }),
+            el('div', { class: 'trust-row' }, [el('span', { class: 'k', text: '생산자' }), el('span', { class: 'v', text: listing.farmer_name })]),
+            el('div', { class: 'trust-row' }, [el('span', { class: 'k', text: '농가' }), el('span', { class: 'v', text: listing.farm_name })]),
+            el('div', { class: 'trust-row' }, [el('span', { class: 'k', text: '생산지' }), el('span', { class: 'v', text: region })]),
+            el('div', { class: 'trust-row' }, [el('span', { class: 'k', text: '수확일' }), el('span', { class: 'v', text: listing.harvested_on ?? '-' })]),
+            el('div', { class: 'trust-row' }, [el('span', { class: 'k', text: '등록일' }), el('span', { class: 'v', text: listing.created_at })]),
+            el('div', { class: 'trust-row' }, [el('span', { class: 'k', text: '검수 거점' }), el('span', { class: 'v', text: listing.hub_name ?? '미지정' })]),
+          ]),
+          el('div', { class: 'panel' }, [
+            el('h3', { text: 'AI 이미지 확인 결과' }),
+            el('div', { class: 'trust-row' }, [
+              el('span', { class: 'k', text: '판정 방식' }),
+              el('span', { class: 'v', text: ai?.source === 'seed' ? '시드 데이터' : (ai?.source ?? listing.ai_source ?? '-') }),
+            ]),
+            el('div', { class: 'trust-row' }, [
+              el('span', { class: 'k', text: '신뢰도' }),
+              el('span', { class: 'v', text: listing.ai_confidence ? `${Math.round(listing.ai_confidence * 100)}%` : '-' }),
+            ]),
+            el('div', { class: 'trust-row' }, [
+              el('span', { class: 'k', text: '근거' }),
+              el('span', { class: 'v', style: 'font-weight:500;text-align:right', text: (ai?.recognition?.description_basis ?? []).join(' / ') || '-' }),
+            ]),
+            el('p', { style: 'font-size:13px;color:var(--muted);margin:10px 0 0', text: 'AI는 품질 등급을 확정하지 않으며 식품 안전성을 검사하지 않습니다. 최종 품질은 거점 실물 검수로 확정됩니다.' }),
+          ]),
+        );
+
+        $('#barPrice').textContent = money(listing.unit_price);
+        $('#buyBar').hidden = false;
+        const soldOut = listing.remaining_quantity <= 0 || listing.status !== 'active';
+        if (soldOut) {
+          $('#addCart').disabled = true;
+          $('#buyNow').disabled = true;
+          $('#barPrice').textContent = '품절';
+        }
+
+        $('#addCart').addEventListener('click', () => {
+          addToCart(listing.id, 1);
+          location.href = '/store/cart';
+        });
+        $('#buyNow').addEventListener('click', () => {
+          addToCart(listing.id, 1);
+          location.href = '/store/cart?checkout=1';
+        });
+      }
+    </script>
+  </body>
+</html>

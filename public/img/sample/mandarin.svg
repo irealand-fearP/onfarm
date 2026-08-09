@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="감귤 일러스트">
+  <rect width="400" height="400" fill="#fdf0df" />
+  <circle cx="118" cy="288" r="76" fill="#e2721a" />
+  <circle cx="286" cy="284" r="72" fill="#ef8321" />
+  <circle cx="204" cy="200" r="90" fill="#f7941d" />
+  <ellipse cx="176" cy="168" rx="26" ry="30" fill="#ffbb63" opacity="0.7" />
+  <path d="M204 110 q18 -30 52 -30 q-18 30 -44 34z" fill="#3f7a34" />
+  <text x="200" y="378" font-family="system-ui" font-size="20" fill="#a08a6b" text-anchor="middle">일러스트 · 실제 사진 아님</text>
+</svg>

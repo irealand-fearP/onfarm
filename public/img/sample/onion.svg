@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="양파 일러스트">
+  <rect width="400" height="400" fill="#f7f1e2" />
+  <ellipse cx="126" cy="286" rx="80" ry="76" fill="#c99a3e" />
+  <ellipse cx="282" cy="282" rx="76" ry="72" fill="#d5a749" />
+  <ellipse cx="204" cy="204" rx="94" ry="88" fill="#e0b455" />
+  <path d="M204 116 v-40 M204 116 l-26 -34 M204 116 l26 -34" stroke="#8d7a3c" stroke-width="9" stroke-linecap="round" fill="none" />
+  <path d="M150 200 q54 -60 108 0" stroke="#c39a44" stroke-width="6" fill="none" opacity="0.8" />
+  <text x="200" y="378" font-family="system-ui" font-size="20" fill="#9b8f6d" text-anchor="middle">일러스트 · 실제 사진 아님</text>
+</svg>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 주문내역</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store">
+    <header class="store-top">
+      <div class="row">
+        <a class="logo" href="/"><span class="dot"></span>ON-FARM</a>
+        <div class="top-actions"><a class="chip-link" href="/">계속 쇼핑</a></div>
+      </div>
+    </header>
+
+    <main class="store-main">
+      <div class="section-title"><h2>주문내역</h2><span id="hint"></span></div>
+      <div id="list"></div>
+    </main>
+
+    <script type="module">
+      import { $, api, el, money, me, inspectionLabel } from '/js/api.js';
+
+      const justOrdered = new URLSearchParams(location.search).get('new');
+      const session = await me();
+      if (!session || session.user.role !== 'consumer') {
+        location.href = '/login?role=consumer&next=/store/orders';
+      }
+
+      const { orders } = await api('/api/store/orders');
+      const box = $('#list');
+      box.replaceChildren();
+      $('#hint').textContent = `${orders.length}건`;
+
+      if (!orders.length) {
+        box.append(el('p', { style: 'text-align:center;color:var(--muted);padding:40px 0', text: '주문 내역이 없습니다.' }));
+      }
+
+      for (const o of orders) {
+        const isNew = justOrdered && o.order_no === justOrdered;
+        box.append(
+          el('div', { class: 'panel', style: isNew ? 'border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)' : '' }, [
+            el('div', { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px' }, [
+              el('div', [
+                el('div', { style: 'font-weight:800', text: o.order_no }),
+                el('div', { style: 'font-size:13px;color:var(--muted)', text: o.created_at }),
+              ]),
+              el('span', { class: 'badge badge-ai', text: isNew ? '방금 주문' : '결제 완료' }),
+            ]),
+            ...o.items.map((it) =>
+              el('div', { class: 'trust-row' }, [
+                el('span', { class: 'k', text: `${it.title} × ${it.quantity}` }),
+                el('span', { class: 'v', text: `${money(it.amount)} · ${inspectionLabel(it.inspection_status)}` }),
+              ]),
+            ),
+            el('div', { style: 'text-align:right;font-weight:900;margin-top:8px', text: `합계 ${money(o.total_amount)}` }),
+          ]),
+        );
+      }
+    </script>
+  </body>
+</html>

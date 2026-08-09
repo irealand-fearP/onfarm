@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 정산 확인</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/farmer.css" />
+  </head>
+  <body class="farmer">
+    <header class="farmer-top">
+      <a class="plain" href="/farmer">← 처음으로</a>
+      <div class="who">정산 확인</div>
+    </header>
+    <main class="farmer-main">
+      <div class="card">
+        <div class="price-block">
+          <div class="unit">받으실 돈(예정)</div>
+          <p class="price" id="pending">-</p>
+        </div>
+        <div class="kv"><span class="k">지금까지 판 금액</span><span class="v" id="gross">-</span></div>
+        <div class="kv"><span class="k">수수료</span><span class="v" id="fee">-</span></div>
+        <div class="kv"><span class="k">이미 받은 돈</span><span class="v" id="paid">-</span></div>
+        <button class="speak-button" id="speakBtn" style="margin-top: 14px">🔊 읽어주기</button>
+      </div>
+      <div id="rows" style="margin-top: 16px"></div>
+      <p class="note" id="feeNote"></p>
+    </main>
+
+    <script type="module">
+      import { api, requireRole, money, el, $ } from '/js/api.js';
+      import { speak } from '/js/speak.js';
+      import { speakPrice } from '/js/shared/korean.js';
+
+      await requireRole('farmer');
+      const data = await api('/api/farmer/settlements');
+      const s = data.summary;
+
+      $('#pending').textContent = money(s.pendingNet);
+      $('#gross').textContent = money(s.totalGross);
+      $('#fee').textContent = money(s.totalFee);
+      $('#paid').textContent = money(s.paidNet);
+      $('#feeNote').textContent = `수수료 ${(data.feeRate * 100).toFixed(0)}% 는 시연용 가정값입니다. 실제 요율은 운영 정책과 계약으로 정해집니다.`;
+
+      const box = $('#rows');
+      if (!data.rows.length) {
+        box.append(el('p', { class: 'empty', text: '아직 정산 내역이 없습니다.' }));
+      }
+      for (const r of data.rows) {
+        box.append(
+          el('div', { class: 'list-item' }, [
+            el('div', { style: 'flex:1' }, [
+              el('div', { class: 't', text: r.title }),
+              el('div', { class: 's', text: `${r.order_no} · ${r.quantity}개` }),
+              el('div', { class: 's', text: `판매 ${money(r.gross)} − 수수료 ${money(r.fee)}` }),
+            ]),
+            el('div', { style: 'text-align:right' }, [
+              el('div', { style: 'font-size:20px; font-weight:900', text: money(r.net) }),
+              el('span', {
+                class: r.status === 'paid' ? 'badge badge-ai' : 'badge badge-hint',
+                text: r.status === 'paid' ? '지급 완료' : '지급 예정',
+              }),
+            ]),
+          ]),
+        );
+      }
+
+      $('#speakBtn').addEventListener('click', () => {
+        speak(`받으실 돈은 ${speakPrice(s.pendingNet)}입니다.`, { force: true });
+      });
+    </script>
+  </body>
+</html>

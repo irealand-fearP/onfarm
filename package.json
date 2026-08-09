@@ -1,0 +1,24 @@
+{
+  "name": "onfarm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ON-FARM — 고령 농어민을 위한 AI 초간편 직거래 판매 플랫폼",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/server/main.js",
+    "dev": "npm run build && node dist/server/main.js",
+    "seed": "npm run build && node dist/db/seed-cli.js",
+    "reset": "npm run build && node dist/db/seed-cli.js --reset",
+    "test": "npm run build && node --test \"dist/tests/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {}
+}

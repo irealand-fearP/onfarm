@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 판매 중인 상품</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/farmer.css" />
+  </head>
+  <body class="farmer">
+    <header class="farmer-top">
+      <a class="plain" href="/farmer">← 처음으로</a>
+      <div class="who">판매 중인 상품</div>
+    </header>
+    <main class="farmer-main">
+      <div id="list"><p class="empty">불러오는 중…</p></div>
+      <div class="button-row">
+        <a class="big-button" href="/farmer/sell" style="text-decoration: none">사진 찍고 판매하기</a>
+      </div>
+    </main>
+
+    <script type="module">
+      import { api, requireRole, money, el, $, imageOf, inspectionLabel } from '/js/api.js';
+
+      await requireRole('farmer');
+      const { listings } = await api('/api/farmer/listings');
+      const box = $('#list');
+      box.replaceChildren();
+
+      if (!listings.length) {
+        box.append(el('p', { class: 'empty', text: '아직 올린 상품이 없습니다.' }));
+      }
+
+      for (const l of listings) {
+        const sold = l.quantity - l.remaining_quantity;
+        box.append(
+          el('div', { class: 'list-item' }, [
+            el('img', { src: imageOf(l), alt: '' }),
+            el('div', { style: 'flex:1' }, [
+              el('div', { class: 't', text: l.title }),
+              el('div', { class: 's', text: `${l.sku_label} · ${money(l.unit_price)}` }),
+              el('div', { class: 's', text: `남은 수량 ${l.remaining_quantity} / 판매 ${sold}` }),
+              el('div', { style: 'margin-top:6px; display:flex; gap:6px; flex-wrap:wrap' }, [
+                el('span', {
+                  class: l.status === 'active' ? 'badge badge-ai' : 'badge badge-muted',
+                  text: l.status === 'active' ? '판매 중' : l.status === 'sold_out' ? '완판' : '판매 종료',
+                }),
+                el('span', { class: 'badge badge-hub', text: inspectionLabel(l.inspection_status) }),
+              ]),
+            ]),
+          ]),
+        );
+      }
+    </script>
+  </body>
+</html>

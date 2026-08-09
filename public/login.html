@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ON-FARM · 계정 선택</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store">
+    <header class="store-top">
+      <div class="row">
+        <a class="logo" href="/"><span class="dot"></span>ON-FARM</a>
+        <a class="chip-link" href="/demo">시연 안내</a>
+      </div>
+    </header>
+
+    <main class="store-main" style="max-width: 620px">
+      <div class="section-title">
+        <h2>어느 계정으로 볼까요?</h2>
+        <span>MVP 데모 · 비밀번호 없음</span>
+      </div>
+      <p style="font-size: 14px; color: var(--muted); margin: 0 0 14px">
+        실제 서비스에서는 휴대폰 본인확인·간편인증으로 대체되는 자리입니다. 역할별 권한 검사는 지금도 서버에서 동작합니다.
+      </p>
+      <div id="list"></div>
+    </main>
+
+    <script type="module">
+      import { $, api, el } from '/js/api.js';
+
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next');
+      const wantRole = params.get('role');
+
+      const ROLE_LABEL = { farmer: '농민', consumer: '소비자', hub_operator: '거점 담당자', admin: '관리자' };
+      const DEFAULT_NEXT = { farmer: '/farmer', consumer: '/', hub_operator: '/hub', admin: '/hub' };
+
+      const { accounts } = await api('/api/accounts');
+      const box = $('#list');
+      const ordered = wantRole ? [...accounts].sort((a, b) => (b.role === wantRole) - (a.role === wantRole)) : accounts;
+
+      for (const acc of ordered) {
+        box.append(
+          el(
+            'button',
+            {
+              type: 'button',
+              class: 'panel',
+              style: 'display:flex;width:100%;gap:12px;align-items:center;text-align:left;cursor:pointer',
+              onclick: async () => {
+                await api('/api/auth/login', { body: { userId: acc.id } });
+                location.href = next || DEFAULT_NEXT[acc.role] || '/';
+              },
+            },
+            [
+              el('span', { style: 'font-size:30px', text: acc.role === 'farmer' ? '🧑‍🌾' : acc.role === 'consumer' ? '🛒' : acc.role === 'hub_operator' ? '🏢' : '🛠️' }),
+              el('span', { style: 'flex:1' }, [
+                el('div', { style: 'font-weight:800;font-size:17px', text: acc.name }),
+                el('div', { style: 'font-size:13px;color:var(--muted)', text: [ROLE_LABEL[acc.role] ?? acc.role, acc.farmName, acc.region].filter(Boolean).join(' · ') }),
+              ]),
+              el('span', { class: 'badge badge-muted', text: '이 계정으로' }),
+            ],
+          ),
+        );
+      }
+    </script>
+  </body>
+</html>

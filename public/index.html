@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1f7a3f" />
+    <meta name="description" content="ON-FARM — 농어민이 사진 한 장으로 올린 농산물을 산지에서 바로." />
+    <title>ON-FARM · 오늘 산지에서 올라온 농산물</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store">
+    <header class="store-top">
+      <div class="row">
+        <a class="logo" href="/"><span class="dot"></span>ON-FARM</a>
+        <div class="top-actions">
+          <a class="chip-link" href="/store/orders">주문내역</a>
+          <a class="chip-link" href="/store/cart">장바구니 <span id="cartCount">0</span></a>
+          <a class="chip-link primary" href="/farmer">농민 화면</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="store-main">
+      <section class="hero">
+        <h1>오늘 산지에서 올라온 농산물</h1>
+        <p>
+          농가에서 사진 한 장으로 올린 상품입니다. 표시된 품질은 사진 기반 참고 판정이고,
+          최종 품질은 지역 거점의 실물 검수로 확정됩니다.
+        </p>
+      </section>
+
+      <div class="filters" id="filters"></div>
+
+      <div class="section-title">
+        <h2 id="listTitle">오늘 올라온 농산물</h2>
+        <span id="listCount"></span>
+      </div>
+      <div class="card-grid" id="grid"></div>
+      <p class="empty" id="empty" hidden style="text-align: center; color: var(--muted); padding: 40px 0">
+        조건에 맞는 상품이 없습니다.
+      </p>
+    </main>
+
+    <script type="module" src="/js/store.js"></script>
+  </body>
+</html>
