@@ -175,8 +175,21 @@ Colab 은 해외 서버라 **다운로드가 원천적으로 막힌다**. 따라
 224px JPEG(7.2 KB)로 **0.9%** 까지 줄어드는 것을 실측했다.
 
 ```bash
+# 1) 수집 (국내에서, 약 13시간 — 밤에 걸어둔다)
 python tools/aihub_ingest.py --items all --key <APIKEY> --out data/onfarm_cv
+
+# 2) 검증 + 업로드용 zip 만들기
+python tools/pack_for_colab.py --data data/onfarm_cv --out data/onfarm_cv.zip
 ```
+
+수집은 **끊겨도 이어받는다.** 파일키 단위로 `.ingest_state.json` 에 완료 표시를 남기고
+매니페스트도 파일키마다 append 하므로, 죽은 자리에서 같은 명령을 다시 실행하면 된다.
+회선이 끊기면 바깥에서 4회(30/60/90초 대기) 다시 건다 — 실제로 수집 중
+`Connection was reset → DNS 실패`로 한 번 죽었기 때문에 넣은 장치다.
+
+`pack_for_colab.py` 는 묶기 전에 (1) 매니페스트의 이미지가 실제로 있는지 (2) 개체 누출
+(3) 품목 2종 이상 (4) 등급 3종 (5) 검증셋 존재를 확인하고, 문제가 있으면 zip 을 만들지 않는다.
+업로드한 뒤 Colab 에서 문제를 발견하는 왕복을 막기 위함이다.
 
 ### ⚠️ aihubshell 은 조용히 잘린 파일을 남긴다
 
