@@ -135,7 +135,10 @@ def fetch(filekey: int, api_key: str, dest: Path, label: str = "") -> list[Path]
         chunk.sort(key=lambda x: int(x.suffix.replace(".part", "") or 0))
         with base.open("wb") as out:
             for c in chunk:
-                out.write(c.read_bytes())
+                # part 하나가 파일 전체 크기일 수 있다(실측: 444MB 파일의 part0 = 465MB).
+                # read_bytes() 로 통째로 올리면 4GB 파일에서 메모리가 터진다. 스트리밍으로 붙인다.
+                with c.open("rb") as src:
+                    shutil.copyfileobj(src, out, length=8 * 1024 * 1024)
                 c.unlink()
         zips.append(base)
     zips += [p for p in extract_dir.rglob("*.zip") if p not in zips]
