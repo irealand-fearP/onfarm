@@ -63,9 +63,31 @@
 - **인증이 데모용이다.** 비밀번호 없이 계정을 고르는 방식이라 보안 경계로는 무효다. 역할 검사·세션 서명·거점 범위 제한은 실제로 동작하므로, 로그인만 본인확인으로 교체하면 된다. 공개 배포 시 `SESSION_SECRET` 변경 필수.
 - **수산물은 DB 자리만.** MVP는 농산물 8품목.
 
+## 🔬 CV 모델 (진행 중, 2026-08-09)
+
+AI 허브 「농산물 품질(QC) 이미지」(datasetkey 149)로 품목·등급 모델을 학습한다.
+데이터 실측·수령 절차·한계는 [docs/aihub-dataset.md](docs/aihub-dataset.md).
+
+| 단계 | 도구 | 상태 |
+|---|---|---|
+| 수집 (국내 PC 필수 — 해외 IP 차단) | `tools/aihub_ingest.py` | 진행 중 (119GB → 약 900MB) |
+| 검증 + 업로드 패키징 | `tools/pack_for_colab.py` | 완료 |
+| 학습 (Colab GPU) | `notebooks/onfarm_train_colab.ipynb` | 대기 |
+| 서비스 접합 | `src/ai/providers/cnn.ts` | 완료 (모델 대기) |
+
+**접합 방식**: `onnxruntime-node` 를 **선택적 의존성**으로 둔다. 설치돼 있고 `models/` 에
+`onfarm_qc.onnx` + `metadata.json` 이 있으면 `AI_PROVIDER=cnn` 으로 뜨고, 없으면
+서버 기동을 막지 않고 로컬 규칙 판정으로 내려앉는다(사유는 화면 배너에 표기).
+서버에 JPEG 디코더를 들이지 않으려고 브라우저가 224×224 RGB 픽셀을 함께 보낸다 —
+`features` 와 같은 신뢰 경계다.
+
+**모델 출력을 그대로 믿지 않는다**:
+- 확신도는 `metadata.val_object_level.item`(개체 단위 검증 정확도)을 상한으로 자른다.
+- 등급은 `weight_only_grade_baseline`(중량만 보는 기준선)을 넘을 때만 화면에 쓴다.
+  못 넘으면 품목만 쓰고 등급은 거점 실물 검수에 맡긴다.
+
 ## ❌ 미구현 (로드맵)
 
 - 실결제(PG)·배송 추적 연동
-- CV 모델 학습·서빙 (VisionProvider 구현 추가로 접합)
 - 아파트 공동구매 / B2B 견적
 - 판매채널 추천·수요예측 (데이터 축적 후)
