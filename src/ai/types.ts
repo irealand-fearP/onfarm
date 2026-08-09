@@ -30,6 +30,11 @@ export interface VisionInput {
   imageBase64?: string;
   mimeType?: string;
   features?: ImageFeatures;
+  /**
+   * 브라우저가 캔버스로 뽑아 보낸 224×224 RGB(0~255) 픽셀.
+   * 서버에 JPEG 디코더를 들이지 않기 위한 것이며, features 와 같은 신뢰 경계에 있다.
+   */
+  pixels?: Uint8Array;
   /** 우리가 실제로 취급하는 품목만 후보로 준다. 없는 품목을 지어내지 않게 하기 위함. */
   catalog: CatalogItem[];
 }
