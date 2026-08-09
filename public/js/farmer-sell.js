@@ -15,6 +15,8 @@ const state = {
   sku: null,
   quantity: 5,
   step: 'stepPhoto',
+  /** 사용자가 폴백 화면에서 품목을 직접 골랐는가 (감사 기록용) */
+  userPicked: false,
 };
 
 const STEPS = ['stepPhoto', 'stepLoading', 'stepResult', 'stepChoose', 'stepManual', 'stepSku', 'stepConfirm', 'stepDone'];
@@ -127,6 +129,8 @@ function renderResult(result) {
   $('#badgeConfidence').textContent = `신뢰도 ${Math.round(r.confidence * 100)}%`;
   const basis = [...r.description_basis];
   if (r.detected_issues.length) basis.push(`확인 어려웠던 점: ${r.detected_issues.join(', ')}`);
+  // 외부 AI 가 실패해 로컬 판정으로 대체된 사실을 숨기지 않는다.
+  if (result.ai.degraded) basis.push(`※ ${result.ai.degraded}`);
   $('#resultBasis').textContent = basis.join(' / ');
 }
 
@@ -159,7 +163,9 @@ function renderManual() {
 }
 
 async function pickProduct(code) {
-  if (!state.analysisId) {
+  // 분석 요청 자체가 실패해 analysisId 가 없을 수 있다.
+  // 그때도 사진은 손에 있으므로 사진과 함께 다시 보내 폴백이 막다른 길이 되지 않게 한다.
+  if (!state.analysisId && !state.pendingImage) {
     toast('사진을 먼저 찍어 주세요.');
     show('stepPhoto');
     return;
@@ -170,11 +176,17 @@ async function pickProduct(code) {
 async function analyzeForced(code) {
   show('stepLoading');
   try {
-    const result = await api('/api/ai/analyze', { body: { analysisId: state.analysisId, productCode: code } });
+    const payload = state.analysisId
+      ? { analysisId: state.analysisId, productCode: code }
+      : { image: state.pendingImage.dataUrl, features: state.pendingImage.features, productCode: code };
+    const result = await api('/api/ai/analyze', { body: payload });
+    if (result.analysisId) state.analysisId = result.analysisId;
+    if (result.imagePath) state.imagePath = result.imagePath;
     state.analysis = result;
     state.skus = result.skus ?? [];
     state.sku = result.selectedSku ?? state.skus[0] ?? null;
     state.product = code;
+    state.userPicked = true;
     if (!state.sku) {
       toast('이 품목은 아직 판매 단위가 등록되지 않았습니다.');
       renderManual();
@@ -253,6 +265,10 @@ async function onFile(file) {
   show('stepLoading');
   try {
     const prepared = await prepareImage(file);
+    // 분석이 실패해도 폴백 화면에서 다시 쓸 수 있도록 들고 있는다.
+    state.pendingImage = prepared;
+    state.analysisId = null;
+    state.userPicked = false;
     $('#loadingPreview').src = prepared.dataUrl;
     $('#loadingPreview').hidden = false;
     await analyze({ image: prepared.dataUrl, features: prepared.features });
@@ -329,7 +345,9 @@ $('#submitBtn').addEventListener('click', async () => {
         analysisId: state.analysisId,
         skuId: state.sku?.id,
         quantity: state.quantity,
-        productCode: state.product,
+        // 서버가 인식한 품목을 그대로 쓰는 정상 흐름에서는 보내지 않는다.
+        // (항상 보내면 서버 감사 기록이 전부 '수동 선택'으로 남는다)
+        ...(state.userPicked ? { productCode: state.product } : {}),
       },
     });
     const word = unitWord(state.sku?.label);

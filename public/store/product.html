@@ -63,7 +63,10 @@
           el('div', { class: 'panel' }, [
             el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px' }, [
               el('span', { class: 'badge badge-ai', text: `AI 확인: ${listing.product_name}` }),
-              el('span', { class: 'badge badge-hint', text: `AI 품질 참고: ${listing.quality_hint ?? '-'}` }),
+              // 확정 등급이 있으면 그것을 앞세우고, AI 참고값은 참고값으로만 남긴다.
+              listing.confirmed_quality
+                ? el('span', { class: 'badge badge-hub', text: `거점 확정 등급: ${listing.confirmed_quality}` })
+                : el('span', { class: 'badge badge-hint', text: `AI 품질 참고: ${listing.quality_hint ?? '-'} (확정 전)` }),
               el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) }),
             ]),
             el('h1', { style: 'margin:0 0 6px;font-size:22px;letter-spacing:-0.5px', text: listing.title }),

@@ -86,7 +86,9 @@ export function listStoreListings(db: Db, filter: StoreFilter = {}): ListingView
     where.push('(f.region_sigungu LIKE ? OR f.region_sido LIKE ?)');
     params.push(`%${filter.region}%`, `%${filter.region}%`);
   }
-  const limit = Math.min(Math.max(filter.limit ?? 60, 1), 200);
+  // 문자열 보간으로 들어가는 값이라 정수임을 여기서도 한 번 더 보장한다.
+  const requested = Number.isFinite(filter.limit) ? Math.trunc(filter.limit as number) : 60;
+  const limit = Math.min(Math.max(requested, 1), 200);
   return all<ListingView>(
     db,
     `${VIEW_SELECT} WHERE ${where.join(' AND ')} ORDER BY l.created_at DESC, l.id DESC LIMIT ${limit}`,
@@ -106,15 +108,29 @@ export function listByFarmer(db: Db, farmerId: number): ListingView[] {
   );
 }
 
-export function listForHub(db: Db): ListingView[] {
+/** @param hubId null 이면 전체(관리자). 담당자는 자기 거점 물량만 본다. */
+export function listForHub(db: Db, hubId: number | null = null): ListingView[] {
+  const scope = hubId === null ? '' : 'AND f.hub_id = ?';
+  const params = hubId === null ? [] : [hubId];
   return all<ListingView>(
     db,
-    `${VIEW_SELECT} WHERE l.status != 'closed' ORDER BY
+    `${VIEW_SELECT} WHERE l.status != 'closed' ${scope} ORDER BY
        CASE l.inspection_status
          WHEN 'hub_pending' THEN 0 WHEN 'ai_checked' THEN 1
          WHEN 'hub_passed' THEN 2 WHEN 'ready_to_ship' THEN 3 ELSE 4 END,
        l.created_at DESC`,
+    ...params,
   );
+}
+
+/** 이 매물이 해당 거점 소관인지. */
+export function belongsToHub(db: Db, listingId: number, hubId: number): boolean {
+  const row = one<{ hub_id: number | null }>(
+    db,
+    'SELECT f.hub_id FROM listings l JOIN farms f ON f.id = l.farm_id WHERE l.id = ?',
+    listingId,
+  );
+  return row?.hub_id === hubId;
 }
 
 /**
@@ -141,6 +157,11 @@ export function setInspectionStatus(db: Db, listingId: number, status: Inspectio
   run(db, 'UPDATE listings SET inspection_status = ? WHERE id = ?', status, listingId);
 }
 
-export function setQualityHint(db: Db, listingId: number, hint: string): void {
-  run(db, 'UPDATE listings SET quality_hint = ? WHERE id = ?', hint, listingId);
+/**
+ * 거점 실물 검수로 확정된 등급을 기록한다.
+ * AI 참고값(quality_hint)은 그대로 남긴다 — 둘을 같은 칸에 쓰면
+ * 소비자 화면에서 '확정 등급'이 'AI 참고'로 둔갑한다.
+ */
+export function setConfirmedQuality(db: Db, listingId: number, grade: string): void {
+  run(db, 'UPDATE listings SET confirmed_quality = ? WHERE id = ?', grade, listingId);
 }

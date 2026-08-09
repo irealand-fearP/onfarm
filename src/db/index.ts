@@ -16,10 +16,26 @@ function schemaSql(): string {
  * DB 를 열고 스키마를 보장한다.
  * @param path ':memory:' 를 주면 테스트용 인메모리 DB.
  */
+/**
+ * 이미 만들어진 DB 에는 CREATE TABLE IF NOT EXISTS 가 새 컬럼을 더해주지 않는다.
+ * 누락된 컬럼만 조용히 채운다(파괴적 변경 없음).
+ */
+function migrate(db: Db): void {
+  const has = (table: string, column: string): boolean =>
+    (db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>).some(
+      (c) => c.name === column,
+    );
+  if (!has('users', 'hub_id')) db.exec('ALTER TABLE users ADD COLUMN hub_id INTEGER');
+  if (!has('listings', 'confirmed_quality')) {
+    db.exec('ALTER TABLE listings ADD COLUMN confirmed_quality TEXT');
+  }
+}
+
 export function openDb(path: string = dbPath()): Db {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   db.exec(schemaSql());
+  migrate(db);
   return db;
 }
 

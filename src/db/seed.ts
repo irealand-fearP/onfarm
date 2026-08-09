@@ -183,15 +183,17 @@ export function seed(db: Db, options: SeedOptions = {}): void {
     }
   }
 
-  const others: Array<[string, string, string]> = [
-    ['consumer', '장바구니', '010-5555-1000'],
-    ['consumer', '최수민', '010-5555-1001'],
-    ['hub_operator', '성환거점 담당자', '010-7777-2000'],
-    ['admin', '운영자', '010-9999-3000'],
+  // 거점 담당자는 소속 거점에 묶인다(자기 거점 물량만 처리).
+  const others: Array<[string, string, string, number | null]> = [
+    ['consumer', '장바구니', '010-5555-1000', null],
+    ['consumer', '최수민', '010-5555-1001', null],
+    ['hub_operator', '성환거점 담당자', '010-7777-2000', hubs[0]?.id ?? null],
+    ['hub_operator', '충주거점 담당자', '010-7777-2001', hubs[1]?.id ?? null],
+    ['admin', '운영자', '010-9999-3000', null],
   ];
-  for (const [role, name, phone] of others) {
+  for (const [role, name, phone, hubId] of others) {
     if (!one(db, 'SELECT id FROM users WHERE name = ? AND role = ?', name, role)) {
-      run(db, 'INSERT INTO users (role, name, phone) VALUES (?,?,?)', role, name, phone);
+      run(db, 'INSERT INTO users (role, name, phone, hub_id) VALUES (?,?,?,?)', role, name, phone, hubId);
     }
   }
 

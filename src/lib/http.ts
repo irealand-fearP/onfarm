@@ -89,11 +89,18 @@ export async function readBody<T>(req: IncomingMessage): Promise<T> {
   }
   if (chunks.length === 0) return {} as T;
   const raw = Buffer.concat(chunks).toString('utf8');
+  let parsed: unknown;
   try {
-    return JSON.parse(raw) as T;
+    parsed = JSON.parse(raw);
   } catch {
     throw new HttpError(400, 'JSON 형식이 아닙니다.', 'bad_json');
   }
+  // `null`·배열·문자열도 유효한 JSON 이지만 본문 계약은 항상 객체다.
+  // 여기서 걸러야 라우트의 body.foo 접근이 500 대신 400 을 낸다.
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new HttpError(400, '본문은 JSON 객체여야 합니다.', 'bad_json');
+  }
+  return parsed as T;
 }
 
 export function parseCookies(header: string | undefined): Record<string, string> {

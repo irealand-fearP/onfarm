@@ -1,6 +1,6 @@
-import { all, one, run } from '../db/index.js';
+import { all, one, run, tx } from '../db/index.js';
 import type { Db } from '../db/index.js';
-import { setInspectionStatus, setQualityHint } from './listings.js';
+import { setConfirmedQuality, setInspectionStatus } from './listings.js';
 import type { HubInspection } from './types.js';
 
 export interface InspectionInput {
@@ -17,32 +17,36 @@ export interface InspectionInput {
  * 여기서 확정된 등급만이 '확정 등급'이며, AI 참고 판정과 별도 컬럼으로 남는다.
  */
 export function recordInspection(db: Db, input: InspectionInput): HubInspection {
-  const res = run(
-    db,
-    `INSERT INTO hub_inspections (listing_id, hub_id, inspector, result, graded_quality, note)
-     VALUES (?,?,?,?,?,?)`,
-    input.listingId,
-    input.hubId,
-    input.inspector,
-    input.result,
-    input.gradedQuality ?? null,
-    input.note ?? null,
-  );
+  // 기록과 상태 변경은 함께 성립하거나 함께 실패해야 한다.
+  // (검수 기록만 남고 상태는 그대로인 불일치를 막는다)
+  return tx(db, () => {
+    const res = run(
+      db,
+      `INSERT INTO hub_inspections (listing_id, hub_id, inspector, result, graded_quality, note)
+       VALUES (?,?,?,?,?,?)`,
+      input.listingId,
+      input.hubId,
+      input.inspector,
+      input.result,
+      input.gradedQuality ?? null,
+      input.note ?? null,
+    );
 
-  if (input.result === 'reject') {
-    run(db, "UPDATE listings SET status = 'closed' WHERE id = ?", input.listingId);
-  } else {
-    setInspectionStatus(db, input.listingId, 'hub_passed');
-    if (input.gradedQuality) setQualityHint(db, input.listingId, input.gradedQuality);
-  }
+    if (input.result === 'reject') {
+      run(db, "UPDATE listings SET status = 'closed' WHERE id = ?", input.listingId);
+    } else {
+      setInspectionStatus(db, input.listingId, 'hub_passed');
+      if (input.gradedQuality) setConfirmedQuality(db, input.listingId, input.gradedQuality);
+    }
 
-  const created = one<HubInspection>(
-    db,
-    'SELECT * FROM hub_inspections WHERE id = ?',
-    res.lastInsertRowid,
-  );
-  if (!created) throw new Error('검수 기록 저장 실패');
-  return created;
+    const created = one<HubInspection>(
+      db,
+      'SELECT * FROM hub_inspections WHERE id = ?',
+      res.lastInsertRowid,
+    );
+    if (!created) throw new Error('검수 기록 저장 실패');
+    return created;
+  });
 }
 
 export function listInspections(db: Db, listingId: number): HubInspection[] {
@@ -61,16 +65,21 @@ export interface HubCounters {
   soldOut: number;
 }
 
-export function hubCounters(db: Db): HubCounters {
+/** @param hubId null 이면 전체(관리자). */
+export function hubCounters(db: Db, hubId: number | null = null): HubCounters {
+  const scope = hubId === null ? '' : 'AND f.hub_id = ?';
+  const params = hubId === null ? [] : [hubId];
   const row = one<HubCounters>(
     db,
     `SELECT
-       SUM(CASE WHEN inspection_status = 'ai_checked'     THEN 1 ELSE 0 END) AS incoming,
-       SUM(CASE WHEN inspection_status = 'hub_pending'    THEN 1 ELSE 0 END) AS needInspection,
-       SUM(CASE WHEN inspection_status IN ('hub_passed','ready_to_ship') THEN 1 ELSE 0 END) AS readyToShip,
-       SUM(CASE WHEN inspection_status = 'delivered'      THEN 1 ELSE 0 END) AS delivered,
-       SUM(CASE WHEN status = 'sold_out'                  THEN 1 ELSE 0 END) AS soldOut
-     FROM listings WHERE status != 'closed'`,
+       SUM(CASE WHEN l.inspection_status = 'ai_checked'     THEN 1 ELSE 0 END) AS incoming,
+       SUM(CASE WHEN l.inspection_status = 'hub_pending'    THEN 1 ELSE 0 END) AS needInspection,
+       SUM(CASE WHEN l.inspection_status IN ('hub_passed','ready_to_ship') THEN 1 ELSE 0 END) AS readyToShip,
+       SUM(CASE WHEN l.inspection_status = 'delivered'      THEN 1 ELSE 0 END) AS delivered,
+       SUM(CASE WHEN l.status = 'sold_out'                  THEN 1 ELSE 0 END) AS soldOut
+     FROM listings l JOIN farms f ON f.id = l.farm_id
+     WHERE l.status != 'closed' ${scope}`,
+    ...params,
   );
   return {
     incoming: row?.incoming ?? 0,

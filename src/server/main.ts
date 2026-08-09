@@ -54,7 +54,14 @@ export function createApp(): Server {
 
   return createServer((req, res) => {
     const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-    const pathname = decodeURIComponent(url.pathname);
+    // '/%' 같은 잘못된 인코딩이 리스너 밖으로 던져지면 프로세스가 죽는다.
+    let pathname: string;
+    try {
+      pathname = decodeURIComponent(url.pathname);
+    } catch {
+      sendJson(res, { error: '잘못된 주소입니다.', code: 'bad_url' }, 400);
+      return;
+    }
 
     const ctx: Ctx = {
       req,

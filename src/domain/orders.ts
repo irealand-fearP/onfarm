@@ -62,7 +62,12 @@ export function createOrder(db: Db, input: CreateOrderInput): CreatedOrder {
       prepared.push({ listing, quantity: line.quantity, amount });
     }
 
-    const no = orderNo();
+    // 주문번호는 무작위라 드물게 충돌한다. 충돌 때문에 정상 주문이 실패하면 안 된다.
+    let no = orderNo();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      if (!one(db, 'SELECT id FROM orders WHERE order_no = ?', no)) break;
+      no = orderNo();
+    }
     const orderRes = run(
       db,
       `INSERT INTO orders (consumer_id, order_no, total_amount, receiver_name, receiver_phone, address, memo, status)

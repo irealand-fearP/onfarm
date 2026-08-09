@@ -5,6 +5,8 @@ export interface User {
   role: Role;
   name: string;
   phone: string | null;
+  /** 거점 담당자만 값이 있다. 이 거점의 물량만 처리할 수 있다. */
+  hub_id: number | null;
   created_at: string;
 }
 
@@ -79,7 +81,10 @@ export interface Listing {
   ai_analysis: string | null;
   ai_confidence: number | null;
   ai_source: string | null;
+  /** AI 참고 판정. 확정 등급이 아니다. */
   quality_hint: QualityHint | null;
+  /** 거점 실물 검수로 확정된 등급. 이 값이 있으면 이것이 최종이다. */
+  confirmed_quality: string | null;
   inspection_status: InspectionStatus;
   status: ListingStatus;
   created_at: string;

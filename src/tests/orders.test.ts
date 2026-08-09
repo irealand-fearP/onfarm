@@ -156,9 +156,10 @@ describe('거점 실물 검수', () => {
     assert.equal(all(db, 'SELECT id FROM hub_inspections').length, 1);
   });
 
-  it('등급 조정은 AI 참고값이 아니라 확정 등급을 덮어쓴다', () => {
+  it('확정 등급은 AI 참고값을 덮어쓰지 않고 별도로 기록된다', () => {
     const db = freshDb();
     const [listing] = firstTwoListings(db);
+    const aiHint = listing.quality_hint;
     recordInspection(db, {
       listingId: listing.id,
       hubId: null,
@@ -167,7 +168,9 @@ describe('거점 실물 검수', () => {
       gradedQuality: '보통',
       note: '표면 흠집',
     });
-    assert.equal(getListingView(db, listing.id)?.quality_hint, '보통');
+    const after = getListingView(db, listing.id);
+    assert.equal(after?.confirmed_quality, '보통', '확정 등급이 기록돼야 한다');
+    assert.equal(after?.quality_hint, aiHint, 'AI 참고값은 그대로 남아야 감사 추적이 가능하다');
     const row = one<{ result: string; graded_quality: string }>(
       db,
       'SELECT result, graded_quality FROM hub_inspections WHERE listing_id = ?',

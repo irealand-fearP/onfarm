@@ -72,8 +72,11 @@
         ['soldOut', '판매 완료'],
       ];
 
+      let grades = ['특', '상', '보통'];
+
       async function load() {
         const data = await api('/api/hub/dashboard');
+        if (Array.isArray(data.grades)) grades = data.grades;
         const stats = $('#stats');
         stats.replaceChildren();
         for (const [key, label] of STAT_LABELS) {
@@ -92,9 +95,23 @@
         for (const l of data.listings) {
           const actions = el('div', { class: 'inline-actions' });
           if (l.inspection_status === 'ai_checked' || l.inspection_status === 'hub_pending') {
+            // 확정 등급은 담당자가 직접 고른다. AI 참고값을 기본 선택해 두면
+            // '실물 검수로 확정'이라는 설명과 달리 AI값이 그대로 확정돼 버린다.
+            const grade = el(
+              'select',
+              { 'aria-label': '확정 등급' },
+              [el('option', { value: '', text: '등급 선택' }), ...grades.map((g) => el('option', { value: g, text: g }))],
+            );
             actions.append(
-              el('button', { class: 'go', type: 'button', text: '검수 통과', onclick: () => inspect(l.id, 'pass', l.quality_hint) }),
-              el('button', { type: 'button', text: '등급 조정', onclick: () => downgrade(l.id) }),
+              grade,
+              el('button', {
+                class: 'go', type: 'button', text: '검수 확정',
+                onclick: () => {
+                  if (!grade.value) { toast('실물을 보고 확정 등급을 골라주세요.'); return; }
+                  const changed = grade.value !== l.quality_hint;
+                  inspect(l.id, changed ? 'downgrade' : 'pass', grade.value);
+                },
+              }),
               el('button', { class: 'warn', type: 'button', text: '반려', onclick: () => inspect(l.id, 'reject', null) }),
             );
           } else if (l.inspection_status === 'hub_passed') {
@@ -116,7 +133,12 @@
                 el('div', { style: 'font-size:12px;color:var(--muted)', text: `${l.region_sigungu} · ${l.hub_name ?? '거점 미지정'}` }),
               ]),
               el('td', {}, [
-                el('span', { class: 'badge badge-hint', text: l.quality_hint ?? '-' }),
+                el('span', { class: 'badge badge-hint', text: `AI 참고 ${l.quality_hint ?? '-'}` }),
+                l.confirmed_quality
+                  ? el('div', { style: 'margin-top:4px' }, [
+                      el('span', { class: 'badge badge-ai', text: `확정 ${l.confirmed_quality}` }),
+                    ])
+                  : null,
                 el('div', { style: 'font-size:12px;color:var(--muted)', text: l.ai_confidence ? `신뢰도 ${Math.round(l.ai_confidence * 100)}%` : '' }),
               ]),
               el('td', { text: `${l.remaining_quantity} / ${l.quantity}` }),
@@ -128,21 +150,13 @@
       }
 
       async function inspect(listingId, result, gradedQuality) {
+        if (result === 'reject' && !confirm('반려하면 판매가 종료되고 매장에서 사라집니다. 계속할까요?')) return;
         try {
-          await api('/api/hub/inspections', { body: { listingId, result, gradedQuality } });
-          toast(result === 'reject' ? '반려 처리했습니다.' : '검수 결과를 기록했습니다.');
-          await load();
-        } catch (err) {
-          toast(err.message);
-        }
-      }
-
-      async function downgrade(listingId) {
-        const grade = prompt('실물 검수로 확정할 등급을 입력하세요 (특/상/보통)', '보통');
-        if (!grade) return;
-        try {
-          await api('/api/hub/inspections', { body: { listingId, result: 'downgrade', gradedQuality: grade, note: '실물 검수 결과 등급 조정' } });
-          toast('등급을 조정했습니다.');
+          const body = { listingId, result };
+          if (gradedQuality) body.gradedQuality = gradedQuality;
+          if (result === 'downgrade') body.note = '실물 검수 결과 등급 조정';
+          await api('/api/hub/inspections', { body });
+          toast(result === 'reject' ? '반려 처리했습니다.' : `확정 등급 ${gradedQuality} 으로 기록했습니다.`);
           await load();
         } catch (err) {
           toast(err.message);

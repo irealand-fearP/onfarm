@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
   role        TEXT NOT NULL CHECK (role IN ('farmer','consumer','hub_operator','admin')),
   name        TEXT NOT NULL,
   phone       TEXT,
+  -- 거점 담당자가 소속된 거점. 담당자는 자기 거점 물량만 다룬다.
+  hub_id      INTEGER,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -73,7 +75,8 @@ CREATE TABLE IF NOT EXISTS listings (
   ai_analysis        TEXT,                    -- JSON 원문 보관(감사·재현용)
   ai_confidence      REAL,
   ai_source          TEXT,                    -- heuristic | openai | anthropic | mock | manual
-  quality_hint       TEXT,                    -- 특 | 상 | 보통 | 확인필요  (참고 판정)
+  quality_hint       TEXT,                    -- 특 | 상 | 보통 | 확인필요  (AI 참고 판정, 덮어쓰지 않는다)
+  confirmed_quality  TEXT,                    -- 거점 실물 검수로 확정된 등급 (이것만이 '확정')
   inspection_status  TEXT NOT NULL DEFAULT 'ai_checked'
                      CHECK (inspection_status IN ('ai_checked','hub_pending','hub_passed','ready_to_ship','delivered')),
   status             TEXT NOT NULL DEFAULT 'active'

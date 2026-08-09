@@ -11,11 +11,28 @@ function isQualityHint(v: unknown): v is QualityHint {
   return typeof v === 'string' && (QUALITY_HINTS as string[]).includes(v);
 }
 
+const MAX_ITEMS = 8;
+const MAX_LEN = 120;
+
+/**
+ * 소비자에게 그대로 게시되면 안 되는 클레임.
+ * 사진 한 장으로는 확인 불가능한 사실이라, LLM 이 지어내면 허위표시가 된다.
+ * (프롬프트 지시는 런타임 검증을 대신하지 못한다)
+ */
+const FORBIDDEN_CLAIM =
+  /(무농약|유기농|친환경|잔류\s*농약|농약\s*검사|안전성|살균|무첨가|GAP\s*인증|HACCP|인증\s*(완료|받)|당도\s*\d|브릭스|국내\s*최초|최저가|100\s*%)/;
+
+export function hasForbiddenClaim(text: string): boolean {
+  return FORBIDDEN_CLAIM.test(text);
+}
+
 function asStringArray(v: unknown): string[] | null {
   if (v === undefined || v === null) return [];
   if (!Array.isArray(v)) return null;
-  if (!v.every((x) => typeof x === 'string')) return null;
-  return v as string[];
+  if (v.length > MAX_ITEMS) return null;
+  if (!v.every((x) => typeof x === 'string' && x.length <= MAX_LEN)) return null;
+  // 금지 클레임이 섞인 문장은 통째로 버린다(전체 거부 대신 해당 문장만 제거).
+  return (v as string[]).filter((s) => !hasForbiddenClaim(s));
 }
 
 /**
@@ -37,12 +54,12 @@ export function validateRecognition(raw: unknown, catalog: CatalogItem[]): Valid
     errors.push(`카탈로그에 없는 품목: ${product}`);
   }
 
-  let confidence = Number(r['confidence']);
-  if (!Number.isFinite(confidence)) {
-    errors.push('confidence 가 숫자가 아닙니다.');
-    confidence = 0;
+  // "0.99" 같은 문자열을 숫자로 강제 변환하지 않는다 — 계약 위반은 계약 위반이다.
+  let confidence = 0;
+  if (typeof r['confidence'] !== 'number' || !Number.isFinite(r['confidence'])) {
+    errors.push('confidence 는 숫자여야 합니다.');
   } else {
-    confidence = Math.min(1, Math.max(0, confidence));
+    confidence = Math.min(1, Math.max(0, r['confidence']));
   }
 
   const qualityHint = isQualityHint(r['quality_hint']) ? r['quality_hint'] : null;
@@ -77,10 +94,13 @@ export function validateRecognition(raw: unknown, catalog: CatalogItem[]): Valid
     category: known?.category ?? (typeof r['category'] === 'string' ? r['category'] : 'unknown'),
     product,
     product_ko: known?.name_ko ?? (typeof r['product_ko'] === 'string' ? r['product_ko'] : product),
-    variety_guess:
-      typeof r['variety_guess'] === 'string' && r['variety_guess'].trim()
-        ? r['variety_guess'].trim()
-        : (known?.variety ?? null),
+    // 품종 추정은 제목에 그대로 들어가므로 길이·클레임을 검사하고,
+    // 걸리면 카탈로그에 등록된 품종으로 되돌린다.
+    variety_guess: (() => {
+      const raw = typeof r['variety_guess'] === 'string' ? r['variety_guess'].trim() : '';
+      if (!raw || raw.length > 30 || hasForbiddenClaim(raw)) return known?.variety ?? null;
+      return raw;
+    })(),
     quality_hint: qualityHint ?? '확인필요',
     confidence,
     detected_issues: issues ?? [],

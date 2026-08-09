@@ -95,7 +95,7 @@
       $('#resetBtn').addEventListener('click', async () => {
         if (!confirm('현재 등록된 상품·주문을 모두 지우고 초기 상태로 되돌립니다. 계속할까요?')) return;
         try {
-          await api('/api/demo/reset', { body: {} });
+          await api('/api/demo/reset', { body: { confirm: 'RESET' } });
           localStorage.removeItem('onfarm.cart.v1');
           toast('초기화했습니다.');
         } catch (err) {

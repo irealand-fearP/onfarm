@@ -228,6 +228,50 @@ describe('HTTP — 사진 한 장에서 주문까지', () => {
     assert.equal(forced.body.ai.source, 'manual');
   });
 
+  it('같은 분석 ID 로 두 번 등록할 수 없다 — 재시도가 중복 매물을 만들면 안 된다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    const analyzed = await call('/api/ai/analyze', { body: { image: PNG_1X1, features: FEATURES } });
+    const body = { analysisId: analyzed.body.analysisId, skuId: analyzed.body.selectedSku.id, quantity: 2 };
+
+    const first = await call('/api/farmer/listings', { body });
+    assert.equal(first.status, 201);
+    const second = await call('/api/farmer/listings', { body });
+    assert.equal(second.status, 409, `두 번째 등록은 막혀야 한다 (실제 ${second.status})`);
+  });
+
+  it('품목을 바꿔 올리면 이전 품목의 품종이 제목에 남지 않는다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    const analyzed = await call('/api/ai/analyze', { body: { image: PNG_1X1, features: FEATURES } });
+    assert.equal(analyzed.body.recognition.product, 'pear');
+
+    const forced = await call('/api/ai/analyze', {
+      body: { analysisId: analyzed.body.analysisId, productCode: 'apple' },
+    });
+    const created = await call('/api/farmer/listings', {
+      body: {
+        analysisId: forced.body.analysisId,
+        skuId: forced.body.selectedSku.id,
+        quantity: 1,
+        productCode: 'apple',
+      },
+    });
+    assert.equal(created.status, 201);
+    assert.ok(!created.body.listing.title.includes('신고배'), `제목에 이전 품종이 남음: ${created.body.listing.title}`);
+    assert.match(created.body.listing.title, /부사/);
+  });
+
+  it('미래 수확일은 거부한다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    const analyzed = await call('/api/ai/analyze', { body: { image: PNG_1X1, features: FEATURES } });
+    const res = await call('/api/farmer/listings', {
+      body: { analysisId: analyzed.body.analysisId, skuId: analyzed.body.selectedSku.id, quantity: 1, harvestedOn: '2099-01-01' },
+    });
+    assert.equal(res.status, 400);
+  });
+
   it('만료·위조된 분석 ID 는 거부한다', async () => {
     const call = client();
     await loginAs(call, '김복순');
@@ -254,6 +298,142 @@ describe('HTTP — 사진 한 장에서 주문까지', () => {
     const mine = await a('/api/farmer/listings');
     assert.ok(mine.body.listings.length > 0);
     assert.ok(mine.body.listings.every((l: { farm_name: string }) => l.farm_name === '복순이네 배농장'));
+  });
+});
+
+describe('HTTP — 잘못된 입력이 500 이 되면 안 된다', () => {
+  it('JSON null·배열·잘못된 타입은 400 이다', async () => {
+    const call = client();
+    await loginAs(call, '장바구니');
+    for (const body of [null, [1, 2], 'hello'] as unknown[]) {
+      const res = await fetch(`${base}/api/store/orders`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      assert.equal(res.status < 500, true, `${JSON.stringify(body)} → ${res.status}`);
+    }
+  });
+
+  it('lines·receiverName 타입이 이상해도 400 이다', async () => {
+    const call = client();
+    await loginAs(call, '장바구니');
+    assert.equal((await call('/api/store/orders', { body: { lines: {} } })).status, 400);
+    assert.equal(
+      (await call('/api/store/orders', { body: { lines: [], receiverName: {} } })).status < 500,
+      true,
+    );
+  });
+
+  it('image 가 문자열이 아니면 400 이다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    const res = await call('/api/ai/analyze', { body: { image: {} } });
+    assert.equal(res.status, 400);
+  });
+
+  it('limit=abc 가 SQL 로 새지 않는다', async () => {
+    const res = await fetch(`${base}/api/store/listings?limit=abc`);
+    assert.equal(res.status, 200);
+  });
+
+  it('잘못 인코딩된 URL 이 서버를 죽이지 않는다', async () => {
+    const res = await fetch(`${base}/%`);
+    assert.ok(res.status === 400 || res.status === 404, `실제 ${res.status}`);
+    // 서버가 여전히 살아 있어야 한다
+    assert.equal((await fetch(`${base}/api/config`)).status, 200);
+  });
+});
+
+describe('HTTP — 거점 권한과 확정 등급', () => {
+  it('확정 등급 없이 검수를 통과시킬 수 없다', async () => {
+    const call = client();
+    await loginAs(call, '성환거점 담당자');
+    const dash = await call('/api/hub/dashboard');
+    const target = dash.body.listings[0];
+    const res = await call('/api/hub/inspections', { body: { listingId: target.id, result: 'pass' } });
+    assert.equal(res.status, 400, 'AI 참고값이 자동 승격되면 안 된다');
+    assert.equal(res.body.code, 'bad_grade');
+  });
+
+  it('허용목록 밖 등급 문자열을 거부한다', async () => {
+    const call = client();
+    await loginAs(call, '성환거점 담당자');
+    const dash = await call('/api/hub/dashboard');
+    const target = dash.body.listings[0];
+    const res = await call('/api/hub/inspections', {
+      body: { listingId: target.id, result: 'pass', gradedQuality: '무농약·안전성 검사 완료' },
+    });
+    assert.equal(res.status, 400);
+  });
+
+  it('다른 거점 매물은 보이지도, 처리되지도 않는다', async () => {
+    const admin = client();
+    await loginAs(admin, '운영자');
+    const all = await admin('/api/hub/dashboard');
+    const jeju = all.body.listings.find((l: { region_sido: string }) => l.region_sido === '제주');
+    assert.ok(jeju, '제주 매물이 시드에 있어야 한다');
+
+    const call = client();
+    await loginAs(call, '성환거점 담당자');
+    const mine = await call('/api/hub/dashboard');
+    assert.ok(
+      !mine.body.listings.some((l: { id: number }) => l.id === jeju.id),
+      '다른 거점 매물이 목록에 뜨면 안 된다',
+    );
+    const res = await call('/api/hub/inspections', {
+      body: { listingId: jeju.id, result: 'pass', gradedQuality: '상' },
+    });
+    assert.equal(res.status, 403);
+  });
+
+  it('검수 전 매물을 배송 완료로 건너뛸 수 없다', async () => {
+    const call = client();
+    await loginAs(call, '성환거점 담당자');
+    const dash = await call('/api/hub/dashboard');
+    const target = dash.body.listings.find(
+      (l: { inspection_status: string }) => l.inspection_status === 'ai_checked',
+    );
+    assert.ok(target);
+    const res = await call(`/api/hub/listings/${target.id}/status`, { body: { status: 'delivered' } });
+    assert.equal(res.status, 409);
+  });
+
+  it('확정 등급은 AI 참고값과 별도 필드로 소비자에게 내려간다', async () => {
+    const hub = client();
+    await loginAs(hub, '성환거점 담당자');
+    const dash = await hub('/api/hub/dashboard');
+    const target = dash.body.listings[0];
+    const aiHint = target.quality_hint;
+
+    const res = await hub('/api/hub/inspections', {
+      body: { listingId: target.id, result: 'downgrade', gradedQuality: '보통' },
+    });
+    assert.equal(res.status, 201);
+
+    const store = client();
+    const detail = await store(`/api/store/listings/${target.id}`);
+    assert.equal(detail.body.listing.confirmed_quality, '보통');
+    assert.equal(detail.body.listing.quality_hint, aiHint);
+  });
+});
+
+describe('HTTP — 데모 초기화 보호', () => {
+  it('확인값 없이는 초기화되지 않는다', async () => {
+    const count = async (): Promise<number> => {
+      const body = (await fetch(`${base}/api/store/listings`).then((r) => r.json())) as {
+        listings: unknown[];
+      };
+      return body.listings.length;
+    };
+    const before = await count();
+    const res = await fetch(`${base}/api/demo/reset`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    assert.equal(res.status, 400);
+    assert.equal(await count(), before);
   });
 });
 

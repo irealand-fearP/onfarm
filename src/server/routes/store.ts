@@ -21,7 +21,8 @@ export function registerStoreRoutes(router: Router): void {
     const limit = ctx.query.get('limit');
     if (product) filter.productCode = product;
     if (region) filter.region = region;
-    if (limit) filter.limit = Number(limit);
+    // limit=abc 같은 값이 NaN 으로 SQL 에 들어가면 안 된다.
+    if (limit && Number.isFinite(Number(limit))) filter.limit = Number(limit);
     ctx.json({ listings: listStoreListings(db(), filter) });
   });
 
@@ -35,7 +36,16 @@ export function registerStoreRoutes(router: Router): void {
   router.post('/api/store/orders', async (ctx) => {
     const user = requireRole(ctx.user, 'consumer');
     const body = await ctx.body<OrderBody>();
+
+    // 클라이언트가 보낸 모양을 믿지 않는다. 배열이 아니면 400 이지 500 이 아니다.
+    if (body.lines !== undefined && !Array.isArray(body.lines)) {
+      throw new HttpError(400, '주문 항목 형식이 올바르지 않습니다.', 'bad_request');
+    }
+    const text = (value: unknown, fallback = ''): string =>
+      typeof value === 'string' ? value : fallback;
+
     const lines = (body.lines ?? [])
+      .filter((l): l is { listingId?: number; quantity?: number } => typeof l === 'object' && l !== null)
       .map((l) => ({ listingId: Number(l.listingId), quantity: Number(l.quantity) }))
       .filter((l) => Number.isInteger(l.listingId) && Number.isInteger(l.quantity));
 
@@ -43,10 +53,10 @@ export function registerStoreRoutes(router: Router): void {
       const created = createOrder(db(), {
         consumerId: user.id,
         lines,
-        receiverName: body.receiverName ?? user.name,
-        receiverPhone: body.receiverPhone ?? '010-0000-0000',
-        address: body.address ?? '',
-        ...(body.memo ? { memo: body.memo } : {}),
+        receiverName: text(body.receiverName, user.name).slice(0, 60),
+        receiverPhone: text(body.receiverPhone, '010-0000-0000').slice(0, 30),
+        address: text(body.address).slice(0, 200),
+        ...(typeof body.memo === 'string' ? { memo: body.memo.slice(0, 200) } : {}),
       });
       ctx.json({ order: created.order, items: created.items }, 201);
     } catch (err) {
