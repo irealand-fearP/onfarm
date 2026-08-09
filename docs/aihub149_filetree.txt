@@ -1,0 +1,234 @@
+==========================================
+aihubshell version 25.09.19 v0.6
+==========================================
+Fetching file tree structure...
+The contents are encoded in UTF-8 including Korean characters. 
+If the following contents are not output normally, 
+Please modify the character information of the OS. 
+=================공지사항=================== 
+========================================== 
+
+    └─068.농산물 품질(QC) 이미지
+        └─01.데이터
+            ├─1.Training
+            │  ├─원천데이터_230921_add
+            │  │  ├─Apple_fuji_L.zip | 4 GB | 396957
+            │  │  ├─Apple_fuji_M.zip | 4 GB | 396958
+            │  │  ├─Apple_fuji_S.zip | 4 GB | 396959
+            │  │  ├─Apple_yanggwang_L.zip | 4 GB | 396960
+            │  │  ├─Apple_yanggwang_M.zip | 4 GB | 396961
+            │  │  ├─Apple_yanggwang_S.zip | 4 GB | 396962
+            │  │  ├─Cabbage_green_L.zip | 3 GB | 396963
+            │  │  ├─Cabbage_green_M.zip | 3 GB | 396964
+            │  │  ├─Cabbage_green_S.zip | 3 GB | 396965
+            │  │  ├─Chinese-cabbage_L.zip | 8 GB | 396966
+            │  │  ├─Chinese-cabbage_M.zip | 8 GB | 396967
+            │  │  ├─Chinese-cabbage_S.zip | 7 GB | 396968
+            │  │  ├─Mandarine_hallabong_L.zip | 3 GB | 396969
+            │  │  ├─Mandarine_hallabong_M.zip | 3 GB | 396970
+            │  │  ├─Mandarine_hallabong_S.zip | 3 GB | 396971
+            │  │  ├─cabbage_red_L.zip | 4 GB | 396972
+            │  │  ├─cabbage_red_M.zip | 4 GB | 396973
+            │  │  ├─cabbage_red_S.zip | 4 GB | 396974
+            │  │  ├─garlic_uiseong_L.zip | 5 GB | 396975
+            │  │  ├─garlic_uiseong_M.zip | 5 GB | 396976
+            │  │  ├─garlic_uiseong_S.zip | 5 GB | 396977
+            │  │  ├─mandarine_onjumilgam_L.zip | 3 GB | 396978
+            │  │  ├─mandarine_onjumilgam_M.zip | 3 GB | 396979
+            │  │  ├─mandarine_onjumilgam_S.zip | 3 GB | 396980
+            │  │  ├─onion_red_L.zip | 4 GB | 396981
+            │  │  ├─onion_red_M.zip | 4 GB | 396982
+            │  │  ├─onion_red_S.zip | 4 GB | 396983
+            │  │  ├─onion_white_L.zip | 3 GB | 396984
+            │  │  ├─onion_white_M.zip | 4 GB | 396985
+            │  │  ├─onion_white_S.zip | 3 GB | 396986
+            │  │  ├─pear_chuhwang_L.zip | 3 GB | 396987
+            │  │  ├─pear_chuhwang_M.zip | 3 GB | 396988
+            │  │  ├─pear_chuhwang_S.zip | 3 GB | 396989
+            │  │  ├─pear_singo_L.zip | 3 GB | 396990
+            │  │  ├─pear_singo_M.zip | 3 GB | 396991
+            │  │  ├─pear_singo_S.zip | 3 GB | 396992
+            │  │  ├─persimmon_bansi_L.zip | 2 GB | 396993
+            │  │  ├─persimmon_bansi_M.zip | 2 GB | 396994
+            │  │  ├─persimmon_bansi_S.zip | 2 GB | 396995
+            │  │  ├─persimmon_booyu_L.zip | 2 GB | 396996
+            │  │  ├─persimmon_booyu_M.zip | 2 GB | 396997
+            │  │  ├─persimmon_booyu_S.zip | 2 GB | 396998
+            │  │  ├─persimmon_deabong_L.zip | 2 GB | 396999
+            │  │  ├─persimmon_deabong_M.zip | 2 GB | 397000
+            │  │  ├─persimmon_deabong_S.zip | 2 GB | 397001
+            │  │  ├─potato_seolbong_L.zip | 4 GB | 397002
+            │  │  ├─potato_seolbong_M.zip | 4 GB | 397003
+            │  │  ├─potato_seolbong_S.zip | 3 GB | 397004
+            │  │  ├─potato_sumi_L.zip | 4 GB | 397005
+            │  │  ├─potato_sumi_M.zip | 4 GB | 397006
+            │  │  ├─potato_sumi_S.zip | 3 GB | 397007
+            │  │  ├─radish_winter-radish_L.zip | 5 GB | 397008
+            │  │  ├─radish_winter-radish_M.zip | 5 GB | 397009
+            │  │  └─radish_winter-radish_S.zip | 5 GB | 397010
+            │  └─라벨링데이터_230921_add
+            │      ├─Apple_fuji_L.zip | 2 MB | 396903
+            │      ├─Apple_fuji_M.zip | 2 MB | 396904
+            │      ├─Apple_fuji_S.zip | 2 MB | 396905
+            │      ├─Apple_yanggwang_L.zip | 2 MB | 396906
+            │      ├─Apple_yanggwang_M.zip | 2 MB | 396907
+            │      ├─Apple_yanggwang_S.zip | 2 MB | 396908
+            │      ├─cabbage_green_L.zip | 2 MB | 396909
+            │      ├─cabbage_green_M.zip | 2 MB | 396910
+            │      ├─cabbage_green_S.zip | 2 MB | 396911
+            │      ├─cabbage_red_L.zip | 2 MB | 396912
+            │      ├─cabbage_red_M.zip | 2 MB | 396913
+            │      ├─cabbage_red_S.zip | 2 MB | 396914
+            │      ├─chinese-cabbage_L.zip | 4 MB | 396915
+            │      ├─chinese-cabbage_M.zip | 4 MB | 396916
+            │      ├─chinese-cabbage_S.zip | 4 MB | 396917
+            │      ├─garlic_uiseong_L.zip | 4 MB | 396918
+            │      ├─garlic_uiseong_M.zip | 4 MB | 396919
+            │      ├─garlic_uiseong_S.zip | 4 MB | 396920
+            │      ├─mandarine_hallabong_L.zip | 2 MB | 396921
+            │      ├─mandarine_hallabong_M.zip | 2 MB | 396922
+            │      ├─mandarine_hallabong_S.zip | 2 MB | 396923
+            │      ├─mandarine_onjumilgam_L.zip | 2 MB | 396924
+            │      ├─mandarine_onjumilgam_M.zip | 2 MB | 396925
+            │      ├─mandarine_onjumilgam_S.zip | 2 MB | 396926
+            │      ├─onion_red_L.zip | 2 MB | 396927
+            │      ├─onion_red_M.zip | 2 MB | 396928
+            │      ├─onion_red_S.zip | 2 MB | 396929
+            │      ├─onion_white_L.zip | 2 MB | 396930
+            │      ├─onion_white_M.zip | 2 MB | 396931
+            │      ├─onion_white_S.zip | 2 MB | 396932
+            │      ├─pear_chuhwang_L.zip | 2 MB | 396933
+            │      ├─pear_chuhwang_M.zip | 2 MB | 396934
+            │      ├─pear_chuhwang_S.zip | 2 MB | 396935
+            │      ├─pear_singo_L.zip | 2 MB | 396936
+            │      ├─pear_singo_M.zip | 2 MB | 396937
+            │      ├─pear_singo_S.zip | 2 MB | 396938
+            │      ├─persimmon_bansi_L.zip | 1 MB | 396939
+            │      ├─persimmon_bansi_M.zip | 1 MB | 396940
+            │      ├─persimmon_bansi_S.zip | 1 MB | 396941
+            │      ├─persimmon_booyu_L.zip | 1 MB | 396942
+            │      ├─persimmon_booyu_M.zip | 1 MB | 396943
+            │      ├─persimmon_booyu_S.zip | 1 MB | 396944
+            │      ├─persimmon_daebong_L.zip | 1 MB | 396945
+            │      ├─persimmon_daebong_M.zip | 1 MB | 396946
+            │      ├─persimmon_daebong_S.zip | 1 MB | 396947
+            │      ├─potato_seolbong_L.zip | 2 MB | 396948
+            │      ├─potato_seolbong_M.zip | 2 MB | 396949
+            │      ├─potato_seolbong_S.zip | 2 MB | 396950
+            │      ├─potato_sumi_L.zip | 2 MB | 396951
+            │      ├─potato_sumi_M.zip | 2 MB | 396952
+            │      ├─potato_sumi_S.zip | 2 MB | 396953
+            │      ├─radish_winter-radish_L.zip | 4 MB | 396954
+            │      ├─radish_winter-radish_M.zip | 4 MB | 396955
+            │      └─radish_winter-radish_S.zip | 4 MB | 396956
+            └─2.Validation
+                ├─라벨링데이터_230921_add
+                │  ├─Apple_fuji_L.zip | 289 KB | 397011
+                │  ├─Apple_fuji_M.zip | 287 KB | 397012
+                │  ├─Apple_fuji_S.zip | 289 KB | 397013
+                │  ├─Apple_yanggwang_L.zip | 294 KB | 397014
+                │  ├─Apple_yanggwang_M.zip | 304 KB | 397015
+                │  ├─Apple_yanggwang_S.zip | 324 KB | 397016
+                │  ├─Cabbage_green_L.zip | 323 KB | 397017
+                │  ├─Cabbage_green_M.zip | 322 KB | 397018
+                │  ├─Cabbage_green_S.zip | 323 KB | 397019
+                │  ├─Chinese-cabbage_L.zip | 628 KB | 397020
+                │  ├─Chinese-cabbage_M.zip | 626 KB | 397021
+                │  ├─Chinese-cabbage_S.zip | 632 KB | 397022
+                │  ├─Mandarine_hallabong_L.zip | 287 KB | 397023
+                │  ├─Mandarine_hallabong_M.zip | 293 KB | 397024
+                │  ├─Mandarine_hallabong_S.zip | 293 KB | 397025
+                │  ├─cabbage_red_L.zip | 308 KB | 397026
+                │  ├─cabbage_red_M.zip | 316 KB | 397027
+                │  ├─cabbage_red_S.zip | 320 KB | 397028
+                │  ├─garlic_uiseong_L.zip | 670 KB | 397029
+                │  ├─garlic_uiseong_M.zip | 660 KB | 397030
+                │  ├─garlic_uiseong_S.zip | 646 KB | 397031
+                │  ├─mandarine_onjumilgam_L.zip | 295 KB | 397032
+                │  ├─mandarine_onjumilgam_M.zip | 294 KB | 397033
+                │  ├─mandarine_onjumilgam_S.zip | 297 KB | 397034
+                │  ├─onion_red_L.zip | 337 KB | 397035
+                │  ├─onion_red_M.zip | 335 KB | 397036
+                │  ├─onion_red_S.zip | 316 KB | 397037
+                │  ├─onion_white_L.zip | 316 KB | 397038
+                │  ├─onion_white_M.zip | 314 KB | 397039
+                │  ├─onion_white_S.zip | 317 KB | 397040
+                │  ├─pear_chuhwang_L.zip | 282 KB | 397041
+                │  ├─pear_singo_L.zip | 279 KB | 397044
+                │  ├─pear_singo_M.zip | 300 KB | 397045
+                │  ├─pear_singo_S.zip | 280 KB | 397046
+                │  ├─persimmon_bansi_L.zip | 201 KB | 397047
+                │  ├─persimmon_bansi_M.zip | 201 KB | 397048
+                │  ├─persimmon_bansi_S.zip | 202 KB | 397049
+                │  ├─persimmon_booyu_L.zip | 202 KB | 397050
+                │  ├─persimmon_booyu_M.zip | 201 KB | 397051
+                │  ├─persimmon_booyu_S.zip | 203 KB | 397052
+                │  ├─persimmon_daebong_L.zip | 170 KB | 397053
+                │  ├─persimmon_daebong_M.zip | 169 KB | 397054
+                │  ├─persimmon_daebong_S.zip | 170 KB | 397055
+                │  ├─potato_seolbong_L.zip | 287 KB | 397056
+                │  ├─potato_seolbong_M.zip | 285 KB | 397057
+                │  ├─potato_seolbong_S.zip | 288 KB | 397058
+                │  ├─potato_sumi_L.zip | 281 KB | 397059
+                │  ├─potato_sumi_M.zip | 281 KB | 397060
+                │  ├─potato_sumi_S.zip | 281 KB | 397061
+                │  ├─radish_winter-radish_L.zip | 621 KB | 397062
+                │  ├─radish_winter-radish_M.zip | 623 KB | 397063
+                │  ├─radish_winter-radish_S.zip | 624 KB | 397064
+                │  ├─pear_chuhwang_S.zip | 284 KB | 397043
+                │  └─pear_chuhwang_M.zip | 282 KB | 397042
+                └─원천데이터_230921_add
+                    ├─Mandarine_hallabong_L.zip | 391 MB | 397077
+                    ├─Mandarine_hallabong_M.zip | 462 MB | 397078
+                    ├─Mandarine_hallabong_S.zip | 449 MB | 397079
+                    ├─cabbage_red_L.zip | 537 MB | 397080
+                    ├─cabbage_red_M.zip | 502 MB | 397081
+                    ├─cabbage_red_S.zip | 494 MB | 397082
+                    ├─garlic_uiseong_L.zip | 975 MB | 397083
+                    ├─garlic_uiseong_M.zip | 877 MB | 397084
+                    ├─garlic_uiseong_S.zip | 862 MB | 397085
+                    ├─mandarine_onjumilgam_L.zip | 478 MB | 397086
+                    ├─mandarine_onjumilgam_M.zip | 444 MB | 397087
+                    ├─mandarine_onjumilgam_S.zip | 449 MB | 397088
+                    ├─onion_red_L.zip | 558 MB | 397089
+                    ├─onion_red_M.zip | 648 MB | 397090
+                    ├─onion_red_S.zip | 550 MB | 397091
+                    ├─onion_white_L.zip | 480 MB | 397092
+                    ├─onion_white_M.zip | 469 MB | 397093
+                    ├─onion_white_S.zip | 469 MB | 397094
+                    ├─pear_chuhwang_L.zip | 450 MB | 397095
+                    ├─pear_chuhwang_M.zip | 478 MB | 397096
+                    ├─pear_chuhwang_S.zip | 429 MB | 397097
+                    ├─pear_singo_L.zip | 444 MB | 397098
+                    ├─pear_singo_M.zip | 643 MB | 397099
+                    ├─pear_singo_S.zip | 470 MB | 397100
+                    ├─persimmon_bansi_L.zip | 272 MB | 397101
+                    ├─persimmon_bansi_M.zip | 271 MB | 397102
+                    ├─persimmon_bansi_S.zip | 302 MB | 397103
+                    ├─persimmon_booyu_L.zip | 255 MB | 397104
+                    ├─persimmon_booyu_M.zip | 301 MB | 397105
+                    ├─persimmon_booyu_S.zip | 301 MB | 397106
+                    ├─persimmon_deabong_L.zip | 252 MB | 397107
+                    ├─persimmon_deabong_M.zip | 256 MB | 397108
+                    ├─persimmon_deabong_S.zip | 262 MB | 397109
+                    ├─potato_seolbong_L.zip | 570 MB | 397110
+                    ├─potato_seolbong_M.zip | 554 MB | 397111
+                    ├─potato_seolbong_S.zip | 499 MB | 397112
+                    ├─potato_sumi_L.zip | 536 MB | 397113
+                    ├─potato_sumi_M.zip | 561 MB | 397114
+                    ├─potato_sumi_S.zip | 501 MB | 397115
+                    ├─radish_winter-radish_L.zip | 690 MB | 397116
+                    ├─radish_winter-radish_M.zip | 674 MB | 397117
+                    ├─radish_winter-radish_S.zip | 664 MB | 397118
+                    ├─Apple_fuji_L.zip | 632 MB | 397065
+                    ├─Apple_fuji_M.zip | 593 MB | 397066
+                    ├─Apple_fuji_S.zip | 605 MB | 397067
+                    ├─Apple_yanggwang_L.zip | 554 MB | 397068
+                    ├─Apple_yanggwang_M.zip | 554 MB | 397069
+                    ├─Apple_yanggwang_S.zip | 750 MB | 397070
+                    ├─Cabbage_green_L.zip | 504 MB | 397071
+                    ├─Cabbage_green_M.zip | 419 MB | 397072
+                    ├─Cabbage_green_S.zip | 445 MB | 397073
+                    ├─Chinese-cabbage_L.zip | 1 GB | 397074
+                    ├─Chinese-cabbage_M.zip | 1 GB | 397075
+                    └─Chinese-cabbage_S.zip | 1 GB | 397076
