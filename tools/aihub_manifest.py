@@ -34,6 +34,33 @@ FIELDS = [
 ]
 
 
+EXPECTED_ZIPS_PER_SPLIT = 54  # 라벨 zip: 18품종 × L/M/S
+
+
+def check_integrity(root: Path) -> list[str]:
+    """
+    받은 zip 이 온전한지 먼저 본다.
+    실제로 겪은 사고: aihubshell 다운로드가 중간에 잘려 Validation 라벨 54개 중 21개만 받아졌는데,
+    그대로 분석하면 '검증 개체가 177개뿐'이라는 잘못된 결론이 나온다.
+    """
+    problems: list[str] = []
+    for split_dir, split in ((root / "1.Training", "train"), (root / "2.Validation", "valid")):
+        if not split_dir.exists():
+            problems.append(f"{split}: 폴더 없음")
+            continue
+        zips = sorted(split_dir.rglob("*.zip"))
+        if len(zips) != EXPECTED_ZIPS_PER_SPLIT:
+            problems.append(f"{split}: zip {len(zips)}개 (기대 {EXPECTED_ZIPS_PER_SPLIT}개) — 다운로드가 잘렸다")
+        for zp in zips:
+            try:
+                with zipfile.ZipFile(zp) as zf:
+                    if zf.testzip() is not None:
+                        problems.append(f"{split}/{zp.name}: 내용 손상")
+            except zipfile.BadZipFile:
+                problems.append(f"{split}/{zp.name}: 열 수 없음({zp.stat().st_size:,}B) — 다시 받아야 한다")
+    return problems
+
+
 def iter_labels(root: Path):
     """라벨 zip 안의 JSON 을 풀지 않고 순회한다."""
     for split_dir, split in ((root / "1.Training", "train"), (root / "2.Validation", "valid")):
@@ -87,8 +114,22 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("root", type=Path)
     ap.add_argument("-o", "--out", type=Path, default=Path("data/aihub149_report"))
+    ap.add_argument("--allow-incomplete", action="store_true",
+                    help="무결성 문제가 있어도 진행(수치를 신뢰할 수 없다)")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
+
+    problems = check_integrity(args.root)
+    if problems:
+        print("## 무결성 문제", file=sys.stderr)
+        for p in problems:
+            print(f"  ! {p}", file=sys.stderr)
+        if not args.allow_incomplete:
+            print("\n다운로드를 다시 받은 뒤 실행하세요. 불완전한 데이터로 낸 통계는 틀립니다.",
+                  file=sys.stderr)
+            return 2
+    else:
+        print("✅ 무결성 검사 통과 (라벨 zip 108개 전량 정상)")
 
     rows: list[dict] = []
     for split, zip_name, json_name, size_class, obj in iter_labels(args.root):

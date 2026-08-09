@@ -1,0 +1,457 @@
+{
+ "apple": {
+  "label": [
+   "396903",
+   "396904",
+   "396905",
+   "396906",
+   "396907",
+   "396908",
+   "397011",
+   "397012",
+   "397013",
+   "397014",
+   "397015",
+   "397016"
+  ],
+  "src": [
+   {
+    "k": "396957",
+    "n": "Apple_fuji_L",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396958",
+    "n": "Apple_fuji_M",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396959",
+    "n": "Apple_fuji_S",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396960",
+    "n": "Apple_yanggwang_L",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396961",
+    "n": "Apple_yanggwang_M",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396962",
+    "n": "Apple_yanggwang_S",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "397065",
+    "n": "Apple_fuji_L",
+    "gb": 0.62,
+    "s": "valid"
+   },
+   {
+    "k": "397066",
+    "n": "Apple_fuji_M",
+    "gb": 0.58,
+    "s": "valid"
+   },
+   {
+    "k": "397067",
+    "n": "Apple_fuji_S",
+    "gb": 0.59,
+    "s": "valid"
+   },
+   {
+    "k": "397068",
+    "n": "Apple_yanggwang_L",
+    "gb": 0.54,
+    "s": "valid"
+   },
+   {
+    "k": "397069",
+    "n": "Apple_yanggwang_M",
+    "gb": 0.54,
+    "s": "valid"
+   },
+   {
+    "k": "397070",
+    "n": "Apple_yanggwang_S",
+    "gb": 0.73,
+    "s": "valid"
+   }
+  ],
+  "gb": 27.6
+ },
+ "pear": {
+  "label": [
+   "396933",
+   "396934",
+   "396935",
+   "396936",
+   "396937",
+   "396938",
+   "397041",
+   "397044",
+   "397045",
+   "397046",
+   "397043",
+   "397042"
+  ],
+  "src": [
+   {
+    "k": "396987",
+    "n": "pear_chuhwang_L",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396988",
+    "n": "pear_chuhwang_M",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396989",
+    "n": "pear_chuhwang_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396990",
+    "n": "pear_singo_L",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396991",
+    "n": "pear_singo_M",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396992",
+    "n": "pear_singo_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "397095",
+    "n": "pear_chuhwang_L",
+    "gb": 0.44,
+    "s": "valid"
+   },
+   {
+    "k": "397096",
+    "n": "pear_chuhwang_M",
+    "gb": 0.47,
+    "s": "valid"
+   },
+   {
+    "k": "397097",
+    "n": "pear_chuhwang_S",
+    "gb": 0.42,
+    "s": "valid"
+   },
+   {
+    "k": "397098",
+    "n": "pear_singo_L",
+    "gb": 0.43,
+    "s": "valid"
+   },
+   {
+    "k": "397099",
+    "n": "pear_singo_M",
+    "gb": 0.63,
+    "s": "valid"
+   },
+   {
+    "k": "397100",
+    "n": "pear_singo_S",
+    "gb": 0.46,
+    "s": "valid"
+   }
+  ],
+  "gb": 20.9
+ },
+ "mandarine": {
+  "label": [
+   "396921",
+   "396922",
+   "396923",
+   "396924",
+   "396925",
+   "396926",
+   "397023",
+   "397024",
+   "397025",
+   "397032",
+   "397033",
+   "397034"
+  ],
+  "src": [
+   {
+    "k": "396969",
+    "n": "Mandarine_hallabong_L",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396970",
+    "n": "Mandarine_hallabong_M",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396971",
+    "n": "Mandarine_hallabong_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396978",
+    "n": "mandarine_onjumilgam_L",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396979",
+    "n": "mandarine_onjumilgam_M",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396980",
+    "n": "mandarine_onjumilgam_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "397077",
+    "n": "Mandarine_hallabong_L",
+    "gb": 0.38,
+    "s": "valid"
+   },
+   {
+    "k": "397078",
+    "n": "Mandarine_hallabong_M",
+    "gb": 0.45,
+    "s": "valid"
+   },
+   {
+    "k": "397079",
+    "n": "Mandarine_hallabong_S",
+    "gb": 0.44,
+    "s": "valid"
+   },
+   {
+    "k": "397086",
+    "n": "mandarine_onjumilgam_L",
+    "gb": 0.47,
+    "s": "valid"
+   },
+   {
+    "k": "397087",
+    "n": "mandarine_onjumilgam_M",
+    "gb": 0.43,
+    "s": "valid"
+   },
+   {
+    "k": "397088",
+    "n": "mandarine_onjumilgam_S",
+    "gb": 0.44,
+    "s": "valid"
+   }
+  ],
+  "gb": 20.6
+ },
+ "onion": {
+  "label": [
+   "396927",
+   "396928",
+   "396929",
+   "396930",
+   "396931",
+   "396932",
+   "397035",
+   "397036",
+   "397037",
+   "397038",
+   "397039",
+   "397040"
+  ],
+  "src": [
+   {
+    "k": "396981",
+    "n": "onion_red_L",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396982",
+    "n": "onion_red_M",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396983",
+    "n": "onion_red_S",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396984",
+    "n": "onion_white_L",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "396985",
+    "n": "onion_white_M",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "396986",
+    "n": "onion_white_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "397089",
+    "n": "onion_red_L",
+    "gb": 0.54,
+    "s": "valid"
+   },
+   {
+    "k": "397090",
+    "n": "onion_red_M",
+    "gb": 0.63,
+    "s": "valid"
+   },
+   {
+    "k": "397091",
+    "n": "onion_red_S",
+    "gb": 0.54,
+    "s": "valid"
+   },
+   {
+    "k": "397092",
+    "n": "onion_white_L",
+    "gb": 0.47,
+    "s": "valid"
+   },
+   {
+    "k": "397093",
+    "n": "onion_white_M",
+    "gb": 0.46,
+    "s": "valid"
+   },
+   {
+    "k": "397094",
+    "n": "onion_white_S",
+    "gb": 0.46,
+    "s": "valid"
+   }
+  ],
+  "gb": 25.1
+ },
+ "potato": {
+  "label": [
+   "396948",
+   "396949",
+   "396950",
+   "396951",
+   "396952",
+   "396953",
+   "397056",
+   "397057",
+   "397058",
+   "397059",
+   "397060",
+   "397061"
+  ],
+  "src": [
+   {
+    "k": "397002",
+    "n": "potato_seolbong_L",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "397003",
+    "n": "potato_seolbong_M",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "397004",
+    "n": "potato_seolbong_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "397005",
+    "n": "potato_sumi_L",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "397006",
+    "n": "potato_sumi_M",
+    "gb": 4.0,
+    "s": "train"
+   },
+   {
+    "k": "397007",
+    "n": "potato_sumi_S",
+    "gb": 3.0,
+    "s": "train"
+   },
+   {
+    "k": "397110",
+    "n": "potato_seolbong_L",
+    "gb": 0.56,
+    "s": "valid"
+   },
+   {
+    "k": "397111",
+    "n": "potato_seolbong_M",
+    "gb": 0.54,
+    "s": "valid"
+   },
+   {
+    "k": "397112",
+    "n": "potato_seolbong_S",
+    "gb": 0.49,
+    "s": "valid"
+   },
+   {
+    "k": "397113",
+    "n": "potato_sumi_L",
+    "gb": 0.52,
+    "s": "valid"
+   },
+   {
+    "k": "397114",
+    "n": "potato_sumi_M",
+    "gb": 0.55,
+    "s": "valid"
+   },
+   {
+    "k": "397115",
+    "n": "potato_sumi_S",
+    "gb": 0.49,
+    "s": "valid"
+   }
+  ],
+  "gb": 25.1
+ }
+}
