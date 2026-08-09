@@ -28,12 +28,13 @@ function loadDotEnv(): void {
 }
 loadDotEnv();
 
-export type AiProviderName = 'heuristic' | 'openai' | 'anthropic' | 'mock';
+export type AiProviderName = 'heuristic' | 'openai' | 'anthropic' | 'mock' | 'cnn';
+
+const PROVIDER_NAMES: AiProviderName[] = ['heuristic', 'openai', 'anthropic', 'mock', 'cnn'];
 
 function providerName(): AiProviderName {
   const raw = (process.env['AI_PROVIDER'] ?? 'heuristic').toLowerCase();
-  if (raw === 'openai' || raw === 'anthropic' || raw === 'mock' || raw === 'heuristic') return raw;
-  return 'heuristic';
+  return (PROVIDER_NAMES as string[]).includes(raw) ? (raw as AiProviderName) : 'heuristic';
 }
 
 export const config = {
@@ -50,6 +51,8 @@ export const config = {
     openaiModel: process.env['OPENAI_VISION_MODEL'] ?? 'gpt-4o-mini',
     anthropicKey: process.env['ANTHROPIC_API_KEY'] ?? '',
     anthropicModel: process.env['ANTHROPIC_VISION_MODEL'] ?? 'claude-sonnet-5',
+    /** onfarm_qc.onnx 와 metadata.json 이 있는 폴더 (AI_PROVIDER=cnn 일 때) */
+    cnnModelDir: process.env['CNN_MODEL_DIR'] ?? join(PROJECT_ROOT, 'models'),
   },
 } as const;
 

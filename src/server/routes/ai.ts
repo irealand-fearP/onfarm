@@ -12,8 +12,25 @@ interface AnalyzeBody {
   image?: string;
   analysisId?: string;
   features?: ImageFeatures;
+  /** 브라우저가 만든 224×224 RGB 픽셀(base64). 학습 모델 provider 만 쓴다. */
+  pixels?: string;
   /** 폴백 화면에서 사용자가 직접 고른 품목 */
   productCode?: string;
+}
+
+const MODEL_PIXEL_BYTES = 224 * 224 * 3;
+
+/** 길이가 정확히 맞을 때만 받는다. 아니면 조용히 버리고 로컬 판정으로 간다. */
+function sanitizePixels(raw: unknown): Uint8Array | undefined {
+  if (typeof raw !== 'string' || raw.length === 0) return undefined;
+  let buf: Buffer;
+  try {
+    buf = Buffer.from(raw, 'base64');
+  } catch {
+    return undefined;
+  }
+  if (buf.length !== MODEL_PIXEL_BYTES) return undefined;
+  return new Uint8Array(buf);
 }
 
 function sanitizeFeatures(raw: unknown): ImageFeatures | undefined {
@@ -54,12 +71,14 @@ export function registerAiRoutes(router: Router): void {
 
     const body = await ctx.body<AnalyzeBody>();
     const features = sanitizeFeatures(body.features);
+    const pixels = sanitizePixels(body.pixels);
 
     let imagePath: string | null = null;
     let imageBase64: string | null = null;
     let mimeType: string | null = null;
     let storedId: string | null = null;
     let storedFeatures = features ?? null;
+    let storedPixels = pixels ?? null;
 
     if (body.analysisId) {
       const prev = getAnalysis(body.analysisId, user.id);
@@ -68,6 +87,7 @@ export function registerAiRoutes(router: Router): void {
       imageBase64 = prev.imageBase64;
       mimeType = prev.mimeType;
       storedFeatures = features ?? prev.features;
+      storedPixels = pixels ?? prev.pixels;
       storedId = prev.id;
     } else if (body.image) {
       const parsed = parseDataUrl(body.image);
@@ -83,6 +103,7 @@ export function registerAiRoutes(router: Router): void {
       ...(imageBase64 ? { imageBase64 } : {}),
       ...(mimeType ? { mimeType } : {}),
       ...(storedFeatures ? { features: storedFeatures } : {}),
+      ...(storedPixels ? { pixels: storedPixels } : {}),
       ...(body.productCode ? { forcedProductCode: body.productCode } : {}),
       farm,
       farmerName: user.name,
@@ -98,6 +119,7 @@ export function registerAiRoutes(router: Router): void {
         imageBase64,
         mimeType,
         features: storedFeatures,
+        pixels: storedPixels,
         result,
       });
       storedId = stored.id;

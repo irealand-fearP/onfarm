@@ -142,9 +142,46 @@ export function extractFeatures(imageData, width, height) {
   };
 }
 
+/** 학습 모델 입력 크기. 서버 metadata.json 의 img_size 와 같아야 한다. */
+const MODEL_SIZE = 224;
+
+/**
+ * 학습 모델(CNN)이 쓸 224×224 RGB 픽셀을 만든다.
+ *
+ * 서버에 JPEG 디코더를 들이지 않기 위해 브라우저가 픽셀까지 만들어 보낸다
+ * (서버는 런타임 의존성 0 이 원칙). 종횡비를 유지하지 않고 정사각으로 늘리는데,
+ * 학습 데이터가 전부 1000×1000 정사각이라 그쪽과 맞추는 편이 낫다.
+ */
+export function extractModelPixels(source) {
+  const canvas = document.createElement('canvas');
+  canvas.width = MODEL_SIZE;
+  canvas.height = MODEL_SIZE;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(source, 0, 0, MODEL_SIZE, MODEL_SIZE);
+  const { data } = ctx.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE);
+  // RGBA → RGB (알파 제거)
+  const rgb = new Uint8Array(MODEL_SIZE * MODEL_SIZE * 3);
+  for (let i = 0, j = 0; i < data.length; i += 4, j += 3) {
+    rgb[j] = data[i];
+    rgb[j + 1] = data[i + 1];
+    rgb[j + 2] = data[i + 2];
+  }
+  return rgb;
+}
+
+/** Uint8Array → base64 (큰 배열에서 스택이 터지지 않게 조각내서 변환) */
+export function toBase64(bytes) {
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
 /**
  * 파일 하나를 받아 업로드용 dataURL 과 분석용 특징을 만든다.
- * @returns {Promise<{dataUrl:string, features:object, width:number, height:number}>}
+ * @returns {Promise<{dataUrl:string, features:object, pixels:string, width:number, height:number}>}
  */
 export async function prepareImage(file) {
   const bitmap = await toBitmap(file);
@@ -155,6 +192,8 @@ export async function prepareImage(file) {
   const imageData = small.ctx.getImageData(0, 0, small.w, small.h);
   const features = extractFeatures(imageData, small.w, small.h);
 
+  const pixels = toBase64(extractModelPixels(bitmap));
+
   if (bitmap.close) bitmap.close();
-  return { dataUrl, features, width: big.w, height: big.h };
+  return { dataUrl, features, pixels, width: big.w, height: big.h };
 }

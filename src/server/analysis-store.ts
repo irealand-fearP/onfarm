@@ -9,6 +9,8 @@ export interface StoredAnalysis {
   imageBase64: string | null;
   mimeType: string | null;
   features: ImageFeatures | null;
+  /** 학습 모델 입력용 224×224 RGB. 폴백 재분석 때 다시 쓴다. */
+  pixels: Uint8Array | null;
   result: PipelineResult;
   createdAt: number;
   /** 상품 등록에 이미 쓰였는가. 한 번 쓰면 재사용할 수 없다. */

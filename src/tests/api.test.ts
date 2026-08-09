@@ -437,6 +437,44 @@ describe('HTTP — 데모 초기화 보호', () => {
   });
 });
 
+describe('HTTP — 학습 모델용 픽셀 전달', () => {
+  const PIXELS_OK = Buffer.alloc(224 * 224 * 3, 128).toString('base64');
+
+  it('정확한 길이의 픽셀은 받아들이고 분석이 계속된다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    const res = await call('/api/ai/analyze', {
+      body: { image: PNG_1X1, features: FEATURES, pixels: PIXELS_OK },
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.recognition.product, 'pear');
+  });
+
+  it('길이가 틀린 픽셀은 버리고도 분석이 죽지 않는다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    for (const bad of [Buffer.alloc(100).toString('base64'), 'not-base64!!', '', 12345]) {
+      const res = await call('/api/ai/analyze', {
+        body: { image: PNG_1X1, features: FEATURES, pixels: bad },
+      });
+      assert.equal(res.status, 200, `pixels=${String(bad).slice(0, 12)} 에서 ${res.status}`);
+    }
+  });
+
+  it('재분석 때 픽셀을 다시 보내지 않아도 보관본이 쓰인다', async () => {
+    const call = client();
+    await loginAs(call, '김복순');
+    const first = await call('/api/ai/analyze', {
+      body: { image: PNG_1X1, features: FEATURES, pixels: PIXELS_OK },
+    });
+    const again = await call('/api/ai/analyze', {
+      body: { analysisId: first.body.analysisId, productCode: 'apple' },
+    });
+    assert.equal(again.status, 200);
+    assert.equal(again.body.recognition.product, 'apple');
+  });
+});
+
 describe('HTTP — 정적 화면', () => {
   it('주요 화면이 모두 응답한다', async () => {
     for (const path of [

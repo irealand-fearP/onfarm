@@ -31,6 +31,9 @@ export function createProvider(name: AiProviderName): VisionProvider | { error: 
       );
     case 'mock':
       return new MockVisionProvider();
+    case 'cnn':
+      // 비동기 로딩이라 여기서는 만들 수 없다. initProvider() 가 서버 시작 때 처리한다.
+      return { error: '학습 모델은 서버 시작 시 준비됩니다.' };
     case 'heuristic':
     default:
       return new HeuristicVisionProvider();
@@ -38,6 +41,30 @@ export function createProvider(name: AiProviderName): VisionProvider | { error: 
 }
 
 let cached: ProviderSelection | null = null;
+
+/**
+ * CNN provider 는 모델 파일과 onnxruntime 로딩이 필요해 비동기다.
+ * 서버 시작 때 한 번 시도하고, 실패하면 사유를 남긴 채 로컬 판정으로 내려앉는다.
+ * (실패가 서버 기동을 막지 않는다 — AI 가 없어도 판매는 돌아야 한다)
+ */
+export async function initProvider(): Promise<ProviderSelection> {
+  const fallback = new HeuristicVisionProvider();
+  if (config.ai.provider !== 'cnn') return resolveProvider();
+  try {
+    const { CnnVisionProvider } = await import('./cnn.js');
+    const cnn = await CnnVisionProvider.create(config.ai.cnnModelDir);
+    cached = { primary: cnn, fallback, degradedReason: null, demoMode: false };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    cached = {
+      primary: fallback,
+      fallback,
+      degradedReason: `학습 모델을 쓰지 못했습니다 — ${reason} 로컬 규칙 판정으로 동작합니다.`,
+      demoMode: false,
+    };
+  }
+  return cached;
+}
 
 export function resolveProvider(): ProviderSelection {
   if (cached) return cached;

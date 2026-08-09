@@ -15,6 +15,7 @@ export interface PipelineRequest {
   imageBase64?: string;
   mimeType?: string;
   features?: ImageFeatures;
+  pixels?: Uint8Array;
   /** 사용자가 폴백 화면에서 직접 고른 품목. 있으면 인식 단계를 건너뛴다. */
   forcedProductCode?: string;
   farm: Farm;
@@ -103,6 +104,7 @@ export async function runPipeline(
         ...(req.imageBase64 ? { imageBase64: req.imageBase64 } : {}),
         ...(req.mimeType ? { mimeType: req.mimeType } : {}),
         ...(req.features ? { features: req.features } : {}),
+        ...(req.pixels ? { pixels: req.pixels } : {}),
         catalog: catalogInput,
       },
       selection,

@@ -9,6 +9,7 @@ import { getUser } from '../domain/users.js';
 import { HttpError, readBody, Router, sendJson, serveFile } from '../lib/http.js';
 import type { Ctx } from '../lib/http.js';
 import { readSessionUserId } from '../lib/session.js';
+import { initProvider } from '../ai/providers/index.js';
 import { registerAiRoutes } from './routes/ai.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerFarmerRoutes } from './routes/farmer.js';
@@ -143,6 +144,7 @@ export function createApp(): Server {
 
 export async function start(port = config.port, host = config.host): Promise<Server> {
   seed(db());
+  await initProvider();
   const server = createApp();
   await new Promise<void>((resolve) => server.listen(port, host, resolve));
   return server;
