@@ -29,7 +29,12 @@ Colab 은 해외 서버라 반드시 실패한다. 그래서 순서가 이렇다
 # 데이터는 국내 PC 에서 `tools/aihub_ingest.py` 로 만든 뒤 Drive 에 올린 것을 씁니다.
 
 # %%
-# --- 0. 환경 확인 -----------------------------------------------------------
+# --- 0. 환경 확인 + 필요한 패키지 ------------------------------------------
+# ★ 설치는 반드시 학습 '전에' 한다.
+#   onnx 계열을 학습 뒤에 설치하면 Colab 이 런타임을 재시작해 학습 결과가 통째로 사라진다
+#   (실제로 겪은 사고 — 6에폭을 다시 돌려야 했다).
+!pip install -q onnxscript onnx
+
 import shutil, subprocess
 
 print(subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv"],
@@ -148,13 +153,24 @@ class TwoHead(nn.Module):
         return self.item(f), self.grade(f)
 
 model = TwoHead(backbone, feat).to(dev)
+
+# 체크포인트는 Drive 에 둔다(런타임이 죽어도 남는다).
+CKPT_PATH = pathlib.Path("/content/drive/MyDrive/onfarm_ckpt.pt")
+start_epoch = 0
+if CKPT_PATH.exists():
+    ck = torch.load(CKPT_PATH, map_location=dev)
+    model.load_state_dict(ck["state_dict"])
+    start_epoch = ck.get("epoch", 0)
+    print(f"이어서 학습: {start_epoch} 에폭까지 완료된 체크포인트를 불러왔다")
+
 opt = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=1e-4)
 lossf = nn.CrossEntropyLoss(label_smoothing=0.05)
 EPOCHS = 6
-sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=3e-4, total_steps=EPOCHS * len(dl_tr))
+sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=3e-4,
+                                            total_steps=max(1, (EPOCHS - start_epoch)) * len(dl_tr))
 scaler = torch.amp.GradScaler("cuda", enabled=(dev == "cuda"))
 
-for ep in range(EPOCHS):
+for ep in range(start_epoch, EPOCHS):
     model.train(); run = 0.0
     for x, yi, yg, _ in dl_tr:
         x, yi, yg = x.to(dev, non_blocking=True), yi.to(dev), yg.to(dev)
@@ -165,6 +181,11 @@ for ep in range(EPOCHS):
         scaler.scale(loss).backward(); scaler.step(opt); scaler.update(); sched.step()
         run += loss.item() * x.size(0)
     print(f"epoch {ep+1}/{EPOCHS}  loss {run/len(dl_tr.dataset):.4f}")
+    # 에폭마다 Drive 에 저장한다. /content 는 런타임이 죽으면 사라지고,
+    # 세션이 끊기는 일은 실제로 일어난다 — 몇 시간을 다시 태우지 않기 위한 보험.
+    torch.save({"epoch": ep + 1, "state_dict": model.state_dict(),
+                "items": ITEMS, "grades": GRADES, "img_size": IMG_SIZE},
+               CKPT_PATH)
 
 # %%
 # --- 5. 평가: 이미지 단위 + 개체 단위 + 중량 기준선 -------------------------
@@ -217,9 +238,6 @@ print("→ 틀렸을 때도 확신도가 높으면 ON-FARM 신뢰도 임계값�
 
 # %%
 # --- 6. 내보내기 — ON-FARM provider 가 쓸 형태 ------------------------------
-# torch 2.6+ 의 기본 ONNX 경로가 요구하는 패키지. 이미 있으면 즉시 끝난다.
-!pip install -q onnxscript onnx
-
 import json, datetime
 
 EXPORT = pathlib.Path("/content/onfarm_model"); EXPORT.mkdir(exist_ok=True)
