@@ -217,13 +217,33 @@ print("→ 틀렸을 때도 확신도가 높으면 ON-FARM 신뢰도 임계값�
 
 # %%
 # --- 6. 내보내기 — ON-FARM provider 가 쓸 형태 ------------------------------
+# torch 2.6+ 의 기본 ONNX 경로가 요구하는 패키지. 이미 있으면 즉시 끝난다.
+!pip install -q onnxscript onnx
+
 import json, datetime
 
 EXPORT = pathlib.Path("/content/onfarm_model"); EXPORT.mkdir(exist_ok=True)
 m_cpu = model.to("cpu").eval()
-torch.onnx.export(m_cpu, torch.randn(1, 3, IMG_SIZE, IMG_SIZE), EXPORT / "onfarm_qc.onnx",
-                  input_names=["image"], output_names=["item_logits", "grade_logits"],
-                  dynamic_axes={"image": {0: "n"}}, opset_version=17)
+
+# ① 가중치부터 저장한다.
+#    내보내기가 실패해도 학습 결과는 남아야 한다 — 런타임이 끊기면 몇 시간이 통째로 사라진다.
+torch.save({"state_dict": m_cpu.state_dict(), "items": ITEMS,
+            "grades": GRADES, "img_size": IMG_SIZE}, EXPORT / "onfarm_qc.pt")
+print(f"가중치 저장 {(EXPORT / 'onfarm_qc.pt').stat().st_size / 2**20:.0f} MB")
+
+# ② ONNX 내보내기.
+#    torch 2.6+ 의 기본 경로(dynamo)는 onnxscript 를 요구하는데 Colab 에 없을 수 있다.
+#    실패하면 legacy exporter 로 내려간다.
+dummy = torch.randn(1, 3, IMG_SIZE, IMG_SIZE)
+onnx_args = dict(input_names=["image"], output_names=["item_logits", "grade_logits"],
+                 dynamic_axes={"image": {0: "n"}}, opset_version=17)
+try:
+    torch.onnx.export(m_cpu, dummy, EXPORT / "onfarm_qc.onnx", **onnx_args)
+    print("ONNX 성공(기본 exporter)")
+except Exception as e:
+    print("기본 exporter 실패 →", str(e)[:120])
+    torch.onnx.export(m_cpu, dummy, EXPORT / "onfarm_qc.onnx", dynamo=False, **onnx_args)
+    print("ONNX 성공(legacy exporter)")
 
 meta = {
     "trained_at": datetime.datetime.now().isoformat(timespec="seconds"),
