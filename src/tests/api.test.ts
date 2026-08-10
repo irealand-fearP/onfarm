@@ -226,6 +226,20 @@ describe('HTTP — 사진 한 장에서 주문까지', () => {
     assert.equal(forced.body.recognition.product, 'sweet_potato');
     assert.equal(forced.body.selectedSku.price, 15000);
     assert.equal(forced.body.ai.source, 'manual');
+
+    // 후보 선택으로 재분석해도 '최초 인식기'가 감사 기록에 남아야 한다.
+    // (재분석 source='manual' 이 그대로 저장되면 어떤 AI 가 봤는지 사라진다)
+    const created = await call('/api/farmer/listings', {
+      body: {
+        analysisId: forced.body.analysisId,
+        skuId: forced.body.selectedSku.id,
+        quantity: 1,
+        productCode: 'sweet_potato',
+      },
+    });
+    assert.equal(created.status, 201);
+    assert.equal(created.body.listing.ai_source, 'mock+manual',
+      '최초 인식기(mock) + 사용자가 바꿈(+manual) 으로 기록돼야 한다');
   });
 
   it('같은 분석 ID 로 두 번 등록할 수 없다 — 재시도가 중복 매물을 만들면 안 된다', async () => {

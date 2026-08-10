@@ -19,8 +19,8 @@ const state = {
   userPicked: false,
 };
 
-const STEPS = ['stepPhoto', 'stepLoading', 'stepResult', 'stepChoose', 'stepManual', 'stepSku', 'stepConfirm', 'stepDone'];
-const DOT_INDEX = { stepPhoto: 0, stepLoading: 0, stepResult: 1, stepChoose: 1, stepManual: 1, stepSku: 2, stepConfirm: 3, stepDone: 3 };
+const STEPS = ['stepPhoto', 'stepLoading', 'stepResult', 'stepManual', 'stepSku', 'stepConfirm', 'stepDone'];
+const DOT_INDEX = { stepPhoto: 0, stepLoading: 0, stepResult: 1, stepManual: 1, stepSku: 2, stepConfirm: 3, stepDone: 3 };
 
 function show(step) {
   state.step = step;
@@ -102,51 +102,74 @@ async function analyze(payload) {
 }
 
 function route(result) {
-  const mode = result.decision.mode;
-  if (mode === 'auto') {
-    renderResult(result);
-    show('stepResult');
-    speak(`${result.recognition.product_ko}로 확인했습니다.`);
-  } else if (mode === 'choose') {
-    renderChoose(result);
-    show('stepChoose');
-    speak(result.decision.headline);
-  } else {
+  // 신뢰도와 무관하게 후보를 번호로 보여준다.
+  // '맞아요' 한 번보다 고르는 편이 오등록이 적고, AI 가 단정하지 않는다는 원칙과도 맞는다.
+  const candidates = result.candidates ?? [];
+  if (candidates.length === 0) {
     renderManual();
     show('stepManual');
     speak('사진을 자동으로 확인하지 못했습니다. 무엇을 파실까요?');
+    return;
   }
+  renderResult(result);
+  show('stepResult');
+  speakCandidates(candidates);
+}
+
+/** 후보를 번호와 함께 읽어준다. 화면을 못 보는 상황에서도 고를 수 있게. */
+function speakCandidates(candidates) {
+  const list = candidates.map((c, i) => `${i + 1}번 ${c.name}`).join(', ');
+  speak(`사진을 확인했습니다. ${list} 중에 어느 것인가요?`, { force: true });
 }
 
 /* ───────── 각 화면 렌더 ───────── */
 function renderResult(result) {
   const r = result.recognition;
+  const candidates = result.candidates ?? [];
   $('#resultImage').src = result.imagePath ?? '/img/sample/placeholder.svg';
-  $('#resultHeadline').textContent = `${r.product_ko}로 보입니다.`;
-  $('#resultSub').textContent = r.variety_guess ? `${r.variety_guess}로 보입니다.` : '';
-  $('#badgeSource').textContent = result.ai.offline ? `${result.ai.label} · 사진 외부 전송 없음` : result.ai.label;
+  $('#resultSub').textContent =
+    candidates.length > 1 ? '번호를 눌러 주세요.' : '맞으면 눌러 주세요.';
+
+  const grid = $('#candidateGrid');
+  grid.replaceChildren();
+  candidates.forEach((c, i) => {
+    const first = i === 0;
+    grid.append(
+      el(
+        'button',
+        {
+          type: 'button',
+          style: first ? 'border-color:var(--brand); background:var(--brand-tint)' : '',
+          onclick: () => pickProduct(c.code),
+        },
+        [
+          el('span', { class: 'emoji', text: `${i + 1}` }),
+          el('span', { class: 'emoji', text: c.emoji ?? '🧺' }),
+          el('span', { style: 'flex:1' }, [
+            c.name,
+            first
+              ? el('div', {
+                  style: 'font-size:15px;font-weight:600;color:var(--brand-strong)',
+                  text: '가장 비슷해요',
+                })
+              : null,
+          ]),
+        ],
+      ),
+    );
+  });
+
+  $('#badgeSource').textContent = result.ai.offline
+    ? `${result.ai.label} · 사진 외부 전송 없음`
+    : result.ai.label;
   $('#badgeQuality').textContent = `AI 품질 참고: ${r.quality_hint}`;
-  $('#badgeConfidence').textContent = `신뢰도 ${Math.round(r.confidence * 100)}%`;
+  $('#badgeConfidence').textContent = r.confidence
+    ? `1순위 신뢰도 ${Math.round(r.confidence * 100)}%`
+    : '';
   const basis = [...r.description_basis];
   if (r.detected_issues.length) basis.push(`확인 어려웠던 점: ${r.detected_issues.join(', ')}`);
-  // 외부 AI 가 실패해 로컬 판정으로 대체된 사실을 숨기지 않는다.
   if (result.ai.degraded) basis.push(`※ ${result.ai.degraded}`);
   $('#resultBasis').textContent = basis.join(' / ');
-}
-
-function renderChoose(result) {
-  $('#chooseImage').src = result.imagePath ?? '/img/sample/placeholder.svg';
-  $('#chooseHeadline').textContent = result.decision.headline;
-  const grid = $('#chooseGrid');
-  grid.replaceChildren();
-  for (const code of result.decision.options) {
-    grid.append(
-      el('button', { type: 'button', onclick: () => pickProduct(code) }, [
-        el('span', { class: 'emoji', text: emojiOf(code) }),
-        nameOf(code),
-      ]),
-    );
-  }
 }
 
 function renderManual() {
@@ -178,7 +201,7 @@ async function analyzeForced(code) {
   try {
     const payload = state.analysisId
       ? { analysisId: state.analysisId, productCode: code }
-      : { image: state.pendingImage.dataUrl, features: state.pendingImage.features, productCode: code };
+      : { image: state.pendingImage.dataUrl, features: state.pendingImage.features, pixels: state.pendingImage.pixels, productCode: code };
     const result = await api('/api/ai/analyze', { body: payload });
     if (result.analysisId) state.analysisId = result.analysisId;
     if (result.imagePath) state.imagePath = result.imagePath;
@@ -271,7 +294,7 @@ async function onFile(file) {
     state.userPicked = false;
     $('#loadingPreview').src = prepared.dataUrl;
     $('#loadingPreview').hidden = false;
-    await analyze({ image: prepared.dataUrl, features: prepared.features });
+    await analyze({ image: prepared.dataUrl, features: prepared.features, pixels: prepared.pixels });
   } catch (err) {
     toast(err.message ?? '사진을 읽지 못했습니다.');
     show('stepPhoto');
@@ -287,26 +310,12 @@ $('#sampleBtn').addEventListener('click', async () => {
 $('#speakResult').addEventListener('click', () => repeatLast());
 $('#speakSku').addEventListener('click', () => speakSku());
 
-$('#resultYes').addEventListener('click', () => {
-  if (!state.sku) {
-    renderManual();
-    show('stepManual');
-    return;
-  }
-  renderSku();
-  show('stepSku');
-  speakSku();
-});
 $('#resultNo').addEventListener('click', () => {
   renderManual();
   show('stepManual');
   speak('무엇을 파실까요?');
 });
-$('#chooseOther').addEventListener('click', () => {
-  renderManual();
-  show('stepManual');
-});
-$('#chooseRetake').addEventListener('click', () => show('stepPhoto'));
+$('#resultRetake').addEventListener('click', () => show('stepPhoto'));
 $('#manualRetake').addEventListener('click', () => show('stepPhoto'));
 
 $('#qtyMinus').addEventListener('click', () => setQuantity(state.quantity - 1));
@@ -381,8 +390,7 @@ $('#doneHome').addEventListener('click', () => (location.href = '/farmer'));
 $('#backBtn').addEventListener('click', () => {
   const backMap = {
     stepResult: 'stepPhoto',
-    stepChoose: 'stepPhoto',
-    stepManual: 'stepPhoto',
+    stepManual: 'stepResult',
     stepSku: 'stepResult',
     stepConfirm: 'stepSku',
   };

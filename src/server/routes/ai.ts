@@ -79,6 +79,9 @@ export function registerAiRoutes(router: Router): void {
     let storedId: string | null = null;
     let storedFeatures = features ?? null;
     let storedPixels = pixels ?? null;
+    let modelTop: string | null = null;
+    let modelTopConfidence: number | null = null;
+    let modelSource: string | null = null;
 
     if (body.analysisId) {
       const prev = getAnalysis(body.analysisId, user.id);
@@ -88,6 +91,11 @@ export function registerAiRoutes(router: Router): void {
       mimeType = prev.mimeType;
       storedFeatures = features ?? prev.features;
       storedPixels = pixels ?? prev.pixels;
+      // 후보를 고르며 다시 부를 때, 모델의 원래 1순위를 잃지 않게 물려준다.
+      modelTop = prev.result.ai.modelTop ?? prev.result.recognition.product ?? null;
+      modelTopConfidence =
+        prev.result.ai.modelTopConfidence ?? prev.result.recognition.confidence ?? null;
+      modelSource = prev.result.ai.modelSource ?? prev.result.ai.source ?? null;
       storedId = prev.id;
     } else if (body.image) {
       const parsed = parseDataUrl(body.image);
@@ -105,6 +113,9 @@ export function registerAiRoutes(router: Router): void {
       ...(storedFeatures ? { features: storedFeatures } : {}),
       ...(storedPixels ? { pixels: storedPixels } : {}),
       ...(body.productCode ? { forcedProductCode: body.productCode } : {}),
+      ...(modelTop ? { modelTop } : {}),
+      ...(modelTopConfidence !== null ? { modelTopConfidence } : {}),
+      ...(modelSource ? { modelSource } : {}),
       farm,
       farmerName: user.name,
     });

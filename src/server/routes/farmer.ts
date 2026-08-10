@@ -67,6 +67,12 @@ export function registerFarmerRoutes(router: Router): void {
 
     // 사용자가 품목을 바꿨으면 이전 품목의 품종 추정을 그대로 끌고 가면 안 된다.
     // (배 분석 결과로 사과를 올렸는데 제목이 '신고배'가 되는 사고)
+    // 모델의 원래 1순위와 실제 등록 품목을 비교한다.
+    // (사용자가 후보를 고르면 recognition 은 이미 그 값으로 바뀌어 있다)
+    const modelTop = result.ai.modelTop ?? result.recognition.product;
+    // 후보 선택 재분석으로 source 가 'manual' 로 덮여도 최초 인식기의 이름을 남긴다.
+    const modelSource = result.ai.modelSource ?? result.ai.source;
+    const userOverrode = Boolean(modelTop) && modelTop !== product.code;
     const productChanged = result.recognition.product !== product.code;
     const recognition = productChanged
       ? {
@@ -126,12 +132,15 @@ export function registerFarmerRoutes(router: Router): void {
         offline: result.ai.offline,
         // '맞아요'를 누른 정상 흐름까지 수동 개입으로 기록하면 감사 로그가 거짓이 된다.
         // 실제로 품목이 바뀐 경우만 override 로 남긴다.
-        userOverride: productChanged
-          ? { from: result.recognition.product || null, to: product.code }
-          : null,
+        modelTop: modelTop || null,
+        modelSource,
+        userOverride: userOverrode ? { from: modelTop, to: product.code } : null,
       },
-      aiConfidence: recognition.confidence,
-      aiSource: productChanged ? `${result.ai.source}+manual` : result.ai.source,
+      // 확신도는 '모델이 이 품목에 대해 냈던 값'만 기록한다.
+      // 사용자가 고른 뒤의 confidence(=1)를 쓰면 화면에 'AI 신뢰도 100%'로 둔갑한다.
+      // 사용자가 모델과 다른 품목을 골랐다면 그 확신도는 이 품목 것이 아니므로 남기지 않는다.
+      aiConfidence: userOverrode ? null : (result.ai.modelTopConfidence ?? null),
+      aiSource: userOverrode ? `${modelSource}+manual` : modelSource,
       qualityHint: recognition.quality_hint,
     });
 

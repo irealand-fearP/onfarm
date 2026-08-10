@@ -57,34 +57,29 @@
         <img id="loadingPreview" class="photo-preview" style="margin-top: 16px" alt="" hidden />
       </section>
 
-      <!-- ③ AI 결과 -->
+      <!-- ③ AI 결과 — 항상 번호로 고르게 한다 -->
       <section id="stepResult" hidden>
         <img id="resultImage" class="photo-preview" alt="촬영한 농산물 사진" />
-        <div class="card" style="margin-top: 14px">
-          <p class="result-headline" id="resultHeadline">확인 중</p>
-          <p class="result-sub" id="resultSub"></p>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px">
+        <h1 id="resultHeadline" style="font-size: 27px; margin: 16px 0 4px">
+          이 중에 어느 것인가요?
+        </h1>
+        <p class="result-sub" id="resultSub" style="margin: 0 0 14px"></p>
+
+        <div class="choice-grid" id="candidateGrid"></div>
+
+        <div class="button-row">
+          <button class="big-button ghost" id="resultNo">여기 없어요, 직접 고를래요</button>
+          <button class="big-button ghost" id="resultRetake">사진 다시 찍기</button>
+        </div>
+
+        <div class="card" style="margin-top: 16px">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
             <span class="badge badge-ai" id="badgeSource">AI 확인</span>
             <span class="badge badge-hint" id="badgeQuality">AI 품질 참고</span>
             <span class="badge badge-muted" id="badgeConfidence"></span>
           </div>
           <p class="note" id="resultBasis"></p>
-          <button class="speak-button" id="speakResult" style="margin-top: 14px">🔊 다시 듣기</button>
-        </div>
-        <div class="button-row">
-          <button class="big-button" id="resultYes">맞아요, 다음</button>
-          <button class="big-button ghost" id="resultNo">아니에요, 직접 고를래요</button>
-        </div>
-      </section>
-
-      <!-- ③-B 2지선다 폴백 -->
-      <section id="stepChoose" hidden>
-        <img id="chooseImage" class="photo-preview" alt="촬영한 농산물 사진" />
-        <h1 id="chooseHeadline" style="font-size: 26px">어느 것인가요?</h1>
-        <div class="choice-grid" id="chooseGrid"></div>
-        <div class="button-row">
-          <button class="big-button ghost" id="chooseOther">둘 다 아니에요</button>
-          <button class="big-button ghost" id="chooseRetake">다시 찍기</button>
+          <button class="speak-button" id="speakResult" style="margin-top: 12px">🔊 다시 듣기</button>
         </div>
       </section>
 
