@@ -330,12 +330,12 @@
   position: relative;
   width: min(100%, 360px);
   min-height: 0;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   display: grid;
   justify-self: end;
   place-items: center;
   overflow: hidden;
-  border-radius: 50%;
+  border-radius: 20px;
   background: var(--brand-tint);
 }
 
