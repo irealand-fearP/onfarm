@@ -70,10 +70,19 @@ AI 허브 「농산물 품질(QC) 이미지」(datasetkey 149)로 품목·등급
 
 | 단계 | 도구 | 상태 |
 |---|---|---|
-| 수집 (국내 PC 필수 — 해외 IP 차단) | `tools/aihub_ingest.py` | 진행 중 (119GB → 약 900MB) |
-| 검증 + 업로드 패키징 | `tools/pack_for_colab.py` | 완료 |
-| 학습 (Colab GPU) | `notebooks/onfarm_train_colab.ipynb` | 대기 |
-| 서비스 접합 | `src/ai/providers/cnn.ts` | 완료 (모델 대기) |
+| 수집 (국내 PC 필수 — 해외 IP 차단) | `tools/aihub_ingest.py` | ✅ 122,425장 / 1,071MB (4.5시간) |
+| 검증 + 업로드 패키징 | `tools/pack_for_colab.py` | ✅ |
+| 학습 (Colab GPU, EfficientNet-B0 6에폭) | `notebooks/onfarm_train_colab.ipynb` | ✅ |
+| 서비스 접합 (`models/` + `AI_PROVIDER=cnn`) | `src/ai/providers/cnn.ts` | ✅ 실사진 종단 검증 |
+
+**학습 결과 (검증 개체 200, 스튜디오 데이터 기준)**
+- 품목: 개체 단위 **1.000** — 단, 같은 스튜디오 조건 재측정이므로 실사용 수치가 아니다.
+  서버 경로(ONNX+자체 전처리) 재검증에서도 500장/196개체 전량 일치(`tools/verify_model.mjs`).
+- 등급: 개체 단위 **0.705** > 중량 단독 기준선 0.580 → 등급 출력 사용 가능 판정.
+  단 품목별 편차가 크다(감자 0.944 ~ 양파 0.434). 화면에는 계속 '참고 판정'으로만.
+- 확신도: 평균 0.963, 틀렸을 때 0.666 → 신뢰도 게이트가 유효하게 동작할 여지.
+- **대외 표기 원칙: '품목 100%' 단독 표기 금지.** 반드시 '공개데이터 검증셋(스튜디오 촬영) 기준,
+  실사용 폰 사진 성능은 별도 측정 예정'을 병기한다.
 
 **접합 방식**: `onnxruntime-node` 를 **선택적 의존성**으로 둔다. 설치돼 있고 `models/` 에
 `onfarm_qc.onnx` + `metadata.json` 이 있으면 `AI_PROVIDER=cnn` 으로 뜨고, 없으면
