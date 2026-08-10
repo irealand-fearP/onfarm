@@ -3,56 +3,85 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>ON-FARM · 거점/관리자</title>
+    <meta name="theme-color" content="#00754a" />
+    <meta name="description" content="ON-FARM 지역 거점에서 입고, 실물 검수, 배송 상태를 처리하는 업무 화면" />
+    <title>ON-FARM · 지역 거점 작업대</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/css/base.css" />
     <link rel="stylesheet" href="/css/store.css" />
   </head>
   <body class="store">
+    <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
+    <div class="mode-banner" id="modeBanner" hidden></div>
+
     <header class="store-top">
       <div class="row">
-        <a class="logo" href="/"><span class="dot"></span>ON-FARM 거점</a>
-        <div class="top-actions">
-          <span class="chip-link" id="who">-</span>
-          <a class="chip-link" href="/login">계정 바꾸기</a>
-        </div>
+        <a class="logo" href="/hub" aria-label="ON-FARM 지역 거점 작업대 홈">
+          <img src="/img/icon.svg" alt="" aria-hidden="true" />
+          <span class="logo-copy"><strong>ON-FARM</strong><small>지역 거점 작업대</small></span>
+        </a>
+        <nav class="top-actions" aria-label="계정 메뉴">
+          <span class="badge badge-muted" id="who">불러오는 중</span>
+          <a class="nav-link" href="/login" aria-label="계정 바꾸기">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.6-4 2.8-6 6.5-6s5.9 2 6.5 6" /></svg>
+            <span class="nav-label">계정 바꾸기</span>
+          </a>
+        </nav>
       </div>
     </header>
 
-    <main class="store-main wrap-wide">
-      <div class="section-title">
-        <h2>지역 집하·검수 거점</h2>
-        <span>농가는 상품을 갖다 놓기만, 검수·물류·정산은 거점이</span>
-      </div>
+    <main class="store-main hub-main" id="mainContent">
+      <section class="hub-hero" aria-labelledby="hubTitle">
+        <div>
+          <p class="eyebrow">오늘의 거점 업무</p>
+          <h1 id="hubTitle">들어온 상품부터 차례로 처리하세요.</h1>
+          <p class="lead">AI 참고값과 실물 등급을 분리해 기록하고, 검수가 끝난 상품만 배송 단계로 넘깁니다.</p>
+        </div>
+        <div class="hub-shift"><span>현재 담당자</span><strong id="shiftName">확인 중</strong></div>
+      </section>
 
-      <div class="stat-row" id="stats"></div>
+      <section aria-label="업무 요약">
+        <div class="stat-row" id="stats"></div>
+      </section>
 
-      <div class="section-title"><h2>상품 처리 현황</h2><span id="count"></span></div>
-      <div class="table-wrap">
-        <table class="data">
-          <thead>
-            <tr>
-              <th>상품</th>
-              <th>농가</th>
-              <th>AI 참고 판정</th>
-              <th>수량</th>
-              <th>진행 상태</th>
-              <th>처리</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-
-      <p style="font-size: 13px; color: var(--muted); margin-top: 14px">
-        AI 참고 판정과 실물 검수 결과는 별도로 기록됩니다. 소비자에게 표시되는 확정 등급은 실물 검수 결과입니다.
-      </p>
+      <section class="hub-section" aria-labelledby="workTitle">
+        <div class="section-title">
+          <div><p class="eyebrow">처리 목록</p><h2 id="workTitle">상품 처리 현황</h2></div>
+          <span id="count"></span>
+        </div>
+        <div class="table-wrap" id="tableWrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>상품</th>
+                <th>농가</th>
+                <th>품질 판정</th>
+                <th>남은 수량</th>
+                <th>진행 상태</th>
+                <th>처리</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="hubEmpty" hidden>
+          <div class="empty-state-inner">
+            <span class="empty-state-icon" aria-hidden="true">
+              <svg class="ui-icon" viewBox="0 0 24 24"><path d="m7 12 3 3 7-7" /><circle cx="12" cy="12" r="9" /></svg>
+            </span>
+            <h2>처리할 상품이 없습니다.</h2>
+            <p>새 입고나 배송 상태 변경이 생기면 이곳에 표시됩니다.</p>
+          </div>
+        </div>
+        <p class="hub-note">AI 참고 판정과 실물 검수 결과는 별도로 기록됩니다. 소비자에게 표시되는 확정 등급은 담당자가 실물을 확인한 결과입니다.</p>
+      </section>
     </main>
 
     <script type="module">
-      import { $, api, el, money, toast, inspectionLabel } from '/js/api.js';
+      import { $, api, el, money, toast, inspectionLabel, mountModeBanner } from '/js/api.js';
 
+      await mountModeBanner('#modeBanner');
       let session = null;
       try {
         session = await api('/api/me');
@@ -63,6 +92,7 @@
         location.href = '/login?role=hub_operator&next=/hub';
       }
       $('#who').textContent = session ? session.user.name : '';
+      $('#shiftName').textContent = session ? `${session.user.name}님 작업 중` : '담당자 확인 중';
 
       const STAT_LABELS = [
         ['incoming', '입고 예정'],
@@ -71,7 +101,6 @@
         ['delivered', '배송 완료'],
         ['soldOut', '판매 완료'],
       ];
-
       let grades = ['특', '상', '보통'];
 
       async function load() {
@@ -80,8 +109,9 @@
         const stats = $('#stats');
         stats.replaceChildren();
         for (const [key, label] of STAT_LABELS) {
+          const actionable = key === 'incoming' || key === 'needInspection';
           stats.append(
-            el('div', { class: 'stat' }, [
+            el('article', { class: `stat${actionable ? ' is-actionable' : ''}` }, [
               el('div', { class: 'label', text: label }),
               el('div', { class: 'value', text: String(data.counters[key] ?? 0) }),
             ]),
@@ -89,18 +119,18 @@
         }
 
         $('#count').textContent = `${data.listings.length}건`;
+        $('#tableWrap').hidden = data.listings.length === 0;
+        $('#hubEmpty').hidden = data.listings.length > 0;
         const rows = $('#rows');
         rows.replaceChildren();
 
-        for (const l of data.listings) {
+        for (const listing of data.listings) {
           const actions = el('div', { class: 'inline-actions' });
-          if (l.inspection_status === 'ai_checked' || l.inspection_status === 'hub_pending') {
-            // 확정 등급은 담당자가 직접 고른다. AI 참고값을 기본 선택해 두면
-            // '실물 검수로 확정'이라는 설명과 달리 AI값이 그대로 확정돼 버린다.
+          if (listing.inspection_status === 'ai_checked' || listing.inspection_status === 'hub_pending') {
             const grade = el(
               'select',
-              { 'aria-label': '확정 등급' },
-              [el('option', { value: '', text: '등급 선택' }), ...grades.map((g) => el('option', { value: g, text: g }))],
+              { 'aria-label': `${listing.title} 확정 등급` },
+              [el('option', { value: '', text: '등급 선택' }), ...grades.map((value) => el('option', { value, text: value }))],
             );
             actions.append(
               grade,
@@ -108,41 +138,39 @@
                 class: 'go', type: 'button', text: '검수 확정',
                 onclick: () => {
                   if (!grade.value) { toast('실물을 보고 확정 등급을 골라주세요.'); return; }
-                  const changed = grade.value !== l.quality_hint;
-                  inspect(l.id, changed ? 'downgrade' : 'pass', grade.value);
+                  const changed = grade.value !== listing.quality_hint;
+                  inspect(listing.id, changed ? 'downgrade' : 'pass', grade.value);
                 },
               }),
-              el('button', { class: 'warn', type: 'button', text: '반려', onclick: () => inspect(l.id, 'reject', null) }),
+              el('button', { class: 'warn', type: 'button', text: '반려', onclick: () => inspect(listing.id, 'reject', null) }),
             );
-          } else if (l.inspection_status === 'hub_passed') {
-            actions.append(el('button', { class: 'go', type: 'button', text: '배송 준비', onclick: () => setStatus(l.id, 'ready_to_ship') }));
-          } else if (l.inspection_status === 'ready_to_ship') {
-            actions.append(el('button', { class: 'go', type: 'button', text: '배송 완료', onclick: () => setStatus(l.id, 'delivered') }));
+          } else if (listing.inspection_status === 'hub_passed') {
+            actions.append(el('button', { class: 'go', type: 'button', text: '배송 준비', onclick: () => setStatus(listing.id, 'ready_to_ship') }));
+          } else if (listing.inspection_status === 'ready_to_ship') {
+            actions.append(el('button', { class: 'go', type: 'button', text: '배송 완료', onclick: () => setStatus(listing.id, 'delivered') }));
           } else {
-            actions.append(el('span', { style: 'font-size:13px;color:var(--muted)', text: '처리 완료' }));
+            actions.append(el('span', { class: 'badge badge-muted', text: '처리 완료' }));
           }
 
           rows.append(
             el('tr', {}, [
               el('td', {}, [
-                el('div', { style: 'font-weight:700', text: l.title }),
-                el('div', { style: 'font-size:12px;color:var(--muted)', text: `${l.sku_label} · ${money(l.unit_price)}` }),
+                el('div', { class: 'listing-primary', text: listing.title }),
+                el('div', { class: 'listing-secondary', text: `${listing.sku_label} · ${money(listing.unit_price)}` }),
               ]),
               el('td', {}, [
-                el('div', { text: l.farm_name }),
-                el('div', { style: 'font-size:12px;color:var(--muted)', text: `${l.region_sigungu} · ${l.hub_name ?? '거점 미지정'}` }),
+                el('div', { class: 'listing-primary', text: listing.farm_name }),
+                el('div', { class: 'listing-secondary', text: `${listing.region_sigungu} · ${listing.hub_name ?? '거점 미지정'}` }),
               ]),
               el('td', {}, [
-                el('span', { class: 'badge badge-hint', text: `AI 참고 ${l.quality_hint ?? '-'}` }),
-                l.confirmed_quality
-                  ? el('div', { style: 'margin-top:4px' }, [
-                      el('span', { class: 'badge badge-ai', text: `확정 ${l.confirmed_quality}` }),
-                    ])
-                  : null,
-                el('div', { style: 'font-size:12px;color:var(--muted)', text: l.ai_confidence ? `신뢰도 ${Math.round(l.ai_confidence * 100)}%` : '' }),
+                el('div', { class: 'quality-stack' }, [
+                  el('span', { class: 'badge badge-hint', text: `AI 참고 ${listing.quality_hint ?? '-'}` }),
+                  listing.confirmed_quality ? el('span', { class: 'badge badge-ai', text: `실물 확정 ${listing.confirmed_quality}` }) : null,
+                  el('span', { class: 'listing-secondary', text: listing.ai_confidence ? `인식 신뢰도 ${Math.round(listing.ai_confidence * 100)}%` : '신뢰도 정보 없음' }),
+                ]),
               ]),
-              el('td', { text: `${l.remaining_quantity} / ${l.quantity}` }),
-              el('td', {}, [el('span', { class: 'badge badge-hub', text: inspectionLabel(l.inspection_status) })]),
+              el('td', { text: `${listing.remaining_quantity} / ${listing.quantity}` }),
+              el('td', {}, [el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) })]),
               el('td', {}, [actions]),
             ]),
           );
@@ -156,10 +184,10 @@
           if (gradedQuality) body.gradedQuality = gradedQuality;
           if (result === 'downgrade') body.note = '실물 검수 결과 등급 조정';
           await api('/api/hub/inspections', { body });
-          toast(result === 'reject' ? '반려 처리했습니다.' : `확정 등급 ${gradedQuality} 으로 기록했습니다.`);
+          toast(result === 'reject' ? '반려 처리했습니다.' : `확정 등급 ${gradedQuality}으로 기록했습니다.`);
           await load();
-        } catch (err) {
-          toast(err.message);
+        } catch (error) {
+          toast(error.message);
         }
       }
 
@@ -167,8 +195,8 @@
         try {
           await api(`/api/hub/listings/${listingId}/status`, { body: { status } });
           await load();
-        } catch (err) {
-          toast(err.message);
+        } catch (error) {
+          toast(error.message);
         }
       }
 
