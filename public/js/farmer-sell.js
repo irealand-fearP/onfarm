@@ -2,7 +2,7 @@
 import { $, api, money, requireRole, mountModeBanner, toast, el } from '/js/api.js';
 import { prepareImage } from '/js/features.js';
 import { canListen, listenQuantity, repeatLast, speak } from '/js/speak.js';
-import { speakPrice, speakWeight } from '/js/shared/korean.js';
+import { speakPrice, speakWeight, sinoNumber, nativeCount } from '/js/shared/korean.js';
 
 const state = {
   session: null,
@@ -116,9 +116,13 @@ function route(result) {
   speakCandidates(candidates);
 }
 
-/** 후보를 번호와 함께 읽어준다. 화면을 못 보는 상황에서도 고를 수 있게. */
+/**
+ * 후보를 번호와 함께 읽어준다. 화면을 못 보는 상황에서도 고를 수 있게.
+ * 숫자를 그대로 넣으면 TTS 가 "1번"을 '한 번(once)'으로 읽어 횟수처럼 들린다.
+ * 그래서 번호는 한자어 수사로 풀어 "일번, 이번, 삼번" 이라고 말하게 한다.
+ */
 function speakCandidates(candidates) {
-  const list = candidates.map((c, i) => `${i + 1}번 ${c.name}`).join(', ');
+  const list = candidates.map((c, i) => `${sinoNumber(i + 1)}번 ${c.name}`).join(', ');
   speak(`사진을 확인했습니다. ${list} 중에 어느 것인가요?`, { force: true });
 }
 
@@ -328,7 +332,7 @@ $('#voiceQty').addEventListener('click', async () => {
   btn.textContent = '🎤 말로 수량 말하기';
   if (quantity) {
     setQuantity(quantity);
-    speak(`${quantity}${unitWord(state.sku?.label)}로 하겠습니다.`, { force: true });
+    speak(`${nativeCount(quantity)} ${unitWord(state.sku?.label)}로 하겠습니다.`, { force: true });
   } else {
     toast(transcript ? `"${transcript}" 를 알아듣지 못했습니다.` : '잘 들리지 않았습니다.');
   }
@@ -337,7 +341,7 @@ $('#voiceQty').addEventListener('click', async () => {
 $('#skuNext').addEventListener('click', () => {
   renderConfirm();
   show('stepConfirm');
-  speak(`${state.quantity}${unitWord(state.sku?.label)}, 모두 ${speakPrice((state.sku?.price ?? 0) * state.quantity)}입니다. 이대로 올릴까요?`, { force: true });
+  speak(`${nativeCount(state.quantity)} ${unitWord(state.sku?.label)}, 모두 ${speakPrice((state.sku?.price ?? 0) * state.quantity)}입니다. 이대로 올릴까요?`, { force: true });
 });
 $('#confirmBack').addEventListener('click', () => {
   renderSku();

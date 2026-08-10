@@ -89,3 +89,33 @@ export function speakWeight(weight: number, unit: string): string {
   const unitKo = unit === 'kg' ? '킬로그램' : unit === 'g' ? '그램' : unit;
   return `${weight}${unitKo}`;
 }
+
+/*
+ * TTS 는 "1번"을 '한 번(once)'으로 읽어버려 번호가 횟수처럼 들린다.
+ * 그래서 낭독 문장에는 숫자를 글자로 풀어서 넣는다.
+ *  - 번호표: 한자어 수사 → "일번, 이번, 삼번"
+ *  - 개수 세기: 고유어 수사 → "세 상자, 다섯 상자"
+ */
+
+const SINO_ONES = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+
+/** 1~99 를 한자어 수사로: 1→일, 12→십이, 30→삼십 */
+export function sinoNumber(n: number): string {
+  if (!Number.isInteger(n) || n < 1 || n > 99) return String(n);
+  const tens = Math.floor(n / 10);
+  const ones = n % 10;
+  const tensWord = tens === 0 ? '' : tens === 1 ? '십' : `${SINO_ONES[tens]}십`;
+  return `${tensWord}${SINO_ONES[ones] ?? ''}` || String(n);
+}
+
+const NATIVE_COUNT_ONES = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉'];
+const NATIVE_COUNT_TENS = ['', '열', '스물', '서른', '마흔', '쉰', '예순', '일흔', '여든', '아흔'];
+
+/** 1~99 를 개수 세는 고유어 수사로: 3→세, 5→다섯, 12→열두, 20→스무, 21→스물한 */
+export function nativeCount(n: number): string {
+  if (!Number.isInteger(n) || n < 1 || n > 99) return String(n);
+  const tens = Math.floor(n / 10);
+  const ones = n % 10;
+  if (n === 20) return '스무';
+  return `${NATIVE_COUNT_TENS[tens] ?? ''}${NATIVE_COUNT_ONES[ones] ?? ''}` || String(n);
+}
