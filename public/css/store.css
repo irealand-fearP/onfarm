@@ -486,7 +486,8 @@
 .product-card .thumb {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition: transform 280ms ease;
 }
 
@@ -630,7 +631,8 @@
 .detail-image {
   width: 100%;
   aspect-ratio: 1 / 0.84;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   border-radius: 20px;
   background: var(--surface-soft);
   box-shadow: none;
@@ -902,7 +904,8 @@
 .cart-item img {
   width: 108px;
   height: 94px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   border-radius: 12px;
   background: var(--surface-soft);
 }
@@ -1598,7 +1601,7 @@ table.data tr:last-child td {
   }
 
   .product-card:hover .thumb {
-    transform: scale(1.025);
+    transform: none;
   }
 
   .account-button:hover {
@@ -1699,58 +1702,155 @@ table.data tr:last-child td {
     padding: 18px 0 0;
   }
 
-  .table-wrap {
+  .hub-main .table-wrap {
     overflow: visible;
     border: 0;
     background: transparent;
   }
 
-  table.data,
-  table.data tbody,
-  table.data tr,
-  table.data td {
+  .hub-main table.data,
+  .hub-main table.data tbody {
     width: 100%;
     min-width: 0;
     display: block;
   }
 
-  table.data thead {
+  .hub-main table.data thead {
     display: none;
   }
 
-  table.data tbody {
+  .hub-main table.data tbody {
     display: grid;
-    gap: 12px;
+    gap: 14px;
   }
 
-  table.data tr {
+  .hub-main table.data tr {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 14px;
     background: var(--surface);
     box-shadow: none;
   }
 
-  table.data td {
+  .hub-main table.data tr td {
+    width: 100%;
+    min-width: 0;
     display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    gap: 14px;
-    padding: 11px 14px;
+    grid-template-columns: 96px minmax(0, 1fr);
+    padding: 0;
+    border: 0;
     border-bottom: 1px solid var(--line);
+    background: var(--surface);
   }
 
-  table.data td::before {
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 800;
+  .hub-main table.data td:last-child {
+    border-bottom: 0;
   }
 
-  table.data td:nth-child(1)::before { content: '상품'; }
-  table.data td:nth-child(2)::before { content: '농가'; }
-  table.data td:nth-child(3)::before { content: '품질 판정'; }
-  table.data td:nth-child(4)::before { content: '수량'; }
-  table.data td:nth-child(5)::before { content: '진행 상태'; }
-  table.data td:nth-child(6)::before { content: '처리'; }
+  .hub-main table.data td::before {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+    margin: 0;
+    padding: 14px 12px;
+    border-right: 1px solid var(--line);
+    background: #f2f7f4;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 850;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+  }
+
+  .hub-main .hub-cell-content {
+    min-width: 0;
+    padding: 14px 16px;
+  }
+
+  .hub-main .hub-cell-product { order: 1; }
+  .hub-main .hub-cell-status { order: 2; }
+  .hub-main .hub-cell-farm { order: 3; }
+  .hub-main .hub-cell-quality { order: 4; }
+  .hub-main .hub-cell-quantity { order: 5; }
+  .hub-main .hub-cell-actions { order: 6; }
+
+  .hub-main .hub-cell-product::before { content: '상품'; }
+  .hub-main .hub-cell-status::before { content: '진행 상태'; }
+  .hub-main .hub-cell-farm::before { content: '출하 농가'; }
+  .hub-main .hub-cell-quality::before { content: '품질 판정'; }
+  .hub-main .hub-cell-quantity::before { content: '남은 수량'; }
+  .hub-main .hub-cell-actions::before { content: '처리'; }
+
+  .hub-main .hub-cell-status .badge {
+    max-width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hub-main .hub-cell-status .hub-cell-content {
+    display: flex;
+    align-items: center;
+  }
+
+  .hub-main .hub-cell-product .listing-primary,
+  .hub-main .hub-cell-farm .listing-primary {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .hub-main table.data tr .listing-secondary {
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .hub-main .hub-cell-quality .quality-stack {
+    gap: 6px;
+  }
+
+  .hub-main .hub-quantity-value {
+    display: flex;
+    align-items: center;
+    color: var(--ink);
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hub-main .hub-cell-actions .hub-cell-content {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .hub-main .inline-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .hub-main .inline-actions select {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+  }
+
+  .hub-main .inline-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .hub-main .inline-actions button:only-child,
+  .hub-main .inline-actions .badge:only-child {
+    grid-column: 1 / -1;
+  }
 
   .listing-primary {
     max-width: none;
@@ -2097,28 +2197,105 @@ table.data tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .stat-row {
+  .hub-main {
+    padding-top: 28px;
+    padding-bottom: 64px;
+  }
+
+  .hub-main .hub-hero {
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  .hub-main .hub-hero h1 {
+    max-width: 11ch;
+    font-size: 34px;
+    line-height: 1.12;
+    letter-spacing: -0.04em;
+  }
+
+  .hub-main .hub-hero .lead {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .hub-main .hub-shift {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px 14px;
+    border-radius: 10px;
+  }
+
+  .hub-main .hub-shift strong {
+    min-width: 0;
+    margin-top: 0;
+    font-size: 14px;
+    text-align: right;
+  }
+
+  .hub-main .stat-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 24px;
   }
 
-  .stat {
-    padding: 14px;
+  .hub-main .stat {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
   }
 
-  .stat .value {
-    font-size: 27px;
+  .hub-main .stat.is-actionable {
+    border-color: #9bc9b5;
   }
 
-  table.data td {
-    grid-template-columns: 82px minmax(0, 1fr);
+  .hub-main .stat:last-child {
+    grid-column: 1 / -1;
   }
 
-  .inline-actions {
-    align-items: stretch;
+  .hub-main .stat .label {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
   }
 
-  .inline-actions select,
-  .inline-actions button {
-    flex: 1 1 110px;
+  .hub-main .stat .value {
+    margin-top: 4px;
+    font-size: 26px;
+  }
+
+  .hub-main .hub-section {
+    padding-top: 20px;
+  }
+
+  .hub-main .hub-section .section-title {
+    margin-bottom: 12px;
+  }
+
+  .hub-main .hub-section .section-title h2 {
+    font-size: 25px;
+  }
+
+  .hub-main table.data td {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .hub-main .hub-cell-content {
+    padding: 13px 14px;
+  }
+
+  .hub-main .hub-cell-actions .hub-cell-content {
+    padding: 12px;
+  }
+
+  .hub-store #who {
+    max-width: 112px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

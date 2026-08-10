@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/css/base.css" />
     <link rel="stylesheet" href="/css/store.css" />
   </head>
-  <body class="store">
+  <body class="store hub-store">
     <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
     <div class="mode-banner" id="modeBanner" hidden></div>
 
@@ -154,24 +154,36 @@
 
           rows.append(
             el('tr', {}, [
-              el('td', {}, [
-                el('div', { class: 'listing-primary', text: listing.title }),
-                el('div', { class: 'listing-secondary', text: `${listing.sku_label} · ${money(listing.unit_price)}` }),
-              ]),
-              el('td', {}, [
-                el('div', { class: 'listing-primary', text: listing.farm_name }),
-                el('div', { class: 'listing-secondary', text: `${listing.region_sigungu} · ${listing.hub_name ?? '거점 미지정'}` }),
-              ]),
-              el('td', {}, [
-                el('div', { class: 'quality-stack' }, [
-                  el('span', { class: 'badge badge-hint', text: `AI 참고 ${listing.quality_hint ?? '-'}` }),
-                  listing.confirmed_quality ? el('span', { class: 'badge badge-ai', text: `실물 확정 ${listing.confirmed_quality}` }) : null,
-                  el('span', { class: 'listing-secondary', text: listing.ai_confidence ? `인식 신뢰도 ${Math.round(listing.ai_confidence * 100)}%` : '신뢰도 정보 없음' }),
+              el('td', { class: 'hub-cell hub-cell-product' }, [
+                el('div', { class: 'hub-cell-content' }, [
+                  el('div', { class: 'listing-primary', text: listing.title }),
+                  el('div', { class: 'listing-secondary', text: `${listing.sku_label} · ${money(listing.unit_price)}` }),
                 ]),
               ]),
-              el('td', { text: `${listing.remaining_quantity} / ${listing.quantity}` }),
-              el('td', {}, [el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) })]),
-              el('td', {}, [actions]),
+              el('td', { class: 'hub-cell hub-cell-farm' }, [
+                el('div', { class: 'hub-cell-content' }, [
+                  el('div', { class: 'listing-primary', text: listing.farm_name }),
+                  el('div', { class: 'listing-secondary', text: `${listing.region_sigungu} · ${listing.hub_name ?? '거점 미지정'}` }),
+                ]),
+              ]),
+              el('td', { class: 'hub-cell hub-cell-quality' }, [
+                el('div', { class: 'hub-cell-content' }, [
+                  el('div', { class: 'quality-stack' }, [
+                    el('span', { class: 'badge badge-hint', text: `AI 참고 ${listing.quality_hint ?? '-'}` }),
+                    listing.confirmed_quality ? el('span', { class: 'badge badge-ai', text: `실물 확정 ${listing.confirmed_quality}` }) : null,
+                    el('span', { class: 'listing-secondary', text: listing.ai_confidence ? `인식 신뢰도 ${Math.round(listing.ai_confidence * 100)}%` : '신뢰도 정보 없음' }),
+                  ]),
+                ]),
+              ]),
+              el('td', { class: 'hub-cell hub-cell-quantity' }, [
+                el('div', { class: 'hub-cell-content hub-quantity-value', text: `${listing.remaining_quantity} / ${listing.quantity}` }),
+              ]),
+              el('td', { class: 'hub-cell hub-cell-status' }, [
+                el('div', { class: 'hub-cell-content' }, [el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) })]),
+              ]),
+              el('td', { class: 'hub-cell hub-cell-actions' }, [
+                el('div', { class: 'hub-cell-content' }, [actions]),
+              ]),
             ]),
           );
         }
