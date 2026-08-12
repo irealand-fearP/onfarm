@@ -86,10 +86,13 @@
         let ai = null;
         try { ai = listing.ai_analysis ? JSON.parse(listing.ai_analysis) : null; } catch { ai = null; }
         const region = `${listing.region_sido} ${listing.region_sigungu}${listing.region_detail ? ` ${listing.region_detail}` : ''}`;
-        const currentIndex = INSPECTION_STEPS.findIndex(([key]) => key === listing.inspection_status);
+        const qualityStatus = listing.inspection_status === 'ready_to_ship' || listing.inspection_status === 'delivered'
+          ? 'hub_passed'
+          : listing.inspection_status;
+        const currentIndex = INSPECTION_STEPS.findIndex(([key]) => key === qualityStatus);
         const timeline = el(
           'div',
-          { class: 'timeline', 'aria-label': `현재 상태: ${inspectionLabel(listing.inspection_status)}` },
+          { class: 'timeline', 'aria-label': `현재 상태: ${inspectionLabel(qualityStatus)}` },
           INSPECTION_STEPS.map(([, label], index) => {
             const className = index < currentIndex ? 'step done' : index === currentIndex ? 'step now' : 'step';
             return el('span', { class: className, text: label });
@@ -112,13 +115,13 @@
                 el('div', { class: 'tag-row' }, [
                   qualityBadge,
                   el('span', { class: 'badge badge-ai', text: `사진 확인 ${listing.product_name}` }),
-                  el('span', { class: 'badge badge-muted', text: inspectionLabel(listing.inspection_status) }),
+                  el('span', { class: 'badge badge-muted', text: inspectionLabel(qualityStatus) }),
                 ]),
                 el('h1', { id: 'productTitle', text: listing.title }),
                 el('p', { class: 'product-origin', text: `${region} · ${listing.farm_name}` }),
                 el('div', { class: 'product-price', text: money(listing.unit_price) }),
                 el('div', { class: 'product-unit', text: `${listing.sku_label} · 남은 수량 ${listing.remaining_quantity}` }),
-                el('div', { class: 'timeline-label', text: '검수와 배송 진행' }),
+                el('div', { class: 'timeline-label', text: '상품 품질 확인 진행' }),
                 timeline,
               ]),
             ]),

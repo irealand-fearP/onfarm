@@ -195,7 +195,7 @@
     </nav>
 
     <script type="module">
-      import { api, requireRole, mountModeBanner, $ } from '/js/api.js';
+      import { api, requireRole, mountModeBanner, $, startAutoRefresh } from '/js/api.js';
       import { speak } from '/js/speak.js';
 
       mountModeBanner('#modeBanner');
@@ -208,33 +208,41 @@
           ? `${session.farm.farm_name} · ${session.farm.region_sigungu}`
           : '농가 정보 확인 중';
 
-        const [listings, orders, settle] = await Promise.all([
-          api('/api/farmer/listings').catch(() => ({ listings: [] })),
-          api('/api/farmer/orders').catch(() => ({ orders: [] })),
-          api('/api/farmer/settlements').catch(() => ({ summary: { pendingNet: 0 } })),
-        ]);
+        let dashboardSignature = '';
+        async function loadDashboard() {
+          const [listings, orders, settle] = await Promise.all([
+            api('/api/farmer/listings'),
+            api('/api/farmer/orders'),
+            api('/api/farmer/settlements'),
+          ]);
+          const active = listings.listings.filter((listing) => listing.status === 'active').length;
+          const pendingOrders = orders.orders.filter((order) => order.fulfillment_status === 'farmer_preparing' && !order.has_rejection);
+          const signature = `${active}:${orders.orders.length}:${pendingOrders.length}:${settle.summary.pendingNet}`;
+          if (signature === dashboardSignature) return;
 
-        const active = listings.listings.filter((listing) => listing.status === 'active').length;
-        const pendingOrders = orders.orders.filter((order) => order.inspection_status === 'hub_pending');
-        $('#cntListings').textContent = `판매 중 ${active}건`;
-        $('#cntOrders').textContent = `전체 주문 ${orders.orders.length}건`;
-        $('#cntSettle').textContent = `받을 돈 ${Number(settle.summary.pendingNet).toLocaleString('ko-KR')}원`;
+          $('#cntListings').textContent = `판매 중 ${active}건`;
+          $('#cntOrders').textContent = `전체 주문 ${orders.orders.length}건`;
+          $('#cntSettle').textContent = settle.summary.pendingNet > 0
+            ? `받을 돈 ${Number(settle.summary.pendingNet).toLocaleString('ko-KR')}원`
+            : settle.summary.processingNet > 0 ? '배송 완료 후 정산 예정' : '정산 내역 없음';
 
-        const orderCard = $('#orderCard');
-        const orderFlag = $('#orderFlag');
-        if (pendingOrders.length > 0) {
-          orderCard.classList.add('has-pending-orders');
-          orderFlag.textContent = `확인할 주문 ${pendingOrders.length}건`;
-          orderFlag.hidden = false;
-          $('#taskSummary').textContent = `확인 필요 ${pendingOrders.length}건`;
-          orderCard.setAttribute(
-            'aria-label',
-            `주문 확인, 전체 ${orders.orders.length}건, 확인할 주문 ${pendingOrders.length}건`,
-          );
-        } else {
-          $('#taskSummary').textContent = '모두 확인했습니다';
-          orderCard.setAttribute('aria-label', `주문 확인, 전체 ${orders.orders.length}건`);
+          const orderCard = $('#orderCard');
+          const orderFlag = $('#orderFlag');
+          orderCard.classList.toggle('has-pending-orders', pendingOrders.length > 0);
+          orderFlag.hidden = pendingOrders.length === 0;
+          if (pendingOrders.length > 0) {
+            orderFlag.textContent = `준비할 주문 ${pendingOrders.length}건`;
+            $('#taskSummary').textContent = `준비 필요 ${pendingOrders.length}건`;
+            orderCard.setAttribute('aria-label', `주문 확인, 전체 ${orders.orders.length}건, 준비할 주문 ${pendingOrders.length}건`);
+          } else {
+            $('#taskSummary').textContent = '모두 확인했습니다';
+            orderCard.setAttribute('aria-label', `주문 확인, 전체 ${orders.orders.length}건`);
+          }
+          dashboardSignature = signature;
         }
+
+        const refreshDashboard = startAutoRefresh(loadDashboard);
+        await refreshDashboard();
       }
 
       $('#startBtn').addEventListener('click', () => {

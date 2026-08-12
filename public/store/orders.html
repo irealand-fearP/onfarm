@@ -54,7 +54,28 @@
     </main>
 
     <script type="module">
-      import { $, api, el, money, me, inspectionLabel } from '/js/api.js';
+      import { $, api, dateTimeKst, el, money, me, fulfillmentLabel, toast, startAutoRefresh } from '/js/api.js';
+      import { readCart, writeCart } from '/js/cart.js';
+
+      const ORDER_STEPS = ['상품 준비', '거점 입고', '실물 검수', '배송'];
+      const ORDER_STEP_INDEX = { farmer_preparing: 0, ready_for_hub: 1, hub_received: 2, hub_passed: 2, ready_to_ship: 3, delivered: 3 };
+
+      function orderTimeline(status, rejected) {
+        const currentIndex = ORDER_STEP_INDEX[status] ?? 0;
+        const delivered = status === 'delivered';
+        return el(
+          'div',
+          { class: 'timeline order-timeline', role: 'list', 'aria-label': `현재 상태: ${rejected ? '검수 반려' : fulfillmentLabel(status)}` },
+          ORDER_STEPS.map((label, index) =>
+            el('span', {
+              class: delivered || index < currentIndex ? 'step done' : index === currentIndex ? `step ${rejected ? 'rejected' : 'now'}` : 'step',
+              role: 'listitem',
+              'aria-current': !delivered && index === currentIndex ? 'step' : null,
+              text: delivered && index === currentIndex ? '배송 완료' : rejected && index === currentIndex ? '검수 반려' : label,
+            }),
+          ),
+        );
+      }
 
       const justOrdered = new URLSearchParams(location.search).get('new');
       const session = await me();
@@ -62,10 +83,14 @@
         location.href = '/login?role=consumer&next=/store/orders';
       }
 
-      const { orders } = await api('/api/store/orders');
-      const box = $('#list');
-      box.replaceChildren();
-      $('#hint').textContent = `${orders.length}건`;
+      let ordersSignature = '';
+      async function loadOrders() {
+        const { orders } = await api('/api/store/orders');
+        const signature = JSON.stringify(orders);
+        if (signature === ordersSignature) return;
+        const box = $('#list');
+        box.replaceChildren();
+        $('#hint').textContent = `${orders.length}건`;
 
       if (!orders.length) {
         box.append(
@@ -82,33 +107,92 @@
 
       for (const order of orders) {
         const isNew = justOrdered && order.order_no === justOrdered;
-        const lines = order.items.map((item) =>
-          el('div', { class: 'order-line' }, [
+        const reorderItems = order.items.filter((item) => !item.has_rejection);
+        const rejectedCount = order.items.length - reorderItems.length;
+        const lines = order.items.map((item) => {
+          const helpButton = item.has_rejection
+            ? el('button', {
+                class: 'btn secondary order-help-button',
+                type: 'button',
+                text: item.help_requested ? '도움 요청 완료' : '도움 요청',
+                disabled: item.help_requested ? '' : null,
+                'aria-label': `${item.title} 반려와 환불 도움 요청`,
+                onclick: async (event) => {
+                  const button = event.currentTarget;
+                  button.disabled = true;
+                  try {
+                    await api(`/api/store/order-items/${item.id}/help-request`, { body: {} });
+                    button.textContent = '도움 요청 완료';
+                    toast('거점 담당자에게 도움 요청을 보냈습니다.');
+                    await refreshOrders();
+                  } catch (error) {
+                    button.disabled = false;
+                    toast(error.message);
+                  }
+                },
+              })
+            : null;
+          return el('div', { class: `order-line${item.has_rejection ? ' is-rejected' : ''}` }, [
             el('div', {}, [
               el('div', { class: 'order-line-title', text: `${item.title} × ${item.quantity}` }),
-              el('div', { class: 'order-line-status', text: inspectionLabel(item.inspection_status) }),
+              el('div', {
+                class: 'order-line-status',
+                text: `현재 · ${item.has_rejection ? '검수 반려 · 환불 예정' : fulfillmentLabel(item.fulfillment_status)}`,
+              }),
+              orderTimeline(item.fulfillment_status, item.has_rejection),
+              item.has_rejection
+                ? el('div', { class: 'order-rejection' }, [
+                    el('p', {}, [el('strong', { text: '반려 사유 · ' }), item.rejection_note || '사유가 등록되지 않았습니다.']),
+                    el('p', {}, [el('strong', { text: '환불 예정액 · ' }), money(item.refund_amount)]),
+                    el('p', { class: 'order-refund-note', text: '이 상품의 결제금액 전액이 환불 예정입니다. 시연 환경에서는 실제 결제가 취소되지 않습니다.' }),
+                    helpButton,
+                  ])
+                : null,
             ]),
-            el('div', { class: 'order-line-price', text: money(item.amount) }),
-          ]),
-        );
+            el('div', { class: 'order-line-price order-refund' }, [
+              item.has_rejection ? el('small', { text: '환불 예정' }) : null,
+              el('strong', { text: money(item.has_rejection ? item.refund_amount : item.amount) }),
+            ]),
+          ]);
+        });
 
         box.append(
           el('article', { class: `order-card${isNew ? ' is-new' : ''}` }, [
             el('header', { class: 'order-card-head' }, [
               el('div', {}, [
                 el('div', { class: 'order-number', text: order.order_no }),
-                el('div', { class: 'order-date', text: order.created_at }),
+                el('div', { class: 'order-date', text: dateTimeKst(order.created_at) }),
               ]),
               el('span', { class: `badge ${isNew ? 'badge-ai' : 'badge-muted'}`, text: isNew ? '방금 접수' : '결제 완료' }),
             ]),
             el('div', { class: 'order-lines' }, lines),
             el('footer', { class: 'order-total' }, [
-              el('span', { text: '주문 합계' }),
-              el('strong', { text: money(order.total_amount) }),
+              el('div', { class: 'order-total-copy' }, [
+                el('span', { text: '주문 합계' }),
+                el('strong', { text: money(order.total_amount) }),
+              ]),
+              reorderItems.length
+                ? el('button', {
+                    class: 'btn secondary order-repeat-button',
+                    type: 'button',
+                    text: rejectedCount ? '가능한 상품 다시 담기' : '다시 담기',
+                    'aria-label': `${order.order_no} 주문의 ${rejectedCount ? '반려되지 않은 ' : ''}상품 다시 장바구니에 담기`,
+                    onclick: (event) => {
+                      event.currentTarget.disabled = true;
+                      writeCart([...readCart(), ...reorderItems.map((item) => ({ listingId: item.listing_id, quantity: item.quantity }))]);
+                      location.href = '/store/cart';
+                    },
+                  })
+                : null,
             ]),
           ]),
         );
       }
+        ordersSignature = signature;
+      }
+
+      const refreshOrders = startAutoRefresh(loadOrders);
+      await refreshOrders();
     </script>
   </body>
 </html>

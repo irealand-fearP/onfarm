@@ -715,6 +715,11 @@
   color: #fff;
 }
 
+.timeline .step.rejected {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
 .product-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -960,6 +965,11 @@
   cursor: pointer;
 }
 
+.quantity-control button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .quantity-control span {
   text-align: center;
   font-size: 15px;
@@ -1107,6 +1117,42 @@
   font-variant-numeric: tabular-nums;
 }
 
+.order-refund small,
+.order-refund strong {
+  display: block;
+}
+
+.order-refund small {
+  color: var(--danger);
+  font-size: 11px;
+}
+
+.order-rejection {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--danger-tint);
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.order-rejection p {
+  margin: 0 0 5px;
+}
+
+.order-rejection .order-refund-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.order-help-button {
+  min-height: 44px;
+  margin-top: 6px;
+  padding-block: 9px;
+}
+
 .order-total {
   display: flex;
   align-items: baseline;
@@ -1121,6 +1167,16 @@
   font-size: 20px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+}
+
+.order-total-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.order-repeat-button {
+  min-height: 44px;
+  padding: 9px 16px;
 }
 
 /* 로그인 */
@@ -1529,7 +1585,8 @@ table.data tr:last-child td {
   flex-wrap: wrap;
 }
 
-.inline-actions select {
+.inline-actions select,
+.inline-actions input {
   min-height: 44px;
   padding: 8px 30px 8px 10px;
   border: 1px solid var(--line-strong);
@@ -1783,7 +1840,7 @@ table.data tr:last-child td {
   .hub-main .hub-cell-status::before { content: '진행 상태'; }
   .hub-main .hub-cell-farm::before { content: '출하 농가'; }
   .hub-main .hub-cell-quality::before { content: '품질 판정'; }
-  .hub-main .hub-cell-quantity::before { content: '남은 수량'; }
+  .hub-main .hub-cell-quantity::before { content: '주문 수량'; }
   .hub-main .hub-cell-actions::before { content: '처리'; }
 
   .hub-main .hub-cell-status .badge {
@@ -1835,7 +1892,8 @@ table.data tr:last-child td {
     gap: 8px;
   }
 
-  .hub-main .inline-actions select {
+  .hub-main .inline-actions select,
+  .hub-main .inline-actions input {
     grid-column: 1 / -1;
     width: 100%;
     min-width: 0;
@@ -2139,6 +2197,21 @@ table.data tr:last-child td {
 
   .order-line-price {
     text-align: left;
+  }
+
+  .order-timeline {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .order-timeline .step {
+    min-height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 6px 4px;
+    text-align: center;
+    line-height: 1.3;
   }
 
   .auth-main {

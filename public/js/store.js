@@ -39,10 +39,8 @@ function renderFilters() {
             state.region = '';
           } else if (option.key.startsWith('product:')) {
             state.product = option.key.slice(8) === state.product ? '' : option.key.slice(8);
-            state.region = '';
           } else {
             state.region = option.key.slice(7) === state.region ? '' : option.key.slice(7);
-            state.product = '';
           }
           renderFilters();
           load();
@@ -94,13 +92,13 @@ async function load() {
 
   $('#empty').hidden = listings.length > 0;
   $('#listCount').textContent = `${listings.length}건`;
+  const productName = cfg.products.find((product) => product.code === state.product)?.name ?? '';
+  const filterName = [state.region, productName].filter(Boolean).join(' ');
   $('#listTitle').textContent = state.query
     ? `“${state.query}” 검색 결과`
-    : state.product
-      ? `${cfg.products.find((product) => product.code === state.product)?.name ?? ''} 상품`
-      : state.region
-        ? `${state.region} 산지`
-        : '오늘 올라온 농산물';
+    : filterName
+      ? `${filterName} 상품`
+      : '오늘 올라온 농산물';
 }
 
 $('#searchForm').addEventListener('submit', (event) => {

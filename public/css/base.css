@@ -173,6 +173,11 @@ a {
   color: var(--info);
 }
 
+.badge-danger {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
 .badge-muted {
   background: var(--surface-soft);
   color: var(--muted);

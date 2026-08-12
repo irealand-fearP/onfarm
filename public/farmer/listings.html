@@ -57,7 +57,76 @@
     </nav>
 
     <script type="module">
-      import { api, requireRole, money, el, $, imageOf, inspectionLabel } from '/js/api.js';
+      import { api, requireRole, money, el, $, imageOf, inspectionLabel, toast } from '/js/api.js';
+
+      async function manageListing(id, body, button) {
+        button.disabled = true;
+        try {
+          await api(`/api/farmer/listings/${id}/manage`, { body });
+          location.reload();
+        } catch (error) {
+          button.disabled = false;
+          toast(error instanceof Error ? error.message : '처리하지 못했습니다.');
+        }
+      }
+
+      function listingActions(listing) {
+        if (listing.inspection_status !== 'ai_checked' || listing.has_rejection) return null;
+
+        const actions = [];
+        const maxStock = 999 - listing.quantity;
+        if (maxStock > 0) {
+          const inputId = `stock-${listing.id}`;
+          const input = el('input', {
+            id: inputId,
+            name: 'quantity',
+            type: 'number',
+            min: '1',
+            max: String(maxStock),
+            step: '1',
+            inputmode: 'numeric',
+            placeholder: '추가 수량',
+            required: '',
+          });
+          const addButton = el('button', {
+            class: 'inventory-action primary',
+            type: 'submit',
+            text: '재고 추가',
+          });
+          actions.push(
+            el('form', {
+              class: 'inventory-stock',
+              onsubmit: (event) => {
+                event.preventDefault();
+                manageListing(listing.id, { action: 'add_stock', quantity: Number(input.value) }, addButton);
+              },
+            }, [
+              el('label', { class: 'visually-hidden', for: inputId, text: `${listing.title} 추가 수량` }),
+              input,
+              addButton,
+            ]),
+          );
+        }
+
+        const toggleAction = listing.status === 'active'
+          ? { action: 'pause', label: '판매 중지' }
+          : listing.status === 'closed' && listing.remaining_quantity > 0
+            ? { action: 'resume', label: '판매 재개' }
+            : null;
+        if (toggleAction) {
+          const toggleButton = el('button', {
+            class: `inventory-action${toggleAction.action === 'resume' ? ' primary' : ''}`,
+            type: 'button',
+            text: toggleAction.label,
+            'aria-label': `${listing.title} ${toggleAction.label}`,
+          });
+          toggleButton.addEventListener('click', () => {
+            manageListing(listing.id, { action: toggleAction.action }, toggleButton);
+          });
+          actions.push(toggleButton);
+        }
+        return actions.length ? el('div', { class: 'inventory-actions' }, actions) : null;
+      }
 
       await requireRole('farmer');
       const { listings } = await api('/api/farmer/listings');
@@ -111,6 +180,7 @@
                 el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) }),
               ]),
             ]),
+            listingActions(listing),
           ]),
         );
       }
