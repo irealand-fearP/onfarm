@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#00c46a" />
-    <meta name="description" content="ON-FARM 농산물의 생산자, 거점 검수 과정과 가격을 확인하세요." />
+    <meta name="description" content="ON-FARM 농수산물의 생산자, 거점 검수 과정과 가격을 확인하세요." />
     <title>ON-FARM · 상품 정보</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
@@ -149,7 +149,7 @@
             el('section', { class: 'fact-card' }, [
               el('h2', { text: '생산자와 산지' }),
               el('div', { class: 'fact-row' }, [el('span', { class: 'k', text: '생산자' }), el('span', { class: 'v', text: listing.farmer_name })]),
-              el('div', { class: 'fact-row' }, [el('span', { class: 'k', text: '농가' }), el('span', { class: 'v', text: listing.farm_name })]),
+              el('div', { class: 'fact-row' }, [el('span', { class: 'k', text: '생산자' }), el('span', { class: 'v', text: listing.farm_name })]),
               el('div', { class: 'fact-row' }, [el('span', { class: 'k', text: '생산지' }), el('span', { class: 'v', text: region })]),
               el('div', { class: 'fact-row' }, [el('span', { class: 'k', text: '수확일' }), el('span', { class: 'v', text: listing.harvested_on ?? '-' })]),
               el('div', { class: 'fact-row' }, [el('span', { class: 'k', text: '검수 거점' }), el('span', { class: 'v', text: listing.hub_name ?? '미지정' })]),

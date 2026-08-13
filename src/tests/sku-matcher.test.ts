@@ -29,11 +29,17 @@ describe('표준 SKU 매칭 — 가격의 유일한 출처', () => {
     assert.equal(defaultSku(db, 'durian'), null);
   });
 
-  it('MVP 카탈로그에 비활성 품목(수산물)은 노출되지 않는다', () => {
+  // 예전에는 '시드의 수산물이 비활성'이라는 사실에 기대 검증했지만, 수산물이 정식 오픈되며 그 전제가 깨졌다.
+  // 검증하려던 것은 "비활성 품목은 카탈로그에서 빠진다"는 규칙 자체이므로, 시드 상태에 기대지 않고
+  // 테스트 안에서 직접 품목 하나를 비활성으로 만들어 확인한다.
+  it('비활성 품목은 카탈로그에 노출되지 않는다', () => {
     const db = freshDb(false);
+    assert.ok(catalog(db).map((p) => p.code).includes('abalone'), '수산물도 이제 판매 품목이다');
+
+    run(db, "UPDATE products SET active = 0 WHERE code = 'abalone'");
     const codes = catalog(db).map((p) => p.code);
     assert.ok(codes.includes('pear'));
-    assert.ok(!codes.includes('abalone'), '수산물은 Phase 2 라 카탈로그에서 빠져야 한다');
+    assert.ok(!codes.includes('abalone'), '비활성 품목은 카탈로그에서 빠져야 한다');
     assert.equal(findProductByCode(db, 'abalone'), null);
   });
 });

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#00c46a" />
-    <meta name="description" content="오늘 아침 수확한 농산물을 생산자와 검수 상태까지 확인하고 사는 ON-FARM" />
+    <meta name="description" content="오늘 아침 수확한 농수산물을 생산자와 검수 상태까지 확인하고 사는 ON-FARM" />
     <title>ON-FARM · 오늘 아침 수확</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
@@ -32,8 +32,8 @@
       <main class="shop-main" id="mainContent">
         <form class="shop-search" id="searchForm" role="search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
-          <label class="visually-hidden" for="searchInput">농산물·농가 검색</label>
-          <input id="searchInput" type="search" placeholder="배, 감자, 농가 이름" autocomplete="off" />
+          <label class="visually-hidden" for="searchInput">농수산물·생산자 검색</label>
+          <input id="searchInput" type="search" placeholder="배, 고등어, 생산자 이름" autocomplete="off" />
           <button type="submit">찾기</button>
         </form>
 
@@ -84,13 +84,13 @@
                 </a>
               </div>
 
-              <!-- 수산물은 아직 판매 물량이 없어 눌러도 "준비 중" 안내가 뜬다.
-                   배너가 지금 살 수 있다고 오해시키지 않도록 문구 옆에 준비 중 표시를 함께 둔다. -->
+              <!-- 수산물은 전복·고등어·새우·오징어가 실제로 판매 중이라 "준비 중" 표시를 뗀다.
+                   눌러 들어가면 바로 살 수 있는 수산물 목록이 뜬다. -->
               <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="4 / 4">
                 <a class="home-promo home-promo--abalone" href="/shop?category=seafood">
                   <img src="/img/banners/banner-03-fresh-abalone.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
                   <span class="home-promo-copy">
-                    <small>바다에서 바로 <em class="home-promo-soon">준비 중</em></small>
+                    <small>바다에서 바로</small>
                     <strong>싱싱한 전복을<br />우리 집 식탁으로</strong>
                     <span>전복 보러 가기 <b aria-hidden="true">›</b></span>
                   </span>
@@ -133,7 +133,7 @@
         <div class="chip-row" id="regionChips" aria-label="지역 선택"></div>
 
         <div class="list-head">
-          <h2 id="listTitle">오늘 올라온 농산물</h2>
+          <h2 id="listTitle">오늘 올라온 농수산물</h2>
           <span id="listCount" aria-live="polite"></span>
         </div>
 
@@ -146,7 +146,7 @@
         <div class="coming-soon" id="comingSoon" hidden>
           <h2 id="comingSoonTitle">준비 중입니다</h2>
           <p id="comingSoonDesc">곧 열립니다.</p>
-          <button class="empty-reset" type="button" id="comingSoonBack">농산물 보기</button>
+          <button class="empty-reset" type="button" id="comingSoonBack">전체 보기</button>
         </div>
 
         <div class="empty" id="empty" hidden>

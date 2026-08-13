@@ -114,7 +114,10 @@ describe('거점 권한 범위', () => {
     const all = listForHub(db, null);
     assert.ok(scoped.length > 0);
     assert.ok(scoped.length < all.length, '전체보다 적어야 한다');
-    assert.ok(scoped.every((l) => l.region_sigungu === '천안시'));
+    // 예전에는 '성환 거점 물량 = 천안시'라는 시드 우연에 기대 검증했지만, 같은 거점에 다른 시군구
+    // 생산자(서산 마늘)가 들어오며 깨졌다. 검증하려던 규칙은 "담당 거점 소관만 보인다"이므로
+    // 시군구가 아니라 소관 판별(belongsToHub) 로 확인한다.
+    assert.ok(scoped.every((l) => belongsToHub(db, l.id, seonghwan.hub_id)));
   });
 
   it('소관 판별이 다른 거점 매물을 거른다', () => {

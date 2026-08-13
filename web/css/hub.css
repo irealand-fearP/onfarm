@@ -623,7 +623,7 @@ table.data tr:last-child td {
 
   .hub-main .hub-cell-product::before { content: '상품'; }
   .hub-main .hub-cell-status::before { content: '진행 상태'; }
-  .hub-main .hub-cell-farm::before { content: '출하 농가'; }
+  .hub-main .hub-cell-farm::before { content: '출하 생산자'; }
   .hub-main .hub-cell-quality::before { content: '품질 판정'; }
   .hub-main .hub-cell-quantity::before { content: '주문 수량'; }
   .hub-main .hub-cell-actions::before { content: '처리'; }

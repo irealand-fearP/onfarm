@@ -32,7 +32,9 @@ export function writeProduct(input: WriteInput): WrittenProduct {
   const when = harvestedOn === today ? '오늘' : `${harvestedOn.slice(5).replace('-', '월 ')}일`;
   const variety = recognition.variety_guess ?? product.variety ?? product.name_ko;
 
-  const title = `${shortRegion(farm)}에서 ${when} 수확한 ${variety}`;
+  // 수산물에 '수확한'은 어색하다(어가는 잡거나 기른다). 자연산·양식 모두에 무리 없는 '나온'으로 쓴다.
+  const verb = product.category === 'seafood' ? '나온' : '수확한';
+  const title = `${shortRegion(farm)}에서 ${when} ${verb} ${variety}`;
 
   const lines: string[] = [];
   lines.push(

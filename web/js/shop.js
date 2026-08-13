@@ -32,10 +32,10 @@ const productByCode = new Map(
 );
 
 // 준비 중 종류의 안내 문구(종류별로 다르게 쓸 수 있게 표에 둔다).
-const COMING_SOON_NOTES = {
-  grain: '올해 햅쌀 물량을 산지와 준비하고 있습니다.',
-  seafood: '지역 수협·어촌계와 연계해 곧 열립니다.',
-};
+// 지금은 쌀·수산물까지 전부 판매 중이라 비어 있다. 표를 없애지는 않는다 —
+// 준비 중 판정은 데이터 기반 자동이라, 새 종류가 생기면 여기 한 줄만 추가하면 된다.
+// (비어 있는 동안에는 아래 기본 문구 '곧 열립니다.'가 쓰인다.)
+const COMING_SOON_NOTES = {};
 
 // 판매 중 상품 캐시. 종류·품목·지역 후보를 여기서 뽑는다.
 let allListings = [];
@@ -234,7 +234,7 @@ function headline() {
   const label = [state.region, state.product ? productName(state.product) : categoryName]
     .filter(Boolean)
     .join(' ');
-  return label ? `${label} 상품` : '오늘 올라온 농산물';
+  return label ? `${label} 상품` : '오늘 올라온 농수산물';
 }
 
 /** 판매 중 목록을 한 번만 받아 캐시한다(응답 형식·쿼리 계약은 그대로 둔다). */
@@ -380,7 +380,7 @@ $('#searchInput').addEventListener('search', (event) => {
   event.currentTarget.focus();
 });
 
-// 준비 중 안내에서 농산물(전체)로 되돌아가기.
+// 준비 중 안내에서 전체 목록으로 되돌아가기.
 $('#comingSoonBack')?.addEventListener('click', () => {
   state.category = '';
   state.product = '';

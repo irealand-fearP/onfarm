@@ -98,10 +98,67 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     ],
   },
   {
-    // Phase 2 (수산물). 스키마·SKU 자리는 만들어 두되 MVP 에서는 비활성.
-    code: 'abalone', name_ko: '전복', category: 'seafood', variety: null, emoji: '🐚',
-    sample: '/img/sample/abalone.svg', active: 0,
-    skus: [{ code: 'abalone_1kg', label: '1kg (10미)', weight: 1, unit: 'kg', price: 45000, isDefault: true }],
+    // 마늘. 상품컷 /img/products/garlic.webp 준비 완료.
+    // '접'은 마늘 고유 단위(100통)라 라벨에 남기고, 무게 컬럼은 다른 품목과 같은 kg 로 환산해 둔다.
+    code: 'garlic', name_ko: '마늘', category: 'vegetable', variety: '남도마늘', emoji: '🧄',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'garlic_1kg', label: '1kg 한 망', weight: 1, unit: 'kg', price: 12000, isDefault: true },
+      { code: 'garlic_jeop', label: '한 접(100통·약 3kg)', weight: 3, unit: 'kg', price: 33000 },
+    ],
+  },
+  {
+    // 상품컷이 청포도라 품종을 샤인머스캣으로 맞춘다(사진과 글이 어긋나면 안 된다).
+    code: 'grape', name_ko: '포도', category: 'fruit', variety: '샤인머스캣', emoji: '🍇',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'grape_2kg', label: '2kg 한 상자(2~3송이)', weight: 2, unit: 'kg', price: 32000, isDefault: true },
+      { code: 'grape_4kg', label: '4kg 한 상자', weight: 4, unit: 'kg', price: 58000 },
+    ],
+  },
+  {
+    // 상품컷이 단감이라 품종을 단감(부유)으로 맞춘다. 떫은감·곶감용과 혼동되면 안 된다.
+    code: 'persimmon', name_ko: '감', category: 'fruit', variety: '부유단감', emoji: '🟠',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'persimmon_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 25000, isDefault: true },
+      { code: 'persimmon_10kg', label: '10kg 한 상자', weight: 10, unit: 'kg', price: 45000 },
+    ],
+  },
+  {
+    // 수산물 3종 + 전복. 상품컷이 준비돼 정식 판매 품목으로 연다(더 이상 Phase 2 자리가 아니다).
+    // 생선·오징어는 '마리'로 사는 감각이라 라벨에 마릿수를 쓰고, 무게는 kg 로 함께 적어 비교가 되게 한다.
+    code: 'mackerel', name_ko: '고등어', category: 'seafood', variety: '선망 고등어', emoji: '🐟',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'mackerel_4mi', label: '4마리(약 1.6kg)', weight: 1.6, unit: 'kg', price: 22000, isDefault: true },
+      { code: 'mackerel_8mi', label: '8마리(약 3.2kg)', weight: 3.2, unit: 'kg', price: 40000 },
+    ],
+  },
+  {
+    code: 'shrimp', name_ko: '새우', category: 'seafood', variety: '흰다리새우', emoji: '🦐',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'shrimp_1kg', label: '1kg 한 상자', weight: 1, unit: 'kg', price: 38000, isDefault: true },
+      { code: 'shrimp_2kg', label: '2kg 한 상자', weight: 2, unit: 'kg', price: 72000 },
+    ],
+  },
+  {
+    code: 'squid', name_ko: '오징어', category: 'seafood', variety: '살오징어', emoji: '🦑',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'squid_3mi', label: '3마리(약 1.2kg)', weight: 1.2, unit: 'kg', price: 18000, isDefault: true },
+      { code: 'squid_6mi', label: '6마리(약 2.4kg)', weight: 2.4, unit: 'kg', price: 33000 },
+    ],
+  },
+  {
+    // 전복도 함께 연다. 홈 캐러셀이 "전복 보러 가기"로 안내하므로 실제로 살 수 있어야 한다.
+    code: 'abalone', name_ko: '전복', category: 'seafood', variety: '활전복', emoji: '🐚',
+    sample: '/img/sample/abalone.svg',
+    skus: [
+      { code: 'abalone_1kg', label: '1kg (10미)', weight: 1, unit: 'kg', price: 45000, isDefault: true },
+      { code: 'abalone_500g', label: '500g (5미)', weight: 0.5, unit: 'kg', price: 24000 },
+    ],
   },
 ];
 
@@ -109,6 +166,9 @@ const SEED_HUBS = [
   { name: '천안 성환 로컬푸드 거점', region: '충남 천안시', address: '충남 천안시 서북구 성환읍' },
   { name: '충주 로컬푸드 거점', region: '충북 충주시', address: '충북 충주시' },
   { name: '제주 서귀포 거점', region: '제주 서귀포시', address: '제주 서귀포시' },
+  // 수산물은 내륙 거점이 받을 수 없다. 실제 위판·산지가 있는 남해안·동해안에 거점을 둔다.
+  { name: '통영 수산물 거점', region: '경남 통영시', address: '경남 통영시 도남동' },
+  { name: '포항 구룡포 수산 거점', region: '경북 포항시', address: '경북 포항시 남구 구룡포읍' },
 ];
 
 interface SeedFarmer {
@@ -131,6 +191,18 @@ const SEED_FARMERS: SeedFarmer[] = [
   // 감자·양파는 밭작물이라 과수원·감귤원과 성격이 다르다. 기존 '정자네 텃밭' 한 곳에 4건을 몰지 않도록 밭작물 전문 농가를 따로 둔다.
   // 제천 백운면은 감자·양파를 실제로 재배하는 지역이고 1번(충주) 거점 권역이라 지역·거점 연결도 맞는다.
   { name: '한영식', phone: '010-1234-0006', farm: '백운 밭작물농장', sido: '충북', sigungu: '제천시', detail: '백운면', hubIndex: 1 },
+  // 마늘은 밭작물이지만 백운 밭작물농장(감자·양파)에 3건을 몰지 않게 따로 둔다.
+  // 서산 육쪽마늘은 실제 주산지이고 충남이라 0번(천안 성환) 거점 권역과 맞는다.
+  { name: '정길수', phone: '010-1234-0007', farm: '서산 육쪽마늘밭', sido: '충남', sigungu: '서산시', detail: '부석면', hubIndex: 0 },
+  // 포도(샤인머스캣)·단감은 과수라 기존 과수 농가에 붙일 수도 있으나 만수농원이 이미 2건이다.
+  // 영동은 포도·감을 함께 내는 실제 과수 산지이고 충북이라 1번(충주) 거점 권역과 맞는다.
+  { name: '조막래', phone: '010-1234-0008', farm: '영동 과일마을 농원', sido: '충북', sigungu: '영동군', detail: '심천면', hubIndex: 1 },
+  // 여기부터는 어가(수산물). 농가가 수산물을 팔면 안 되므로 생산자 자체를 분리한다.
+  { name: '강영자', phone: '010-1234-0009', farm: '성산포 해녀어촌계', sido: '제주', sigungu: '서귀포시', detail: '성산읍', hubIndex: 2 },
+  { name: '문태호', phone: '010-1234-0010', farm: '통영 선망 어가', sido: '경남', sigungu: '통영시', detail: '도남동', hubIndex: 3 },
+  // 흰다리새우는 고성·통영 일대 양식이 실제로 있고 3번(통영) 거점 권역이다. 통영 어가 한 곳에 2건을 몰지 않는다.
+  { name: '배순옥', phone: '010-1234-0011', farm: '고성 흰다리새우 양식장', sido: '경남', sigungu: '고성군', detail: '하이면', hubIndex: 3 },
+  { name: '최기환', phone: '010-1234-0012', farm: '구룡포 앞바다 어가', sido: '경북', sigungu: '포항시', detail: '남구 구룡포읍', hubIndex: 4 },
 ];
 
 /** 시연용 초기 매물: [농부 index, 품목 code, 수량, 며칠 전 수확] */
@@ -146,6 +218,15 @@ const SEED_LISTINGS: Array<[number, string, number, number]> = [
   [5, 'potato', 9, 2],
   [5, 'onion', 15, 1],
   [4, 'rice', 20, 3],
+  // 신규 농산물 3종.
+  [6, 'garlic', 14, 2],
+  [7, 'grape', 9, 0],
+  [7, 'persimmon', 11, 1],
+  // 수산물 4종 — 어가별로 한 건씩 나눠 담는다.
+  [8, 'abalone', 6, 0],
+  [9, 'mackerel', 12, 1],
+  [10, 'shrimp', 8, 2],
+  [11, 'squid', 10, 3],
 ];
 
 function daysAgo(days: number): string {
@@ -210,6 +291,10 @@ export function seed(db: Db, options: SeedOptions = {}): void {
     ['consumer', '최수민', '010-5555-1001', null],
     ['hub_operator', '성환거점 담당자', '010-7777-2000', hubs[0]?.id ?? null],
     ['hub_operator', '충주거점 담당자', '010-7777-2001', hubs[1]?.id ?? null],
+    // 수산물 거점에도 담당자가 있어야 그 거점 물량을 검수할 수 있다(담당자 없는 거점 = 검수 불가).
+    ['hub_operator', '서귀포거점 담당자', '010-7777-2002', hubs[2]?.id ?? null],
+    ['hub_operator', '통영거점 담당자', '010-7777-2003', hubs[3]?.id ?? null],
+    ['hub_operator', '포항거점 담당자', '010-7777-2004', hubs[4]?.id ?? null],
     ['admin', '운영자', '010-9999-3000', null],
   ];
   for (const [role, name, phone, hubId] of others) {
