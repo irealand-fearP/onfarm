@@ -102,6 +102,26 @@
           <div class="promo-dots" id="promoDots" role="group" aria-label="배너 이동"></div>
         </section>
 
+        <!-- 추석 이벤트 보조 배너 — 주 배너(캐러셀)를 압도하지 않게 높이를 67%로 낮췄다.
+             사진 위아래를 자르면 보름달·대추가 잘리므로, 자르지 않고 사진을 오른쪽에 붙여 축소해 넣고
+             남는 왼쪽은 사진과 같은 남색(#00070f)으로 채운다(이음매가 보이지 않는다).
+             기획전 페이지는 없으므로 실제로 있는 필터(과일 종류)로만 연결한다. -->
+        <a class="event-promo" href="/shop?category=fruit">
+          <img
+            src="/img/banners/banner-05-chuseok-event.webp"
+            alt=""
+            width="1800"
+            height="675"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="event-promo-copy">
+            <small class="event-promo-tag">한가위</small>
+            <strong>차례상에 올릴 것들<br />산지에서 바로</strong>
+            <span>추석 과일 보러 가기 <b aria-hidden="true">›</b></span>
+          </span>
+        </a>
+
         <!-- 1단 종류 → 2단 품목 → 3단 지역 순서로 좁힌다(상위가 하위를 결정한다). -->
         <!-- data-hscroll: 가로로 넘칠 때 화살표·페이드를 붙여 주는 상자(마우스 전용 환경 대응) -->
         <div class="hscroll" data-hscroll>

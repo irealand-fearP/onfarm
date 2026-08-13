@@ -708,6 +708,84 @@ body.shop img {
   }
 }
 
+/* ───────── 추석 이벤트 보조 배너(캐러셀 바로 아래) ───────── */
+/* 높이는 캐러셀(1800:675)의 약 67%인 1800:452 비율로 잡는다 — 주 배너보다 확실히 작다.
+   사진을 잘라서 줄이면 오른쪽 위 보름달과 아래 대추가 잘리므로 object-fit: contain 으로
+   통째로 넣고 오른쪽에 붙인다. 사진 배경이 거의 단색 남색이라 남는 왼쪽을 같은 색으로 칠하면
+   경계가 보이지 않고, 문구가 놓일 왼쪽 여백은 오히려 더 넓어진다.
+   aspect-ratio 로 높이를 미리 잡아 이미지 로딩 중 화면이 밀리지 않는다. */
+.event-promo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  margin: 10px 16px 2px;
+  aspect-ratio: 1800 / 452;
+  border-radius: 16px;
+  background: #00070f; /* 사진 배경과 같은 남색 — 다크·라이트 모두 동일 */
+  text-decoration: none;
+}
+
+.event-promo > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+}
+
+.event-promo-copy {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 52%;
+  padding: 10px 0 10px 16px;
+  color: #fff7ea; /* 남색(#00070f) 위 대비 약 18:1 */
+}
+
+.event-promo-copy strong,
+.event-promo-copy > span {
+  display: block;
+}
+
+/* 라벨은 이벤트임이 한눈에 보이도록 금색 알약으로 처리한다(금색 위 진갈색 글자, 대비 약 9:1). */
+.event-promo-tag {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f2b441;
+  color: #2a1704;
+  font-size: clamp(9.5px, 2.5vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.event-promo-copy strong {
+  margin-top: 6px;
+  font-size: clamp(13px, 3.6vw, 19px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.045em;
+}
+
+.event-promo-copy > span:last-child {
+  margin-top: 6px;
+  font-size: clamp(9.5px, 2.5vw, 11.5px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.event-promo-copy b {
+  font-weight: 800;
+}
+
+.event-promo:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
 /* ───────── 가로 스크롤 줄(품목 칩·종류 탭) ───────── */
 /* 스크롤바를 감춰 둔 줄이라, 마우스만 있는 환경에서는 밀 방법이 없었다.
    양 끝 페이드로 "더 있다"를 알리고, 마우스 환경에서만 화살표 버튼을 띄운다. */
