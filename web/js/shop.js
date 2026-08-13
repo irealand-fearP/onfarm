@@ -326,7 +326,17 @@ $('#comingSoonBack')?.addEventListener('click', () => {
   load();
 });
 
+/** 홈 하단 배너 등 외부 링크에서 들어올 때 ?category= 로 종류 탭을 미리 골라 준다.
+ *  품목 표에 없는 값이면 조용히 무시하고 전체 목록을 보여준다(에러 화면을 띄우지 않는다). */
+function applyCategoryFromUrl() {
+  const code = new URLSearchParams(location.search).get('category');
+  if (!code) return;
+  const registered = new Set([...productByCode.values()].map((product) => product.category));
+  if (CATEGORY_LABELS.some(([known]) => known === code) && registered.has(code)) state.category = code;
+}
+
 renderQuickTiles();
 await fetchListings();
+applyCategoryFromUrl();
 renderAllFilters();
 load();

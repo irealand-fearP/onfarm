@@ -630,6 +630,116 @@ body.shop img {
   text-overflow: ellipsis;
 }
 
+/* ───────── 산지 추천 배너 3종(홈 하단) ───────── */
+/* 사진은 왼쪽 약 40%가 비어 있는 1800×675 원본이다. 그 여백 위에 HTML 문구를 얹는다.
+   슬라이더가 아니라 세로로 이어지는 정적 링크 3개다. */
+.home-promos {
+  display: grid;
+  gap: 12px;
+  margin: 24px 16px 0;
+}
+
+.home-promo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1800 / 675;
+  border-radius: 16px;
+  text-decoration: none;
+}
+
+.home-promo > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-promo-copy {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 38%;
+  padding: 12px 0 12px 16px;
+}
+
+.home-promo-copy small,
+.home-promo-copy strong,
+.home-promo-copy > span {
+  display: block;
+}
+
+.home-promo-copy small {
+  font-size: clamp(10px, 2.7vw, 11.5px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  opacity: 0.85;
+}
+
+.home-promo-copy strong {
+  margin-top: 4px;
+  font-size: clamp(15px, 4.1vw, 21px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.045em;
+}
+
+.home-promo-copy > span {
+  margin-top: 8px;
+  font-size: clamp(10px, 2.7vw, 11.5px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.home-promo-copy b {
+  font-weight: 800;
+}
+
+/* 아직 판매 물량이 없는 종류임을 배너 안에서 미리 알린다(눌렀을 때 준비 중 안내가 뜬다). */
+.home-promo-soon {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px currentColor;
+  font-size: 0.92em;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* 문구 색은 사진마다 다른 배경에 얹히므로 테마 토큰이 아니라 사진에 맞춘 고정색을 쓴다.
+   (다크 모드에서도 사진은 그대로 밝으므로 글자는 계속 어두워야 한다.) */
+.home-promo--fruit .home-promo-copy {
+  color: #6f321d;
+}
+
+.home-promo--field .home-promo-copy {
+  color: #275b3b;
+}
+
+.home-promo--abalone .home-promo-copy {
+  color: #174e58;
+}
+
+/* 배너 전체가 링크다. 키보드 포커스가 이미지에 묻히지 않게 안쪽 테두리까지 준다. */
+.home-promo:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 아주 좁은 화면에서는 사진 속 상품이 시작되는 위치가 가까워 문구 폭을 조금 줄인다. */
+@media (max-width: 359px) {
+  .home-promo-copy {
+    width: 40%;
+    padding: 8px 0 8px 12px;
+  }
+}
+
 /* ───────── 하단 탭바 ───────── */
 /* 없는 기능은 탭에 넣지 않는다("찜"이 빠진 이유). 네 칸 모두 실제로 동작한다. */
 .tabbar {
