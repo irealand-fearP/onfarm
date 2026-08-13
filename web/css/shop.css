@@ -554,12 +554,13 @@ body.shop img {
 }
 
 /* 점 인디케이터 — 배너 아래가 아니라 배너 이미지 안쪽 하단에 얹는다(세로 공간 절약).
-   왼쪽 문구 영역(38%)을 피해 오른쪽 영역의 가운데에 둔다.
-   사진 위라 배경이 제각각이므로 반투명 검정 알약 + 흰 점으로 대비를 고정한다.
+   배너 아래쪽 가운데에 둔다(오른쪽으로 치우치면 사진 속 상품과 겹쳐 보인다).
+   사진 위라 배경이 제각각이므로 옅은 검정 알약 + 흰 점으로 대비를 고정한다.
+   알약은 은은하게 낮추되, 가장 밝은 크림색 배너(쌀·잡곡)에서도 알약 그림자와 점이 구분되는 값이다.
    배너 링크(<a>) 바깥에 있는 형제 요소라 점을 눌러도 페이지 이동은 일어나지 않는다. */
 .promo-dots {
   position: absolute;
-  left: 70%; /* 문구(왼쪽 38%)를 피한 오른쪽 영역의 가운데 */
+  left: 50%; /* 배너 폭의 가운데 */
   bottom: 8px;
   z-index: 2;
   transform: translateX(-50%);
@@ -569,7 +570,7 @@ body.shop img {
   width: fit-content;
   padding: 5px 8px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.34);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .promo-dot {
@@ -578,7 +579,7 @@ body.shop img {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: width 200ms ease, background 200ms ease;
 }
@@ -586,7 +587,7 @@ body.shop img {
 .promo-dot[aria-current='true'] {
   width: 18px;
   border-radius: 999px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .promo-dot:focus-visible {
@@ -685,6 +686,10 @@ body.shop img {
   color: #275b3b;
 }
 
+.home-promo--grain .home-promo-copy {
+  color: #5a3517;
+}
+
 .home-promo--abalone .home-promo-copy {
   color: #174e58;
 }
@@ -701,6 +706,160 @@ body.shop img {
     width: 40%;
     padding: 8px 0 8px 12px;
   }
+}
+
+/* ───────── 가로 스크롤 줄(품목 칩·종류 탭) ───────── */
+/* 스크롤바를 감춰 둔 줄이라, 마우스만 있는 환경에서는 밀 방법이 없었다.
+   양 끝 페이드로 "더 있다"를 알리고, 마우스 환경에서만 화살표 버튼을 띄운다. */
+.hscroll {
+  position: relative;
+}
+
+/* 부드럽게 이동(화살표·탭 이동 모두). 움직임 최소화 설정이면 아래에서 끈다. */
+.hscroll > :first-child {
+  scroll-behavior: smooth;
+}
+
+/* 페이드는 클릭을 가로막지 않아야 하므로 pointer-events: none 인 가상요소로 얹는다. */
+.hscroll::before,
+.hscroll::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 36px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.hscroll::before {
+  left: 0;
+  background: linear-gradient(to right, var(--surface), transparent);
+}
+
+.hscroll::after {
+  right: 0;
+  background: linear-gradient(to left, var(--surface), transparent);
+}
+
+/* 더 밀 수 있는 쪽에만 페이드를 켠다(맨 왼쪽이면 왼쪽 표시 없음). */
+.hscroll[data-can-prev]::before,
+.hscroll[data-can-next]::after {
+  opacity: 1;
+}
+
+.hscroll-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-top: -15px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(25, 31, 40, 0.14);
+  color: var(--t2);
+  cursor: pointer;
+}
+
+.hscroll-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hscroll-arrow--prev {
+  left: 4px;
+  transform: rotate(180deg);
+}
+
+.hscroll-arrow--next {
+  right: 4px;
+}
+
+/* 마우스가 있는 환경에서만 노출한다(터치 기기에서는 손가락으로 밀면 된다). */
+@media (hover: hover) and (pointer: fine) {
+  .hscroll-arrow {
+    display: flex;
+  }
+}
+
+.hscroll-arrow[hidden] {
+  display: none;
+}
+
+.hscroll-arrow:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hscroll > :first-child {
+    scroll-behavior: auto;
+  }
+}
+
+/* ───────── 상품 목록 페이지 이동 ───────── */
+/* 페이지를 바꾸면 이 위치로 스크롤되므로, 고정 상단바에 제목이 가리지 않게 여유를 준다. */
+.list-head {
+  scroll-margin-top: 64px;
+}
+
+/* 10개 이하면 JS가 아무것도 그리지 않는다. 그때 빈 여백까지 사라지도록 :empty 를 함께 둔다.
+   목록 아래 여백은 .shop-main 의 탭바 여백이 이미 확보한다(탭바에 가리지 않는다). */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 16px 8px;
+}
+
+.pager:empty {
+  display: none;
+}
+
+.pager button {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--t2);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.pager button[aria-current='page'] {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-weight: 800;
+}
+
+.pager button[disabled] {
+  color: var(--t3);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.pager-arrow {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.pager button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* ───────── 하단 탭바 ───────── */

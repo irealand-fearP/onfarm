@@ -37,7 +37,7 @@
           <button type="submit">찾기</button>
         </form>
 
-        <!-- 산지 추천 배너 3종 캐러셀 — 4초 간격 자동 순환.
+        <!-- 산지 추천 배너 4종 캐러셀 — 4초 간격 자동 순환.
              문구는 이미지가 아니라 HTML이며, 링크는 홈의 종류 필터(?category=)로 연결한다.
              자동으로 바뀌는 영역이라 aria-live="off"(스크린리더가 계속 읽지 않게)로 둔다. -->
         <section
@@ -49,7 +49,7 @@
         >
           <div class="promo-viewport">
             <div class="promo-track" id="promoTrack">
-              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="1 / 3">
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="1 / 4">
                 <a class="home-promo home-promo--fruit" href="/shop?category=fruit">
                   <img src="/img/banners/banner-01-seasonal-fruit.webp" alt="" width="1800" height="675" decoding="async" />
                   <span class="home-promo-copy">
@@ -60,7 +60,7 @@
                 </a>
               </div>
 
-              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="2 / 3">
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="2 / 4">
                 <a class="home-promo home-promo--field" href="/shop?category=vegetable">
                   <img src="/img/banners/banner-02-field-harvest.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
                   <span class="home-promo-copy">
@@ -71,9 +71,22 @@
                 </a>
               </div>
 
+              <!-- 쌀·잡곡은 판매 중 물량(햅쌀)이 있어 준비 중 표시를 붙이지 않는다.
+                   사진 왼쪽 여백이 크림색이라 글자는 짙은 갈색으로 대비를 잡는다. -->
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="3 / 4">
+                <a class="home-promo home-promo--grain" href="/shop?category=grain">
+                  <img src="/img/banners/banner-04-rice-grains.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
+                  <span class="home-promo-copy">
+                    <small>들녘에서 바로</small>
+                    <strong>갓 도정한 쌀과<br />구수한 잡곡</strong>
+                    <span>쌀·잡곡 보러 가기 <b aria-hidden="true">›</b></span>
+                  </span>
+                </a>
+              </div>
+
               <!-- 수산물은 아직 판매 물량이 없어 눌러도 "준비 중" 안내가 뜬다.
                    배너가 지금 살 수 있다고 오해시키지 않도록 문구 옆에 준비 중 표시를 함께 둔다. -->
-              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="3 / 3">
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="4 / 4">
                 <a class="home-promo home-promo--abalone" href="/shop?category=seafood">
                   <img src="/img/banners/banner-03-fresh-abalone.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
                   <span class="home-promo-copy">
@@ -90,8 +103,13 @@
         </section>
 
         <!-- 1단 종류 → 2단 품목 → 3단 지역 순서로 좁힌다(상위가 하위를 결정한다). -->
-        <div class="cat-tabs" id="catTabs" role="group" aria-label="종류 선택"></div>
-        <div class="item-strip" id="itemStrip" role="group" aria-label="품목 선택"></div>
+        <!-- data-hscroll: 가로로 넘칠 때 화살표·페이드를 붙여 주는 상자(마우스 전용 환경 대응) -->
+        <div class="hscroll" data-hscroll>
+          <div class="cat-tabs" id="catTabs" role="group" aria-label="종류 선택"></div>
+        </div>
+        <div class="hscroll" data-hscroll id="itemStripBox">
+          <div class="item-strip" id="itemStrip" role="group" aria-label="품목 선택"></div>
+        </div>
         <div class="chip-row" id="regionChips" aria-label="지역 선택"></div>
 
         <div class="list-head">
@@ -100,6 +118,9 @@
         </div>
 
         <div class="goods-grid" id="grid"></div>
+
+        <!-- 한 페이지 10개를 넘을 때만 채워진다(그 전에는 비어 있어 보이지 않는다). -->
+        <nav class="pager" id="pager" aria-label="상품 목록 페이지"></nav>
 
         <!-- 품목은 등록돼 있으나 아직 판매 물량이 없는 종류 안내(빈 목록 대신) -->
         <div class="coming-soon" id="comingSoon" hidden>

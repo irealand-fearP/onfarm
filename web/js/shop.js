@@ -5,13 +5,18 @@ import { $, api, el, money } from '/js/api.js';
 import { isInspected, mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
 import { mountDemoNav } from '/js/demo-nav.js';
 import { mountPromoCarousel } from '/js/promo-carousel.js';
+import { mountEdgeScrollers } from '/js/edge-scroll.js';
 
 mountCartBadges();
 mountDemoNav('#demoNavSlot');
 mountPromoCarousel('#promoCarousel');
+// 품목 칩·종류 탭은 개수가 늘면 화면 밖으로 나간다. 마우스만 있는 데스크톱에서도 밀 수 있게 한다.
+mountEdgeScrollers();
 
 const cfg = await api('/api/config').catch(() => ({ products: [], allProducts: [] }));
-const state = { category: '', product: '', region: '', query: '' };
+// 한 페이지에 보여줄 상품 수. 이보다 적으면 페이지 이동 자체를 노출하지 않는다.
+const PAGE_SIZE = 10;
+const state = { category: '', product: '', region: '', query: '', page: 1 };
 
 // products.category 값을 한국어로 노출한다. 노출 순서도 이 순서를 따른다.
 const CATEGORY_LABELS = [
@@ -90,7 +95,7 @@ function renderCategoryTabs() {
             state.product = '';
             state.region = '';
             renderAllFilters();
-            load();
+            reloadFromFirstPage();
           },
         },
         // 준비 중 종류도 누를 수 있게 둔다. 눌러야 "왜 비어 있는지"를 안내할 수 있기 때문이다.
@@ -144,7 +149,7 @@ function itemButton(code, label, photoCode) {
         if (state.product) state.category = productByCode.get(state.product)?.category ?? state.category;
         if (!matchRegionStillPossible()) state.region = '';
         renderAllFilters();
-        load();
+        reloadFromFirstPage();
       },
     },
     [thumb, el('span', { class: 'item-name', text: label })],
@@ -176,7 +181,7 @@ function renderRegionChips() {
         onclick: () => {
           state.region = state.region === key ? '' : key;
           renderAllFilters();
-          load();
+          reloadFromFirstPage();
         },
       }),
     );
@@ -187,7 +192,8 @@ function renderAllFilters() {
   renderCategoryTabs();
   // 준비 중 종류는 보여줄 품목·지역이 없으므로 하위 2단을 아예 감춘다.
   const soon = isComingSoon(state.category);
-  $('#itemStrip').hidden = soon;
+  // 감출 때는 칩 줄 자체가 아니라 감싼 상자를 감춘다(화살표·페이드도 함께 사라져야 한다).
+  $('#itemStripBox').hidden = soon;
   $('#regionChips').hidden = soon;
   if (soon) {
     $('#itemStrip').replaceChildren();
@@ -237,11 +243,67 @@ async function fetchListings() {
   allListings = listings;
 }
 
+/** 필터·검색이 바뀌면 늘 1페이지로 돌아간다(3페이지에 머물면 빈 화면이 뜬다). */
+function reloadFromFirstPage() {
+  state.page = 1;
+  load();
+}
+
+/** 페이지를 옮기면 목록 맨 위로 데려간다(제자리에 있으면 바뀐 걸 알아채지 못한다). */
+function goToPage(page) {
+  state.page = page;
+  load();
+  document.querySelector('.list-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** 이전 · 번호 · 다음 형태의 페이지 이동. 한 페이지(=10개 이하)면 아예 그리지 않는다. */
+function renderPager(totalPages) {
+  const box = $('#pager');
+  box.replaceChildren();
+  if (totalPages <= 1) return;
+
+  box.append(pagerArrow('prev', '이전 페이지', state.page - 1, state.page === 1));
+  for (const page of pageNumbers(state.page, totalPages)) {
+    box.append(
+      el('button', {
+        type: 'button',
+        class: 'pager-num',
+        text: String(page),
+        'aria-label': `${page}페이지${page === state.page ? ' (현재 페이지)' : ''}`,
+        ...(page === state.page ? { 'aria-current': 'page' } : {}),
+        onclick: () => goToPage(page),
+      }),
+    );
+  }
+  box.append(pagerArrow('next', '다음 페이지', state.page + 1, state.page === totalPages));
+}
+
+function pagerArrow(kind, label, target, disabled) {
+  return el('button', {
+    type: 'button',
+    class: `pager-arrow pager-arrow--${kind}`,
+    text: kind === 'prev' ? '‹' : '›',
+    'aria-label': label,
+    ...(disabled ? { disabled: 'disabled' } : {}),
+    onclick: () => goToPage(target),
+  });
+}
+
+/** 번호가 많아져도 줄이 넘치지 않게 현재 페이지 주변 최대 5개만 보여준다. */
+function pageNumbers(current, totalPages) {
+  const WINDOW = 5;
+  let start = Math.max(1, current - Math.floor(WINDOW / 2));
+  const end = Math.min(totalPages, start + WINDOW - 1);
+  start = Math.max(1, end - WINDOW + 1);
+  return Array.from({ length: end - start + 1 }, (_, offset) => start + offset);
+}
+
 function load() {
   // 준비 중 종류는 빈 목록 대신 안내만 보여준다.
   if (isComingSoon(state.category)) {
     const label = CATEGORY_LABELS.find(([code]) => code === state.category)?.[1] ?? '';
     $('#grid').replaceChildren();
+    $('#pager').replaceChildren();
     $('#empty').hidden = true;
     $('#comingSoon').hidden = false;
     $('#comingSoonTitle').textContent = `${label}은 준비 중입니다`;
@@ -264,9 +326,15 @@ function load() {
       .includes(keyword);
   });
 
+  // 전체 건수는 그대로 알려 주고(“12건”), 화면에는 현재 페이지 몫만 그린다.
+  const totalPages = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
+  if (state.page > totalPages) state.page = totalPages;
+  const pageItems = listings.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+
   const grid = $('#grid');
   grid.replaceChildren();
-  for (const listing of listings) grid.append(card(listing));
+  for (const listing of pageItems) grid.append(card(listing));
+  renderPager(totalPages);
 
   $('#empty').hidden = listings.length > 0;
   $('#listCount').textContent = `${listings.length}건`;
@@ -276,7 +344,7 @@ function load() {
 $('#searchForm').addEventListener('submit', (event) => {
   event.preventDefault();
   state.query = $('#searchInput').value.trim();
-  load();
+  reloadFromFirstPage();
 });
 
 // 탭바의 "검색"은 별도 화면 대신 이 화면의 검색창으로 데려간다(없는 화면을 만들지 않는다).
@@ -292,6 +360,7 @@ function resetAll() {
   state.product = '';
   state.region = '';
   state.query = '';
+  state.page = 1;
   $('#searchInput').value = '';
   if (location.search) history.replaceState(null, '', location.pathname);
   renderAllFilters();
