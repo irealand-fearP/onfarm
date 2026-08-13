@@ -694,7 +694,7 @@ describe('HTTP — 정적 화면', () => {
     // fetch 는 host 헤더 지정을 막으므로 저수준 http 로 요청한다.
     const { status, body } = await rawGet('/', `seller.example.com:${port}`);
     assert.equal(status, 200);
-    assert.match(body, /farmer\.css/);
+    assert.match(body, /seller\.css/);
   });
 
   it('판매자 사이트는 세션이 없으면 자동 로그인 쿠키를 내려준다', async () => {

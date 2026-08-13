@@ -24,12 +24,13 @@ function sharedModuleDir(): string {
 
 /** 예쁜 URL → 실제 파일. 판매자·소비자·공용을 나눠 사이트 판정에 그대로 쓴다. */
 const SELLER_PAGES: Record<string, string> = {
-  '/seller': 'farmer/index.html',
-  '/seller/sell': 'farmer/sell.html',
-  '/seller/listings': 'farmer/listings.html',
-  '/seller/orders': 'farmer/orders.html',
-  '/seller/settlement': 'farmer/settlement.html',
+  '/seller': 'seller/index.html',
+  '/seller/sell': 'seller/sell.html',
+  '/seller/todo': 'seller/todo.html',
 };
+
+/** 판매자 화면 3개로 합쳐진 옛 화면들 — 전부 '오늘 할 일' 한 페이지로 흡수됐다. */
+const MERGED_INTO_TODO = new Set(['/seller/listings', '/seller/orders', '/seller/settlement']);
 
 const SHOP_PAGES: Record<string, string> = {
   '/': 'index.html',
@@ -80,11 +81,16 @@ export function sellerHostPath(pathname: string): string {
 /** 옛 경로면 새 경로를, 아니면 null 을 돌려준다. 확장자가 붙은 정적 파일은 건드리지 않는다. */
 export function legacyRedirect(pathname: string): string | null {
   if (/\.[a-z0-9]+$/i.test(pathname)) return null;
+  let moved: string | null = null;
   for (const [from, to] of Object.entries(LEGACY_PREFIXES)) {
-    if (pathname === from) return to;
-    if (pathname.startsWith(`${from}/`)) return to + pathname.slice(from.length);
+    if (pathname === from) moved = to;
+    else if (pathname.startsWith(`${from}/`)) moved = to + pathname.slice(from.length);
+    if (moved) break;
   }
-  return null;
+  // 합쳐진 판매자 화면은 한 번에 '오늘 할 일'로 보낸다(리다이렉트를 두 번 타지 않게).
+  const target = moved ?? pathname;
+  if (MERGED_INTO_TODO.has(target)) return '/seller/todo';
+  return moved;
 }
 
 /**

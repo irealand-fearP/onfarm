@@ -1,0 +1,935 @@
+/* ON-FARM 판매자 전용 스타일 (Phase 3)
+   - 색은 base.css 토큰만 쓴다. 이 파일에서 색을 새로 하드코딩하지 않는다.
+   - 모든 치수는 밀도 기준 단위 --u 에 비례한다. 디자인을 두 벌 만들지 않고
+     기준 단위 하나만 바꿔 "크게 / 보통"을 전환하기 위한 구조다. */
+
+body.seller {
+  --u: 1; /* 크게 — 기본값 */
+}
+
+body.seller[data-density='compact'] {
+  --u: 0.82; /* 보통 */
+}
+
+body.seller {
+  /* 글자 */
+  --fs-xs: calc(13px * var(--u));
+  --fs-sm: calc(15px * var(--u));
+  --fs-body: calc(19px * var(--u));
+  --fs-lg: calc(22px * var(--u));
+  --fs-title: calc(28px * var(--u));
+  --fs-huge: calc(34px * var(--u));
+  --fs-num: calc(46px * var(--u));
+
+  /* 크기 */
+  --btn-h: calc(68px * var(--u));
+  --btn-h-sm: calc(52px * var(--u));
+  --step-size: calc(82px * var(--u));
+  --icon: calc(24px * var(--u));
+
+  /* 여백 */
+  --gap: calc(14px * var(--u));
+  --gap-sm: calc(8px * var(--u));
+  --pad: calc(18px * var(--u));
+  --radius-card: calc(18px * var(--u));
+  --radius-btn: calc(16px * var(--u));
+
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--t1);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+body.seller h1,
+body.seller h2,
+body.seller h3 {
+  margin: 0;
+  line-height: 1.28;
+  letter-spacing: -0.04em;
+}
+
+body.seller p {
+  margin: 0;
+}
+
+/* 화면 뼈대 — 휴대폰 폭을 기준으로 하고 넓은 화면에서는 가운데 정렬한다. */
+.s-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  width: 100%;
+  max-width: calc(560px * var(--u));
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--gap) var(--pad) calc(var(--pad) * 1.4);
+}
+
+/* ───────── 상단 바 ───────── */
+.s-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.s-head .who {
+  min-width: 0;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.s-head-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+.s-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(40px * var(--u));
+  padding: 0 calc(12px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: calc(11px * var(--u));
+  background: var(--surface);
+  color: var(--t2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.s-chip:hover {
+  border-color: var(--line-strong);
+}
+
+/* 밀도 토글은 글자 크기 변화를 그대로 보여준다(가⁺ = 지금 크게 볼 수 있음). */
+.density-toggle {
+  font-size: calc(16px * var(--u));
+}
+
+/* ───────── 시작 화면 ───────── */
+.s-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.shoot {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  min-height: calc(240px * var(--u));
+  padding: var(--pad);
+  border: 0;
+  border-radius: calc(24px * var(--u));
+  background: var(--brand);
+  color: var(--on-brand);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.shoot:active {
+  background: var(--brand-strong);
+}
+
+.shoot .lens {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(84px * var(--u));
+  height: calc(84px * var(--u));
+  border-radius: calc(26px * var(--u));
+  background: rgb(255 255 255 / 22%);
+}
+
+.shoot .lens svg {
+  width: 60%;
+  height: 60%;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.shoot .big {
+  font-size: var(--fs-huge);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.shoot .sub {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  opacity: 0.86;
+}
+
+.mic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(7px * var(--u));
+  color: var(--t3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.mic .dot {
+  width: calc(7px * var(--u));
+  height: calc(7px * var(--u));
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+/* 오늘 할 일 요약 카드 */
+.todo-card {
+  display: block;
+  padding: var(--pad);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.todo-card .t {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+  font-size: var(--fs-body);
+  font-weight: 800;
+}
+
+.todo-card .t2 {
+  margin-top: calc(4px * var(--u));
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.count-badge {
+  min-width: calc(24px * var(--u));
+  padding: calc(2px * var(--u)) calc(9px * var(--u));
+  border-radius: 999px;
+  background: var(--alert);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  text-align: center;
+}
+
+.demo-note {
+  color: var(--t3);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+/* ───────── 버튼 ───────── */
+.s-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  margin-top: auto;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8px * var(--u));
+  width: 100%;
+  min-height: var(--btn-h);
+  padding: calc(10px * var(--u)) var(--pad);
+  border: 0;
+  border-radius: var(--radius-btn);
+  background: var(--brand);
+  color: var(--on-brand);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:active {
+  background: var(--brand-strong);
+}
+
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.btn.ghost {
+  min-height: var(--btn-h-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.btn.ghost:active {
+  background: var(--surface-soft);
+}
+
+/* 낭독·음성 보조 버튼 */
+.assist {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6px * var(--u));
+  min-height: calc(46px * var(--u));
+  padding: 0 calc(14px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: calc(12px * var(--u));
+  background: var(--surface);
+  color: var(--t2);
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.assist svg {
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.assist.is-listening {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+.assist-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+  justify-content: center;
+}
+
+/* ───────── 진행 표시 ───────── */
+.prog .pt {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+  color: var(--t3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.prog .pt b {
+  color: var(--t1);
+  font-weight: 800;
+}
+
+.prog .pb {
+  height: calc(6px * var(--u));
+  margin-top: calc(9px * var(--u));
+  border-radius: 999px;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+
+.prog .pb i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand);
+  transition: width 0.25s ease;
+}
+
+/* ───────── 등록 단계 공통 ───────── */
+.sell-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.sell-step[hidden] {
+  display: none;
+}
+
+.ask {
+  font-size: var(--fs-title);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.ask-sub {
+  margin-top: calc(4px * var(--u));
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.photo-drop {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  min-height: calc(220px * var(--u));
+  padding: var(--pad);
+  border: calc(2px * var(--u)) dashed var(--line-strong);
+  border-radius: calc(24px * var(--u));
+  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+}
+
+.photo-drop strong {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+
+.photo-drop span {
+  color: var(--t3);
+  font-size: var(--fs-sm);
+}
+
+.photo-drop .lens {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(72px * var(--u));
+  height: calc(72px * var(--u));
+  border-radius: calc(22px * var(--u));
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+.photo-drop .lens svg {
+  width: 58%;
+  height: 58%;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.photo-preview {
+  width: 100%;
+  max-height: calc(230px * var(--u));
+  border-radius: var(--radius-card);
+  object-fit: cover;
+}
+
+.loading-box {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  text-align: center;
+}
+
+/* ───────── 품목 고르기 ───────── */
+.cands {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.cand {
+  display: flex;
+  align-items: center;
+  gap: calc(13px * var(--u));
+  width: 100%;
+  min-height: var(--btn-h);
+  padding: calc(12px * var(--u)) calc(14px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cand.on {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  box-shadow: inset 0 0 0 calc(1px * var(--u)) var(--brand);
+}
+
+.cand .no {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: calc(34px * var(--u));
+  height: calc(34px * var(--u));
+  border-radius: calc(10px * var(--u));
+  background: var(--surface-soft);
+  color: var(--t2);
+  font-size: var(--fs-sm);
+  font-weight: 800;
+}
+
+.cand.on .no {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.cand .nm {
+  display: block;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.cand .cf {
+  display: block;
+  margin-top: calc(2px * var(--u));
+  color: var(--t3);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+
+.cand.on .cf {
+  color: var(--brand-strong);
+  font-weight: 700;
+}
+
+/* 품목 직접 고르기(폴백) — 이름만 있는 촘촘한 격자 */
+.manual-grid {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: var(--gap-sm);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.manual-grid .cand {
+  min-height: var(--btn-h-sm);
+}
+
+/* ───────── 수량 + 최종 확인 (한 화면) ───────── */
+.qty-wrap {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.qty-card {
+  padding: calc(14px * var(--u)) calc(16px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.qty-card .lbl {
+  color: var(--t3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.qty-card .val {
+  margin-top: calc(3px * var(--u));
+  font-size: var(--fs-body);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+/* 판매 단위가 여러 개일 때만 보이는 선택 줄 */
+.sku-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+}
+
+.sku-row .cand {
+  flex: 1 1 calc(46% * var(--u));
+  min-height: var(--btn-h-sm);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.stepper button {
+  flex: 0 0 auto;
+  width: var(--step-size);
+  height: var(--step-size);
+  border: 1px solid var(--line);
+  border-radius: calc(22px * var(--u));
+  background: var(--surface);
+  color: var(--t1);
+  font-family: inherit;
+  font-size: calc(38px * var(--u));
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stepper button:active {
+  background: var(--surface-soft);
+}
+
+.stepper .num {
+  flex: 1;
+  font-size: var(--fs-num);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.stepper .num small {
+  display: block;
+  margin-top: calc(2px * var(--u));
+  color: var(--t3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(6px * var(--u));
+  align-items: center;
+  justify-content: center;
+  min-height: calc(22px * var(--u));
+}
+
+.boxes i {
+  display: block;
+  width: calc(26px * var(--u));
+  height: calc(21px * var(--u));
+  border-radius: calc(5px * var(--u));
+  background: var(--line-strong);
+}
+
+.boxes .more {
+  color: var(--t3);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.sum {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+  padding: calc(15px * var(--u)) calc(16px * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--brand-tint);
+}
+
+.sum .k {
+  color: var(--brand-strong);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.sum .v {
+  color: var(--brand-strong);
+  font-size: calc(26px * var(--u));
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+}
+
+.price-note {
+  color: var(--t3);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+/* ───────── 완료 ───────── */
+.done {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  text-align: center;
+}
+
+.done .tick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(88px * var(--u));
+  height: calc(88px * var(--u));
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.done .tick svg {
+  width: 46%;
+  height: 46%;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.done h1 {
+  font-size: var(--fs-title);
+  font-weight: 800;
+}
+
+.done p {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.done .sum {
+  width: 100%;
+}
+
+/* ───────── 오늘 할 일 (3개 화면 통합) ───────── */
+.todo-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  padding-top: var(--gap);
+}
+
+.todo-section > h2 {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+
+.todo-section > .sec-sub {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.card {
+  padding: calc(14px * var(--u)) calc(16px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.card.attention {
+  border-color: var(--brand);
+}
+
+.card h3 {
+  font-size: var(--fs-body);
+  font-weight: 800;
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.card .meta {
+  margin-top: calc(3px * var(--u));
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.card .amount {
+  margin-top: calc(4px * var(--u));
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.card .hub-guide {
+  margin-top: calc(10px * var(--u));
+  padding-top: calc(10px * var(--u));
+  border-top: 1px solid var(--line);
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.card .hub-guide address {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+  font-style: normal;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+  margin-top: calc(10px * var(--u));
+}
+
+.mini-btn {
+  min-height: var(--btn-h-sm);
+  padding: 0 calc(16px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: calc(12px * var(--u));
+  background: var(--surface);
+  color: var(--t1);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mini-btn.primary {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.mini-btn[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.stock-form {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+}
+
+.stock-form input {
+  width: calc(110px * var(--u));
+  min-height: var(--btn-h-sm);
+  padding: 0 calc(12px * var(--u));
+  border: 1px solid var(--line-strong);
+  border-radius: calc(12px * var(--u));
+  background: var(--bg);
+  font-size: var(--fs-sm);
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(6px * var(--u));
+  margin-top: calc(8px * var(--u));
+}
+
+.stock-bar {
+  width: 100%;
+  height: calc(8px * var(--u));
+  margin-top: calc(8px * var(--u));
+  border-radius: 999px;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+
+.stock-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand);
+}
+
+.money-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: var(--pad);
+  border-radius: var(--radius-card);
+  background: var(--brand-tint);
+}
+
+.money-hero .k {
+  color: var(--brand-strong);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.money-hero .v {
+  display: block;
+  margin-top: calc(2px * var(--u));
+  color: var(--brand-strong);
+  font-size: calc(30px * var(--u));
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+}
+
+.money-hero .due {
+  display: block;
+  margin-top: calc(2px * var(--u));
+  color: var(--t2);
+  font-size: var(--fs-xs);
+}
+
+.kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8px * var(--u));
+  margin: 0;
+}
+
+.kv-list .kv {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.kv-list dt {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+.kv-list dd {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  padding: var(--pad);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+  color: var(--t3);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.note-panel {
+  padding: calc(12px * var(--u)) calc(14px * var(--u));
+  border-radius: var(--radius-card);
+  background: var(--surface-soft);
+  color: var(--t2);
+  font-size: var(--fs-xs);
+}
+
+/* 농가 바꾸기 — 농민 계정만 큰 카드로 */
+.swap-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
