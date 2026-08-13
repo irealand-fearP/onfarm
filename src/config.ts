@@ -44,7 +44,7 @@ export const config = {
   /** 시연용: 판매자 사이트에 세션 없이 들어오면 기본 농민 계정으로 자동 로그인한다. */
   demoAutoLogin: (process.env['DEMO_AUTO_LOGIN'] ?? 'true').toLowerCase() !== 'false',
   dataDir: process.env['DATA_DIR'] ?? join(PROJECT_ROOT, 'data'),
-  publicDir: join(PROJECT_ROOT, 'public'),
+  publicDir: join(PROJECT_ROOT, 'web'),
   ai: {
     provider: providerName(),
     timeoutMs: Number(process.env['AI_TIMEOUT_MS'] ?? 12_000),

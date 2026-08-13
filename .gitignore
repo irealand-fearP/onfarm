@@ -5,6 +5,7 @@ data/
 *.log
 .DS_Store
 Thumbs.db
-public/img/_test_*
+web/img/_test_*
 .vercel/
 .gstack/
+.vercel
