@@ -52,6 +52,11 @@
   --line: #e5e8eb;
   --line-strong: #d1d6db;
 
+  /* 상품 사진 타일 — 상품컷이 흰 배경이라 다크에서도 밝게 유지한다.
+     여기서 어둡게 뒤집으면 사진만 흰 사각형으로 떠 보인다. */
+  --photo-bg: #ffffff;
+  --photo-line: #e5e8eb;
+
   /* 기존 화면(farmer.css·store.css)이 쓰던 이름은 별칭으로 유지한다. */
   --ink: var(--t1);
   --ink-soft: var(--t2);
@@ -100,6 +105,10 @@
     --line: #2c3033;
     --line-strong: #3c4247;
 
+    /* 사진 타일은 다크에서도 밝게 둔다(상품컷이 흰 배경이라 뒤집으면 사진만 뜬다). */
+    --photo-bg: #f4f6f8;
+    --photo-line: #3c4247;
+
     --paper: var(--bg);
     --surface: var(--bg-2);
     --surface-soft: #2a2e31;
@@ -133,6 +142,10 @@
   --brand-strong: #4fe6a2;
   --line: #2c3033;
   --line-strong: #3c4247;
+
+  /* 사진 타일은 다크에서도 밝게 둔다(상품컷이 흰 배경이라 뒤집으면 사진만 뜬다). */
+  --photo-bg: #f4f6f8;
+  --photo-line: #3c4247;
 
   --paper: var(--bg);
   --surface: var(--bg-2);

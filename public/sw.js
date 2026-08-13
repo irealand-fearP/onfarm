@@ -3,7 +3,7 @@
   - 화면 껍데기(HTML/CSS/JS/아이콘)만 캐시해 통신이 느린 산지에서도 화면이 뜨게 한다.
   - API 응답은 절대 캐시하지 않는다(재고·주문이 과거 값으로 보이면 안 되므로).
 */
-const CACHE = 'onfarm-shell-v4';
+const CACHE = 'onfarm-shell-v5';
 const SHELL = [
   '/',
   '/login',
@@ -11,16 +11,19 @@ const SHELL = [
   '/seller',
   '/seller/sell',
   '/seller/todo',
-  '/store/product',
-  '/store/cart',
-  '/store/orders',
+  '/shop',
+  '/shop/product',
+  '/shop/cart',
+  '/shop/orders',
   '/hub',
   '/css/base.css',
   '/css/seller.css',
   '/css/store.css',
+  '/css/shop.css',
   '/js/api.js',
   '/js/cart.js',
-  '/js/store.js',
+  '/js/shop.js',
+  '/js/shop-ui.js',
   '/js/speak.js',
   '/js/features.js',
   '/js/seller-sell.js',

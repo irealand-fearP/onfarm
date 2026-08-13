@@ -1,0 +1,1147 @@
+/* ON-FARM 소비자 전용 스타일 (Phase 4)
+   - store.css 를 고치지 않고 새로 쓴다. store.css 는 거점·로그인·데모가 아직 쓰고 있어
+     여기서 손대면 범위 밖 화면이 함께 깨진다.
+   - 색은 base.css 토큰만 쓴다. 이 파일에서 색을 새로 하드코딩하지 않는다.
+   - 판매자의 밀도 변수(--u)는 쓰지 않는다. 소비자는 본문 16px 표준 밀도 하나뿐이다. */
+
+body.shop {
+  /* 아래 고정 바 높이 — 본문 하단 여백을 이 값에 맞춰 콘텐츠가 가리지 않게 한다. */
+  --tabbar-h: 60px;
+  --buybar-h: 74px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --shop-max: 560px;
+
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--t1);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden; /* 360px 폭에서 가로 스크롤이 생기지 않게 한다. */
+}
+
+body.shop h1,
+body.shop h2,
+body.shop h3 {
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+}
+
+body.shop p {
+  margin: 0;
+}
+
+body.shop img {
+  max-width: 100%;
+}
+
+/* ───────── 화면 뼈대 ───────── */
+.shop-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--shop-max);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--surface);
+}
+
+.shop-main {
+  flex: 1;
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 16px);
+}
+
+/* 하단 탭바가 없고 구매바만 있는 화면(상세·장바구니) */
+.shop-main.with-buybar {
+  padding-bottom: calc(var(--buybar-h) + var(--safe-b) + 16px);
+}
+
+/* ───────── 상단 바 ───────── */
+.shop-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.shop-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--t1);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  text-decoration: none;
+}
+
+.shop-logo i {
+  color: var(--brand);
+  font-style: normal;
+}
+
+.shop-top-title {
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-top-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 아이콘 버튼 — 장바구니·뒤로가기 */
+.icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--t2);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.icon-button:hover {
+  background: var(--bg-2);
+}
+
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 장바구니 개수 — 알림 빨강은 이 배지에만 쓴다. */
+.cart-badge {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--alert);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  text-align: center;
+}
+
+.cart-badge[hidden] {
+  display: none;
+}
+
+/* ───────── 검색바 ───────── */
+.shop-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-2);
+}
+
+.shop-search:focus-within {
+  border-color: var(--brand);
+}
+
+.shop-search svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--t3);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.shop-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 14.5px;
+  outline: none;
+}
+
+.shop-search input::placeholder {
+  color: var(--t3);
+}
+
+.shop-search button {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--brand-strong);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ───────── 피치 배너 ───────── */
+.shop-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 16px 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--peach);
+}
+
+.shop-banner .b1 {
+  display: block;
+  color: var(--t2);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.shop-banner .b2 {
+  display: block;
+  margin-top: 4px;
+  color: var(--t1);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.38;
+}
+
+/* 아침 해 — 배너의 피치 위에 얹히므로 브랜드 그린이 아니라 따뜻한 버터색을 쓴다. */
+.shop-banner .sun {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--butter);
+  box-shadow: 0 0 0 6px var(--butter);
+  opacity: 0.75;
+}
+
+/* ───────── 퀵 타일 3개 ───────── */
+/* 장식이 아니라 실제 목록 필터다. 눌린 상태를 aria-pressed 로 알린다. */
+.quick-tiles {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+
+.quick-tile {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 8px;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  color: var(--t1);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+  cursor: pointer;
+}
+
+.quick-tile i {
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin: 0 auto 7px;
+  border-radius: 9px;
+}
+
+.quick-tile .qn {
+  display: block;
+}
+
+.quick-tile[data-quick='inspected'] {
+  background: var(--brand-tint);
+}
+
+.quick-tile[data-quick='inspected'] i {
+  background: var(--brand);
+}
+
+.quick-tile[data-quick='today'] {
+  background: var(--lilac);
+}
+
+.quick-tile[data-quick='today'] i {
+  background: var(--info);
+}
+
+.quick-tile[data-quick='last'] {
+  background: var(--butter);
+}
+
+.quick-tile[data-quick='last'] i {
+  background: var(--warn);
+}
+
+.quick-tile[aria-pressed='true'] {
+  border-color: var(--t1);
+}
+
+/* ───────── 지역·품목 칩 ───────── */
+.chip-row {
+  display: flex;
+  gap: 6px;
+  padding: 14px 16px 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-row button {
+  flex: 0 0 auto;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--t2);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip-row button[aria-pressed='true'] {
+  background: var(--t1);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+/* ───────── 목록 제목 ───────── */
+.list-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 0;
+}
+
+.list-head h2 {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.list-head span {
+  flex: 0 0 auto;
+  color: var(--t3);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────── 상품 그리드 2열 ───────── */
+.goods-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 12px;
+  padding: 12px 16px;
+}
+
+.goods-card {
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 상품컷이 흰 배경이라 타일도 흰색 + 얇은 테두리다. 파스텔은 배너·퀵타일 몫이다. */
+.goods-photo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--photo-bg);
+  box-shadow: inset 0 0 0 1px var(--photo-line);
+}
+
+.goods-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.goods-stamp {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+/* 시연용 시드 이미지 표기 — 농민이 직접 올린 사진에는 붙이지 않는다. */
+.goods-demo {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--t2);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.goods-farm {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 9px;
+  color: var(--t3);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.goods-farm .face {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.goods-farm .who {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.goods-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: 3px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.4;
+}
+
+.goods-price {
+  margin-top: 6px;
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.goods-unit {
+  overflow: hidden;
+  color: var(--t3);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ───────── 하단 탭바 ───────── */
+/* 없는 기능은 탭에 넣지 않는다("찜"이 빠진 이유). 네 칸 모두 실제로 동작한다. */
+.tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  width: 100%;
+  max-width: var(--shop-max);
+  padding: 7px 0 calc(8px + var(--safe-b));
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  transform: translateX(-50%);
+}
+
+.tabbar a,
+.tabbar button {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--t3);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tabbar svg {
+  width: 21px;
+  height: 21px;
+  margin: 0 auto 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tabbar .is-current {
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.tab-count {
+  display: inline-block;
+  min-width: 15px;
+  margin-left: 3px;
+  border-radius: 999px;
+  background: var(--alert);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 15px;
+}
+
+/* ───────── 상세 화면 ───────── */
+.detail-hero {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--photo-bg);
+  box-shadow: inset 0 0 0 1px var(--photo-line);
+}
+
+.detail-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+
+.detail-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.38;
+}
+
+.detail-price {
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+}
+
+.detail-price small {
+  display: block;
+  margin-top: 2px;
+  color: var(--t3);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* 생산자 카드 — 사진 바로 아래. 가격보다 사람이 먼저 읽히게 한다. */
+.grower {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg-2);
+}
+
+.grower .face {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.grower .g1 {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.grower .g2 {
+  display: block;
+  margin-top: 2px;
+  color: var(--t3);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+/* AI 참고 판정과 거점 확정 등급을 한 칸에 섞지 않는다. 두 줄로 나눠 못 박아 둔다. */
+.grade-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.grade-box {
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.grade-box .k {
+  display: block;
+  color: var(--t3);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.grade-box .v {
+  display: block;
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.grade-box.is-ai {
+  background: var(--warn-tint);
+}
+
+.grade-box.is-ai .k,
+.grade-box.is-ai .v {
+  color: var(--warn);
+}
+
+.grade-box.is-hub {
+  background: var(--info-tint);
+}
+
+.grade-box.is-hub .k,
+.grade-box.is-hub .v {
+  color: var(--info);
+}
+
+.grade-box.is-waiting {
+  background: var(--bg-2);
+}
+
+.grade-box.is-waiting .v {
+  color: var(--t3);
+}
+
+/* 검수 타임라인 */
+.track {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.track .row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.track .pip {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.track .row.is-waiting .pip {
+  background: var(--bg-2);
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+}
+
+.track .row.is-rejected .pip {
+  background: var(--danger);
+}
+
+.track .k {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.track .v {
+  display: block;
+  color: var(--t3);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+/* 표 형태의 근거 공개 */
+.fact-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.fact-card h2 {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.fact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12.5px;
+}
+
+.fact-row + .fact-row {
+  border-top: 1px solid var(--line);
+}
+
+.fact-row .k {
+  flex: 0 0 auto;
+  color: var(--t3);
+  font-weight: 600;
+}
+
+/* 근거처럼 긴 값은 라벨 옆에 끼지 않고 다음 줄로 내려가 왼쪽부터 읽히게 한다. */
+.fact-row .v {
+  flex: 1 1 60%;
+  min-width: 0;
+  text-align: right;
+  word-break: break-word;
+}
+
+.fact-note {
+  margin-top: 10px;
+  color: var(--t2);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.detail-copy {
+  color: var(--t2);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ───────── 하단 고정 구매바 ───────── */
+.buybar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: var(--shop-max);
+  padding: 12px 16px calc(12px + var(--safe-b));
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  transform: translateX(-50%);
+}
+
+.buybar .p {
+  flex: 1;
+  min-width: 0;
+}
+
+.buybar .p b {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+}
+
+.buybar .p span {
+  display: block;
+  overflow: hidden;
+  color: var(--t3);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ───────── 버튼 ───────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  background: var(--bg-2);
+  color: var(--t3);
+  cursor: not-allowed;
+}
+
+.btn.ghost {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--t2);
+}
+
+.btn.block {
+  width: 100%;
+}
+
+.btn.small {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+/* ───────── 장바구니 ───────── */
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 0;
+}
+
+.cart-item {
+  display: flex;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.cart-item .thumb {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  background: var(--photo-bg);
+  box-shadow: inset 0 0 0 1px var(--photo-line);
+  object-fit: contain;
+}
+
+.cart-item .copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-item .t {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.cart-item .m {
+  margin-top: 2px;
+  color: var(--t3);
+  font-size: 11.5px;
+}
+
+.cart-item .amount {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.qty {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  align-self: flex-end;
+  gap: 4px;
+}
+
+.qty button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.qty button:disabled {
+  color: var(--t3);
+  cursor: not-allowed;
+}
+
+.qty span {
+  min-width: 26px;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* 받는 분 정보 */
+.checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 16px 0;
+}
+
+.checkout h2 {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.field span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--t2);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background: var(--surface);
+  font-size: 15px;
+}
+
+.field input:focus {
+  border-color: var(--brand);
+  outline: none;
+}
+
+.notice {
+  margin: 12px 16px 0;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: var(--warn-tint);
+  color: var(--warn);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.notice.plain {
+  background: var(--bg-2);
+  color: var(--t2);
+}
+
+/* ───────── 주문 내역 ───────── */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+
+.order-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.order-card.is-new {
+  border-color: var(--brand);
+}
+
+.order-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.order-no {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.order-date {
+  color: var(--t3);
+  font-size: 11.5px;
+}
+
+.order-line {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.order-line-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.order-line-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.order-line-status {
+  margin-top: 2px;
+  color: var(--t3);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.order-line.is-rejected .order-line-status {
+  color: var(--danger);
+}
+
+.order-line-price {
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.order-line-price small {
+  display: block;
+  color: var(--t3);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.rejection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--danger-tint);
+  color: var(--t2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.rejection strong {
+  color: var(--danger);
+}
+
+.order-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.order-total {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.order-total strong {
+  margin-left: 6px;
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────── 빈 상태 · 로딩 ───────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.empty h2 {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.empty p {
+  color: var(--t3);
+  font-size: 13px;
+}
+
+.empty .btn {
+  margin-top: 6px;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 72px 24px;
+  color: var(--t3);
+  font-size: 13.5px;
+}
+
+/* 넓은 화면에서는 휴대폰 폭 카드처럼 가운데 세워 둔다(소비자 화면은 모바일이 기준). */
+@media (min-width: 620px) {
+  body.shop {
+    background: var(--bg-2);
+  }
+
+  .shop-page {
+    box-shadow: var(--shadow);
+  }
+}

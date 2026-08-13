@@ -35,9 +35,9 @@ const MERGED_INTO_TODO = new Set(['/seller/listings', '/seller/orders', '/seller
 const SHOP_PAGES: Record<string, string> = {
   '/': 'index.html',
   '/shop': 'index.html',
-  '/shop/product': 'store/product.html',
-  '/shop/cart': 'store/cart.html',
-  '/shop/orders': 'store/orders.html',
+  '/shop/product': 'shop/product.html',
+  '/shop/cart': 'shop/cart.html',
+  '/shop/orders': 'shop/orders.html',
 };
 
 /** 사이트 구분 없이 열리는 화면 */

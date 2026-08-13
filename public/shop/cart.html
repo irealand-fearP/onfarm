@@ -3,96 +3,68 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#00754a" />
+    <meta name="theme-color" content="#00c46a" />
     <meta name="description" content="ON-FARM 장바구니 상품과 받는 분 정보를 확인하고 주문하세요." />
     <title>ON-FARM · 장바구니</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/css/base.css" />
-    <link rel="stylesheet" href="/css/store.css" />
+    <link rel="stylesheet" href="/css/shop.css" />
   </head>
-  <body class="store store-consumer">
+  <body class="shop">
     <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
 
-    <header class="store-top">
-      <div class="row">
-        <a class="logo" href="/" aria-label="ON-FARM 산지 직송 매장 홈">
-          <img src="/img/icon.svg" alt="" aria-hidden="true" />
-          <span class="logo-copy"><strong>ON-FARM</strong><small>장바구니</small></span>
+    <div class="shop-page">
+      <header class="shop-top">
+        <a class="icon-button" href="/shop" aria-label="목록으로">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
         </a>
-        <nav class="top-actions" aria-label="주요 메뉴">
-          <a class="nav-link" href="/" aria-label="매장 홈">
-            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></svg>
-            <span class="nav-label">홈</span>
-          </a>
-          <a class="nav-link" href="/store/orders" aria-label="주문 내역">
-            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-2-1.5L13 21l-2-1.5L9 21l-2-1.5L5 21V5a2 2 0 0 1 2-2Z" /><path d="M9 8h6M9 12h6" /></svg>
-            <span class="nav-label">주문 내역</span>
-          </a>
-          <a class="nav-link current" href="/store/cart" aria-current="page" aria-label="장바구니">
-            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7M9 20h.01M17 20h.01" /></svg>
-            <span class="nav-label">장바구니</span>
-          </a>
-          <a class="nav-link role-switch" href="/farmer" aria-label="농가 작업장">
-            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c5-1 8-4 9-9 4 2 6 5 6 9-4 3-9 3-15 0Z" /><path d="M7 17c2-3 5-5 9-6" /></svg>
-            <span class="nav-label">농가</span>
-          </a>
-        </nav>
-      </div>
-    </header>
-
-    <main class="store-main" id="mainContent">
-      <div class="page-heading">
-        <div>
-          <p class="eyebrow">주문 준비</p>
-          <h1>장바구니를 확인하세요.</h1>
-          <p class="lead">수량과 받는 분 정보를 확인하면 주문이 접수됩니다.</p>
+        <span class="shop-top-title">장바구니</span>
+        <div class="shop-top-actions">
+          <span class="shop-top-title" id="who"></span>
         </div>
-        <span class="page-count" id="who"></span>
-      </div>
+      </header>
 
-      <div class="cart-layout">
-        <section aria-labelledby="cartItemsTitle">
-          <div class="section-title"><h2 id="cartItemsTitle">담은 상품</h2><span id="itemCount"></span></div>
-          <p class="info-note" id="cartNotice" role="status" hidden></p>
-          <div class="cart-items" id="items"></div>
-        </section>
+      <main class="shop-main with-buybar" id="mainContent">
+        <p class="notice" id="cartNotice" role="status" hidden></p>
+        <div class="cart-list" id="items"></div>
 
-        <form class="checkout-panel" id="checkout" hidden>
+        <form class="checkout" id="checkout" hidden>
           <h2>받는 분 정보</h2>
-          <p class="info-note" id="deliveryNotice" role="status" hidden></p>
+          <p class="notice plain" id="deliveryNotice" role="status" hidden></p>
           <label class="field"><span>이름</span><input id="rName" autocomplete="name" placeholder="받는 분 이름" required /></label>
           <label class="field"><span>연락처</span><input id="rPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required /></label>
           <label class="field"><span>주소</span><input id="rAddress" autocomplete="street-address" placeholder="도로명과 상세 주소" required /></label>
-          <label class="field"><span>요청사항 <small>(선택)</small></span><input id="rMemo" /></label>
-          <p class="checkout-note">
-            현재는 시연 환경입니다. 실제 결제·배송은 연동되지 않으며 주문은 결제 완료 상태로 기록됩니다.
+          <label class="field"><span>요청사항 (선택)</span><input id="rMemo" /></label>
+          <p class="notice plain">
+            시연 환경입니다. 실제 결제·배송은 연동되지 않으며 주문은 결제 완료 상태로 기록됩니다.
           </p>
         </form>
-      </div>
-    </main>
+      </main>
 
-    <aside class="buy-bar" id="bar" aria-label="주문 합계" hidden>
-      <div class="buy-bar-inner">
-        <div class="total"><small>주문 합계</small><span id="total">0원</span></div>
-        <div class="buy-actions"><button class="btn" id="orderBtn" type="submit" form="checkout">주문 접수하기</button></div>
-      </div>
-    </aside>
+      <aside class="buybar" id="bar" aria-label="주문 합계" hidden>
+        <div class="p"><b id="total">0원</b><span id="itemCount"></span></div>
+        <button class="btn" id="orderBtn" type="submit" form="checkout">주문 접수하기</button>
+      </aside>
+    </div>
 
     <script type="module">
-      import { $, api, el, imageOf, money, me, toast } from '/js/api.js';
+      import { $, api, el, money, me, toast } from '/js/api.js';
       import { clearCart, readCart, setQuantity, writeCart } from '/js/cart.js';
+      import { mountCartBadges, photoImg } from '/js/shop-ui.js';
+
+      mountCartBadges();
 
       const session = await me();
-      $('#who').textContent = session?.user?.role === 'consumer'
-        ? `${session.user.name}님`
-        : '소비자 로그인이 필요합니다';
+      $('#who').textContent = session?.user?.role === 'consumer' ? `${session.user.name}님` : '로그인 필요';
+
+      // 최근 배송지 자동 입력 — 매번 다시 타이핑하지 않게 한다.
       if (session?.user?.role === 'consumer') {
         let delivery = null;
         try {
           ({ delivery } = await api('/api/store/delivery-profile'));
         } catch {
-          /* 계정 정보만으로 계속 입력할 수 있다. */
+          /* 계정 정보만으로도 계속 입력할 수 있다. */
         }
         $('#rName').value ||= delivery?.receiver_name ?? session.user.name;
         $('#rPhone').value ||= delivery?.receiver_phone ?? session.user.phone ?? '';
@@ -114,6 +86,7 @@
         box.replaceChildren();
         notice.hidden = true;
 
+        // 담아둔 사이에 재고가 바뀔 수 있어 매번 서버에서 다시 확인한다.
         const available = [];
         const nextItems = [];
         let removed = 0;
@@ -156,19 +129,16 @@
 
         if (!available.length) {
           box.append(
-            el('div', { class: 'empty-state' }, [
-              el('div', { class: 'empty-state-inner' }, [
-                el('span', { class: 'empty-state-icon', 'aria-hidden': 'true', html: '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M3 5h2l2 10h10l2-7H7M9 20h.01M17 20h.01" /></svg>' }),
-                el('h2', { text: unavailable ? '상품 정보를 확인하지 못했습니다.' : '장바구니가 비어 있습니다.' }),
-                el('p', { text: unavailable
-                  ? '담은 상품은 그대로 보관했습니다. 잠시 후 페이지를 새로고침해주세요.'
-                  : '오늘 올라온 농산물을 둘러보고 필요한 상품을 담아보세요.' }),
-                unavailable ? null : el('a', { class: 'btn', href: '/', text: '상품 둘러보기' }),
-              ]),
+            el('div', { class: 'empty' }, [
+              el('h2', { text: unavailable ? '상품 정보를 확인하지 못했습니다.' : '장바구니가 비어 있습니다.' }),
+              el('p', {
+                text: unavailable
+                  ? '담은 상품은 그대로 보관했습니다. 잠시 후 새로고침해주세요.'
+                  : '오늘 올라온 농산물을 둘러보고 필요한 상품을 담아보세요.',
+              }),
+              unavailable ? null : el('a', { class: 'btn', href: '/shop', text: '상품 둘러보기' }),
             ]),
           );
-          $('#bar').hidden = true;
-          $('#checkout').hidden = true;
           return;
         }
 
@@ -176,18 +146,31 @@
         for (const { listing, quantity } of available) {
           const amount = listing.unit_price * quantity;
           total += amount;
+          const thumb = photoImg(listing);
+          thumb.className = 'thumb';
           box.append(
             el('article', { class: 'cart-item' }, [
-              el('img', { src: imageOf(listing), alt: listing.title }),
-              el('div', { class: 'cart-item-copy' }, [
-                el('div', { class: 'cart-item-title', text: listing.title }),
-                el('div', { class: 'cart-item-meta', text: `${listing.farm_name} · ${listing.sku_label} · 남은 재고 ${listing.remaining_quantity}개` }),
-                el('div', { class: 'cart-item-price', text: money(amount) }),
+              thumb,
+              el('div', { class: 'copy' }, [
+                el('div', { class: 't', text: listing.title }),
+                el('div', { class: 'm', text: `${listing.farm_name} · ${listing.sku_label} · 남은 재고 ${listing.remaining_quantity}개` }),
+                el('div', { class: 'amount', text: money(amount) }),
               ]),
-              el('div', { class: 'quantity-control', 'aria-label': `${listing.title} 수량` }, [
-                el('button', { type: 'button', 'aria-label': `${listing.title} 수량 줄이기`, text: '−', onclick: () => { setQuantity(listing.id, quantity - 1); render(); } }),
+              el('div', { class: 'qty', 'aria-label': `${listing.title} 수량` }, [
+                el('button', {
+                  type: 'button',
+                  'aria-label': `${listing.title} 수량 줄이기`,
+                  text: '−',
+                  onclick: () => { setQuantity(listing.id, quantity - 1); void render(); },
+                }),
                 el('span', { 'aria-live': 'polite', text: String(quantity) }),
-                el('button', { type: 'button', 'aria-label': `${listing.title} 수량 늘리기`, text: '+', disabled: quantity >= listing.remaining_quantity ? '' : null, onclick: () => { setQuantity(listing.id, quantity + 1); render(); } }),
+                el('button', {
+                  type: 'button',
+                  'aria-label': `${listing.title} 수량 늘리기`,
+                  text: '+',
+                  disabled: quantity >= listing.remaining_quantity ? '' : null,
+                  onclick: () => { setQuantity(listing.id, quantity + 1); void render(); },
+                }),
               ]),
             ]),
           );
@@ -204,7 +187,7 @@
         event.preventDefault();
         const current = await me();
         if (!current || current.user.role !== 'consumer') {
-          location.href = '/login?role=consumer&next=/store/cart';
+          location.href = '/login?role=consumer&next=/shop/cart';
           return;
         }
 
@@ -222,7 +205,7 @@
             },
           });
           clearCart();
-          location.href = `/store/orders?new=${encodeURIComponent(response.order.order_no)}`;
+          location.href = `/shop/orders?new=${encodeURIComponent(response.order.order_no)}`;
         } catch (error) {
           if (error.code === 'out_of_stock' || error.code === 'not_found') {
             await render();
