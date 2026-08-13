@@ -9,3 +9,6 @@ web/img/_test_*
 .vercel/
 .gstack/
 .vercel
+
+# 음성 합성 모델(약 380MB) — 저장소가 아니라 이미지 빌드 때 받는다
+vendor/supertonic/assets/

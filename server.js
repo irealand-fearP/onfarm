@@ -21,6 +21,10 @@ const [{ createApp }, { initProvider }, { db }, { seed }] = await Promise.all([
 seed(db());
 await initProvider();
 
+// 고정 멘트 미리 데우기 — 없으면 첫 안내가 1초 가까이 늦는다. 기동은 막지 않는다.
+const { warmUp } = await import('./dist/server/tts.js');
+warmUp();
+
 const app = createApp();
 const server = createServer((request, response) => app.emit('request', request, response));
 server.listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '0.0.0.0');

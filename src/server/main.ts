@@ -16,6 +16,8 @@ import { registerFarmerRoutes } from './routes/farmer.js';
 import { registerHubRoutes } from './routes/hub.js';
 import { registerStoreRoutes } from './routes/store.js';
 import { registerSystemRoutes } from './routes/system.js';
+import { registerTtsRoutes } from './routes/tts.js';
+import { warmUp } from './tts.js';
 
 /** 브라우저와 공유하는 컴파일 결과(dist/lib) 위치 */
 function sharedModuleDir(): string {
@@ -125,6 +127,7 @@ export function buildRouter(): Router {
   registerFarmerRoutes(router);
   registerStoreRoutes(router);
   registerHubRoutes(router);
+  registerTtsRoutes(router);
   return router;
 }
 
@@ -246,6 +249,8 @@ export function createApp(): Server {
 export async function start(port = config.port, host = config.host): Promise<Server> {
   seed(db());
   await initProvider();
+  // 고정 멘트를 미리 만들어 둔다. 기동을 기다리게 하지 않으려고 await 하지 않는다.
+  warmUp();
   const server = createApp();
   await new Promise<void>((resolve) => server.listen(port, host, resolve));
   return server;

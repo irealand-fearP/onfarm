@@ -16,6 +16,12 @@ RUN npm ci --include=dev --include=optional
 COPY . .
 RUN npm run build
 
+# 음성 안내용 Supertonic 3 자산(약 380MB)을 이미지에 굽는다.
+# 저장소에 커밋하지 않는 이유는 clone 을 무겁게 하지 않기 위해서고,
+# 볼륨(DATA_DIR)이 아니라 이미지에 두는 이유는 볼륨은 시연 데이터 몫이기 때문이다.
+# 받지 못해도 빌드는 계속된다 — 자산이 없으면 화면이 브라우저 내장 음성으로 내려앉는다.
+RUN node scripts/fetch-tts-assets.mjs
+
 # 시연 데이터는 볼륨에 둔다(이미지 안이 아니라). 재배포해도 주문·상품이 남는다.
 ENV DATA_DIR=/data \
     HOST=0.0.0.0 \
