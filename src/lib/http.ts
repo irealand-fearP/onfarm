@@ -145,13 +145,20 @@ export function serveFile(res: ServerResponse, rootDir: string, relPath: string)
 
   const ext = extname(full).toLowerCase();
   const type = MIME[ext] ?? 'application/octet-stream';
-  // 코드·화면은 항상 재검증한다. 배포 직후 사용자가 옛 스크립트를 쓰는 사고를 막기 위함.
-  // 이미지는 내용이 바뀌면 파일명이 바뀌므로 길게 캐시해도 안전하다.
-  const codeLike = ['.html', '.js', '.mjs', '.css', '.webmanifest', '.json'].includes(ext);
+  // HTML 은 절대 캐시하지 않는다(no-store). 판매자 화면은 응답에 세션 쿠키를 실어 보내는데,
+  // CDN(Vercel 엣지)이 이 응답을 캐시해 버리면 뒤에 오는 사람은 쿠키 없는 사본을 받아
+  // 자동 로그인이 통째로 죽는다. 실제로 프로덕션에서 x-vercel-cache: HIT 로 재현됐다.
+  // 코드는 재검증만 하고(no-cache), 이미지는 파일명이 바뀌므로 길게 캐시해도 안전하다.
+  const isHtml = ext === '.html';
+  const codeLike = ['.js', '.mjs', '.css', '.webmanifest', '.json'].includes(ext);
   res.writeHead(200, {
     'content-type': type,
     'content-length': stat.size,
-    'cache-control': codeLike ? 'no-cache' : 'public, max-age=86400',
+    'cache-control': isHtml
+      ? 'private, no-store, max-age=0, must-revalidate'
+      : codeLike
+        ? 'no-cache'
+        : 'public, max-age=86400',
   });
   createReadStream(full).pipe(res);
   return true;
