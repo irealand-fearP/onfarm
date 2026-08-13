@@ -46,6 +46,9 @@
   --peach: #ffe3d2;
   --lilac: #eae4ff;
   --butter: #fff1c9;
+  /* 파스텔 타일 위 아이콘 — 구 팔레트의 --info/--warn 은 탁해서 따로 둔다 */
+  --lilac-ink: #8b7bf0;
+  --butter-ink: #f0b429;
 
   /* 파생 토큰 — 글자로 쓸 수 있는 진한 브랜드색과 경계선 */
   --brand-strong: #009a53;
@@ -100,6 +103,8 @@
     --peach: #4a3226;
     --lilac: #322c4a;
     --butter: #433a1e;
+    --lilac-ink: #a695ff;
+    --butter-ink: #f5c451;
 
     --brand-strong: #4fe6a2;
     --line: #2c3033;
@@ -138,6 +143,8 @@
   --peach: #4a3226;
   --lilac: #322c4a;
   --butter: #433a1e;
+  --lilac-ink: #a695ff;
+  --butter-ink: #f5c451;
 
   --brand-strong: #4fe6a2;
   --line: #2c3033;

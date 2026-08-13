@@ -293,7 +293,7 @@ body.shop img {
 }
 
 .quick-tile[data-quick='today'] i {
-  background: var(--info);
+  background: var(--lilac-ink);
 }
 
 .quick-tile[data-quick='last'] {
@@ -301,7 +301,7 @@ body.shop img {
 }
 
 .quick-tile[data-quick='last'] i {
-  background: var(--warn);
+  background: var(--butter-ink);
 }
 
 .quick-tile[aria-pressed='true'] {
