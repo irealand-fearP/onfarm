@@ -91,13 +91,22 @@
 
       await mountModeBanner('#modeBanner');
       let session = null;
+
+      /* 로그인 화면으로 보낼 때는 이 스크립트를 여기서 멈춘다.
+         location.href 만 걸고 넘어가면 이동이 끝나기 전까지 아래 대시보드 폴링이 계속 돌아
+         권한 없는 403 요청을 수백 번 쏟아낸다(시연 중 화면이 늦게 넘어가는 원인). */
+      function goLogin() {
+        location.href = '/login?role=hub_operator&next=/hub';
+        return new Promise(() => {});
+      }
+
       try {
         session = await api('/api/me');
       } catch {
-        location.href = '/login?role=hub_operator&next=/hub';
+        await goLogin();
       }
-      if (session && session.user.role !== 'hub_operator' && session.user.role !== 'admin') {
-        location.href = '/login?role=hub_operator&next=/hub';
+      if (session.user.role !== 'hub_operator' && session.user.role !== 'admin') {
+        await goLogin();
       }
       $('#who').textContent = session ? session.user.name : '';
       $('#shiftName').textContent = session ? `${session.user.name}님 작업 중` : '담당자 확인 중';

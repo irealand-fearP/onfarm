@@ -2,19 +2,19 @@
   "name": "ON-FARM 온팜",
   "short_name": "ON-FARM",
   "description": "사진 한 장으로 끝나는 농어민 직거래 판매",
-  "start_url": "/farmer",
+  "start_url": "/seller",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f7f7f3",
-  "theme_color": "#00754a",
+  "background_color": "#ffffff",
+  "theme_color": "#00c46a",
   "lang": "ko",
   "icons": [
     { "src": "/img/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/img/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "사진 찍고 판매하기", "url": "/farmer/sell" },
-    { "name": "주문 확인", "url": "/farmer/orders" }
+    { "name": "사진 찍고 판매하기", "url": "/seller/sell" },
+    { "name": "오늘 할 일", "url": "/seller/todo" }
   ]
 }

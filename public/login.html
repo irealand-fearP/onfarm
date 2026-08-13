@@ -3,49 +3,33 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#00754a" />
-    <meta name="description" content="ON-FARM 시연 계정을 선택해 농민, 소비자, 거점 담당자 화면을 확인하세요." />
+    <meta name="theme-color" content="#00c46a" />
+    <meta name="description" content="ON-FARM 시연 계정을 역할별로 골라 판매자, 소비자, 거점 담당자 화면을 확인하세요." />
     <title>ON-FARM · 계정 선택</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/css/base.css" />
-    <link rel="stylesheet" href="/css/store.css" />
+    <link rel="stylesheet" href="/css/entry.css" />
   </head>
-  <body class="store">
+  <body class="entry">
     <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
 
-    <header class="store-top">
-      <div class="row">
-        <a class="logo" href="/" aria-label="ON-FARM 홈">
-          <img src="/img/icon.svg" alt="" aria-hidden="true" />
-          <span class="logo-copy"><strong>ON-FARM</strong><small>계정 선택</small></span>
-        </a>
-        <a class="chip-link" href="/demo">시연 안내</a>
-      </div>
-    </header>
+    <div class="entry-page">
+      <header class="entry-top">
+        <a class="entry-logo" href="/shop" aria-label="ON-FARM 홈">ON<i>·</i>FARM</a>
+        <a class="entry-top-link" href="/demo">시연 시작</a>
+      </header>
 
-    <main class="store-main auth-main" id="mainContent">
-      <section class="auth-story" aria-labelledby="authStoryTitle">
-        <div>
-          <p class="eyebrow">한 번의 수확, 하나의 흐름</p>
-          <h2 id="authStoryTitle">농가에서 식탁까지 역할이 이어집니다.</h2>
-          <p>사진으로 판매를 시작하고, 소비자가 주문하고, 지역 거점이 실물을 확인합니다.</p>
-        </div>
-        <ol class="auth-route-list">
-          <li><span>01</span><div><strong>농민</strong><br />사진과 수량으로 판매 등록</div></li>
-          <li><span>02</span><div><strong>소비자</strong><br />생산지와 검수 정보를 보고 주문</div></li>
-          <li><span>03</span><div><strong>지역 거점</strong><br />실물 등급과 배송 상태 확정</div></li>
-        </ol>
-      </section>
+      <main class="entry-main" id="mainContent">
+        <section class="entry-hero">
+          <span class="entry-eyebrow">시연 계정</span>
+          <h1 id="loginTitle">어느 역할로 확인할까요?</h1>
+          <p class="lead">계정을 고르면 그 역할의 실제 화면과 권한으로 이동합니다. 시연 환경이라 비밀번호는 없습니다.</p>
+        </section>
 
-      <section class="auth-panel" aria-labelledby="loginTitle">
-        <p class="eyebrow">시연 계정</p>
-        <h1 id="loginTitle">어느 역할로 확인할까요?</h1>
-        <p class="lead">계정을 선택하면 각 역할의 실제 화면과 권한으로 이동합니다.</p>
-        <span class="auth-hint">MVP 시연 환경 · 비밀번호 없음</span>
-        <div class="account-list" id="list"></div>
-      </section>
-    </main>
+        <div id="list"></div>
+      </main>
+    </div>
 
     <script type="module">
       import { $, api, el } from '/js/api.js';
@@ -53,36 +37,68 @@
       const params = new URLSearchParams(location.search);
       const next = params.get('next');
       const wantRole = params.get('role');
-      const ROLE_LABEL = { farmer: '농민', consumer: '소비자', hub_operator: '거점 담당자', admin: '관리자' };
-      const DEFAULT_NEXT = { farmer: '/seller', consumer: '/', hub_operator: '/hub', admin: '/hub' };
+
+      // 역할 표시 순서 = 시연 순서(판매자 → 소비자 → 거점 → 관리자)로 고정한다.
+      const ROLE_ORDER = ['farmer', 'consumer', 'hub_operator', 'admin'];
+      const ROLE_LABEL = { farmer: '판매자', consumer: '소비자', hub_operator: '거점 담당자', admin: '관리자' };
+      const ROLE_GROUP = {
+        farmer: '판매자 · 사진으로 등록',
+        consumer: '소비자 · 보고 주문',
+        hub_operator: '지역 거점 · 실물 검수',
+        admin: '관리자',
+      };
+      const DEFAULT_NEXT = { farmer: '/seller', consumer: '/shop', hub_operator: '/hub', admin: '/hub' };
       const ROLE_ICON = {
-        farmer: '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 17c5-1 8-4 9-9 4 2 6 5 6 9-4 3-9 3-15 0Z"/><path d="M7 17c2-3 5-5 9-6"/></svg>',
-        consumer: '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M3 5h2l2 10h10l2-7H7M9 20h.01M17 20h.01"/></svg>',
-        hub_operator: '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13M8 21v-6h8v6M8 10h.01M12 10h.01M16 10h.01"/></svg>',
-        admin: '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 15 6.2L14.7 3h-4L10 6.2a7 7 0 0 0-1.5.9l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.5.9l.7 3.2h4l.3-3.2a7 7 0 0 0 1.5-.9l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z"/></svg>',
+        farmer: '<svg viewBox="0 0 24 24"><path d="M4 17c5-1 8-4 9-9 4 2 6 5 6 9-4 3-9 3-15 0Z"/><path d="M7 17c2-3 5-5 9-6"/></svg>',
+        consumer: '<svg viewBox="0 0 24 24"><path d="M3 5h2l2 10h10l2-7H7M9 20h.01M17 20h.01"/></svg>',
+        hub_operator: '<svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13M8 21v-6h8v6M8 10h.01M12 10h.01M16 10h.01"/></svg>',
+        admin: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.5-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.3 3.1a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.5 2 3.4 2.4-1c.5.4 1.1.7 1.7 1L11 21h4l.3-3.1c.6-.3 1.2-.6 1.7-1l2.4 1 2-3.4Z"/></svg>',
       };
 
       const { accounts } = await api('/api/accounts');
       const box = $('#list');
-      const ordered = wantRole ? [...accounts].sort((a, b) => Number(b.role === wantRole) - Number(a.role === wantRole)) : accounts;
 
-      for (const account of ordered) {
+      function accountButton(account) {
         const roleClass = account.role === 'hub_operator' ? 'hub' : account.role;
-        box.append(
-          el('button', {
+        const suggested = account.role === wantRole;
+        return el(
+          'button',
+          {
             type: 'button',
-            class: 'account-button',
+            class: `account-button${suggested ? ' is-suggested' : ''}`,
             onclick: async () => {
               await api('/api/auth/login', { body: { userId: account.id } });
-              location.href = next || DEFAULT_NEXT[account.role] || '/';
+              location.href = next || DEFAULT_NEXT[account.role] || '/shop';
             },
-          }, [
+          },
+          [
             el('span', { class: `role-icon ${roleClass}`, 'aria-hidden': 'true', html: ROLE_ICON[account.role] ?? ROLE_ICON.consumer }),
             el('span', { class: 'account-copy' }, [
               el('strong', { text: account.name }),
-              el('span', { text: [ROLE_LABEL[account.role] ?? account.role, account.farmName, account.region].filter(Boolean).join(' · ') }),
+              el('span', {
+                text: [ROLE_LABEL[account.role] ?? account.role, account.farmName, account.region].filter(Boolean).join(' · '),
+              }),
             ]),
-            el('span', { class: 'account-enter', text: account.role === wantRole ? '추천 계정 →' : '이 계정으로 →' }),
+            el('span', { class: 'account-enter', 'aria-hidden': 'true', text: '›' }),
+          ],
+        );
+      }
+
+      // 역할별로 묶어서 낸다. ?role= 로 지목된 역할이 있으면 그 묶음을 맨 위로 올린다.
+      const roles = [...new Set([...ROLE_ORDER, ...accounts.map((a) => a.role)])].filter((role) =>
+        accounts.some((a) => a.role === role),
+      );
+      if (wantRole && roles.includes(wantRole)) {
+        roles.splice(roles.indexOf(wantRole), 1);
+        roles.unshift(wantRole);
+      }
+
+      for (const role of roles) {
+        const mine = accounts.filter((account) => account.role === role);
+        box.append(
+          el('section', { class: 'account-group' }, [
+            el('h2', { text: ROLE_GROUP[role] ?? ROLE_LABEL[role] ?? role }),
+            el('div', { class: 'account-list' }, mine.map(accountButton)),
           ]),
         );
       }

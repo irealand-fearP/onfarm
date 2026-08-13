@@ -60,7 +60,7 @@
   --photo-bg: #ffffff;
   --photo-line: #e5e8eb;
 
-  /* 기존 화면(farmer.css·store.css)이 쓰던 이름은 별칭으로 유지한다. */
+  /* 화면별 스타일시트(seller/shop/hub/entry)가 함께 쓰는 별칭 이름. */
   --ink: var(--t1);
   --ink-soft: var(--t2);
   --muted: var(--t3);

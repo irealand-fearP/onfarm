@@ -1,0 +1,445 @@
+/* ON-FARM 진입 화면 전용 스타일 (/demo · /login)
+   - 옛 store.css 를 대체한다. 이 두 화면만 store.css 를 붙들고 있어서
+     여기로 옮기면 2000줄짜리 옛 팔레트 파일을 통째로 지울 수 있다.
+   - 색은 base.css 토큰만 쓴다. 하드코딩 금지 → 라이트·다크가 자동으로 따라온다.
+   - 판매자의 밀도 변수(--u)는 쓰지 않는다. 진입 화면은 표준 밀도 하나뿐이다. */
+
+body.entry {
+  --entry-max: 560px;
+
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--t1);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden; /* 360px 폭에서 가로 스크롤이 생기지 않게 한다. */
+}
+
+body.entry h1,
+body.entry h2,
+body.entry h3 {
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+}
+
+body.entry p {
+  margin: 0;
+}
+
+.entry-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--entry-max);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--surface);
+}
+
+.entry-main {
+  flex: 1;
+  padding: 0 16px calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ───────── 상단 바 ───────── */
+.entry-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.entry-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--t1);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  text-decoration: none;
+}
+
+.entry-logo i {
+  color: var(--brand);
+  font-style: normal;
+}
+
+/* 상단 오른쪽 보조 링크 */
+.entry-top-link {
+  flex: 0 0 auto;
+  padding: 7px 13px;
+  /* 다크에서는 --bg-2 가 상단 바(--surface)와 같은 값이라 테두리가 없으면 칩이 사라진다. */
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--t2);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ───────── 머리말 ───────── */
+.entry-hero {
+  padding: 22px 0 6px;
+}
+
+.entry-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--brand-strong);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.entry-hero h1 {
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.entry-hero .lead {
+  margin-top: 8px;
+  color: var(--t2);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+/* ───────── 역할 카드 3개 (시연 시작점) ───────── */
+.role-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* 카드 전체가 버튼이다 — 심사장에서 크게 누를 수 있어야 한다. */
+.role-card {
+  display: grid;
+  grid-template-columns: 52px 1fr 16px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 84px;
+  padding: 16px 16px 16px 14px;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background: var(--bg-2);
+  color: var(--t1);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.role-card:hover {
+  border-color: var(--line-strong);
+}
+
+.role-card:active {
+  transform: translateY(1px);
+}
+
+/* 역할별 파스텔 — 소비자 화면의 퀵타일과 같은 색 규칙을 쓴다. */
+.role-card[data-role='seller'] {
+  background: var(--brand-tint);
+}
+
+.role-card[data-role='shop'] {
+  background: var(--peach);
+}
+
+.role-card[data-role='hub'] {
+  background: var(--lilac);
+}
+
+.role-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.role-mark svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 파스텔 타일 위 아이콘 색 — 탁한 구 토큰(--info/--warn) 대신 전용 잉크 토큰을 쓴다. */
+.role-card[data-role='seller'] .role-mark svg {
+  stroke: var(--brand-strong);
+}
+
+.role-card[data-role='shop'] .role-mark svg {
+  stroke: var(--butter-ink);
+}
+
+.role-card[data-role='hub'] .role-mark svg {
+  stroke: var(--lilac-ink);
+}
+
+.role-copy {
+  min-width: 0;
+}
+
+.role-step {
+  display: block;
+  color: var(--t2);
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.role-copy strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 17.5px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.role-copy span.role-desc {
+  display: block;
+  margin-top: 3px;
+  color: var(--t2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.role-copy code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--t2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.role-go {
+  color: var(--t2);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+/* ───────── 카드형 정보 블록 ───────── */
+.entry-card {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.entry-card h2 {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.entry-card .note {
+  margin-top: 6px;
+  color: var(--t2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.entry-section-title {
+  margin-top: 26px;
+  color: var(--t3);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* 상태 표 — AI 판정 제공자 등 */
+.state-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.state-row:first-of-type {
+  border-top: 0;
+}
+
+.state-row .k {
+  color: var(--t2);
+  font-weight: 600;
+}
+
+.state-row .v {
+  color: var(--t1);
+  font-weight: 800;
+  text-align: right;
+}
+
+/* ───────── 버튼 ───────── */
+.entry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 12px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--t1);
+  font-size: 15.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.entry-btn.danger {
+  border-color: transparent;
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+/* ───────── 로그인 계정 목록 ───────── */
+.account-group {
+  margin-top: 18px;
+}
+
+.account-group > h2 {
+  margin-bottom: 8px;
+  color: var(--t3);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.account-list {
+  display: grid;
+  gap: 8px;
+}
+
+.account-button {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 66px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--t1);
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-button:hover {
+  border-color: var(--line-strong);
+  background: var(--bg-2);
+}
+
+/* 추천 계정(?role= 로 지목된 역할)은 테두리로 표시한다. */
+.account-button.is-suggested {
+  border-color: var(--brand);
+}
+
+.role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--bg-2);
+}
+
+.role-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.role-icon.farmer {
+  background: var(--brand-tint);
+}
+
+.role-icon.farmer svg {
+  stroke: var(--brand-strong);
+}
+
+.role-icon.consumer {
+  background: var(--peach);
+}
+
+.role-icon.consumer svg {
+  stroke: var(--butter-ink);
+}
+
+.role-icon.hub {
+  background: var(--lilac);
+}
+
+.role-icon.hub svg {
+  stroke: var(--lilac-ink);
+}
+
+.role-icon.admin svg {
+  stroke: var(--t2);
+}
+
+.account-copy {
+  min-width: 0;
+}
+
+.account-copy strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.account-copy span {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--t2);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-enter {
+  flex: 0 0 auto;
+  color: var(--t3);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* 아주 좁은 화면(360px)에서는 화살표를 접어 이름이 잘리지 않게 한다. */
+@media (max-width: 359px) {
+  .account-button {
+    grid-template-columns: 42px 1fr;
+  }
+
+  .account-enter {
+    display: none;
+  }
+}
