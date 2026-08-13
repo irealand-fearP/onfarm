@@ -55,6 +55,8 @@ const COMMON_PAGES: Record<string, string> = {
   '/login': 'login.html',
   '/demo': 'demo.html',
   '/hub': 'hub/index.html',
+  // 서비스 소개(팀·심사 공유용). 화면 캡처를 문서 안에 담아 두어 외부 자원 없이 혼자 열린다.
+  '/about': 'about.html',
 };
 
 const PAGES: Record<string, string> = { ...SELLER_PAGES, ...SHOP_PAGES, ...COMMON_PAGES };

@@ -25,7 +25,8 @@ npm run dev      # 빌드 + 서버 시작 (기본 http://127.0.0.1:4173)
 | 주소 | 화면 |
 |---|---|
 | `/demo` | **시연 시작점** — 세 화면으로 가는 역할 전환 버튼 + 데이터 초기화 |
-| `/seller` | 판매자(농어민) 화면 — 큰 버튼·음성 안내. 하위: `/seller/sell`(사진 등록), `/seller/todo`(오늘 할 일) |
+| `/about` | **서비스 소개** — 팀·심사 공유용 한 장 문서 |
+| `/seller` | 판매자(농어민) 화면 — 큰 버튼·음성 안내. 하위: `/seller/sell`(사진 등록), `/seller/orders`(주문), `/seller/products`(내 상품), `/seller/money`(받을 돈) |
 | `/shop` | 소비자 매장 (`/` 도 같은 화면). 하위: `/shop/product`, `/shop/cart`, `/shop/orders` |
 | `/hub` | 거점/관리자 대시보드 |
 | `/login` | 데모 계정 선택 (역할별로 묶여 있음) |
