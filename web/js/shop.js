@@ -105,7 +105,12 @@ function renderCategoryTabs() {
 function renderItemStrip() {
   const box = $('#itemStrip');
   box.replaceChildren();
-  const codes = [...new Set(allListings.filter(matchCategory).map((listing) => listing.product_code))];
+  // 품목 카탈로그 순서로 고정한다. 판매 목록 등록순을 그대로 쓰면 새 상품이 올라올 때마다
+  // 칩 순서가 뒤바뀌어, 같은 화면을 다시 봐도 늘 다른 자리에 있게 된다.
+  const catalogOrder = [...productByCode.keys()];
+  const codes = [...new Set(allListings.filter(matchCategory).map((listing) => listing.product_code))].sort(
+    (a, b) => catalogOrder.indexOf(a) - catalogOrder.indexOf(b),
+  );
 
   box.append(itemButton('', '전체', null));
   for (const code of codes) box.append(itemButton(code, productName(code), code));
