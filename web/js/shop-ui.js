@@ -4,13 +4,16 @@ import { el } from '/js/api.js';
 /**
  * 상품 사진 고르기.
  * - 농민이 직접 촬영해 올린 사진(/uploads/...)은 그대로 쓰고 배지를 붙이지 않는다.
+ * - 단, "사진 없이 시연" 버튼으로 올린 건은 파일명이 /uploads/demo- 로 시작한다.
+ *   실제 농민 촬영본이 아니므로 사진은 그대로 쓰되 "시연용 이미지" 배지를 붙인다.
+ *   (DB 컬럼·API 응답을 늘리지 않고 구분하려고 파일명 표식을 쓴다.)
  * - 시드 상품은 품목 코드와 파일명이 1:1로 맞는 실사 상품컷으로 폴백하고
  *   "시연용 이미지"를 표기한다. 무엇이 진짜 산지 사진인지 화면에서 구분돼야 한다.
  * (기존 일러스트 products.sample_image 는 더 이상 쓰지 않는다.)
  */
 export function productPhoto(listing) {
   const uploaded = typeof listing.image_path === 'string' && listing.image_path.startsWith('/uploads/');
-  if (uploaded) return { src: listing.image_path, demo: false };
+  if (uploaded) return { src: listing.image_path, demo: listing.image_path.startsWith('/uploads/demo-') };
   return { src: `/img/products/${listing.product_code}.webp`, demo: true };
 }
 

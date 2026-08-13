@@ -20,6 +20,8 @@ const state = {
   step: 'stepPhoto',
   /** 사용자가 폴백 화면에서 품목을 직접 골랐는가 (감사 기록용) */
   userPicked: false,
+  /** "사진 없이 시연" 경로로 만든 사진인가 (파일명 표식 → 소비자 화면 배지) */
+  demoPhoto: false,
 };
 
 const STEPS = ['stepPhoto', 'stepLoading', 'stepResult', 'stepManual', 'stepSku', 'stepDone'];
@@ -63,34 +65,18 @@ function nameOf(code) {
   return state.catalog.find((p) => p.code === code)?.name ?? code;
 }
 
-/* ───────── 시연용 합성 이미지 ─────────
+/* ───────── 시연용 사진 ─────────
    실제 사진이 없을 때도 파이프라인 전체(특징 추출 → 판정 → SKU)를 그대로 태우기 위한 보조 수단.
-   합성 이미지임을 화면에 밝힌다. */
-function sampleImageFile() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 640;
-  canvas.height = 480;
-  const ctx = canvas.getContext('2d');
-  // 배경은 실제 촬영 환경(회색 상자/바닥)처럼 채도가 낮게 둔다.
-  ctx.fillStyle = '#b9b5ad';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < 26; i += 1) {
-    const x = 70 + Math.random() * 500;
-    const y = 70 + Math.random() * 340;
-    const r = 46 + Math.random() * 16;
-    // 신고배 표피색(#C7BA7B 근처)에 맞춘다 — 채도가 높으면 실제로 양파에 가까워진다.
-    const hue = 48 + Math.random() * 6;
-    const grad = ctx.createRadialGradient(x - r / 3, y - r / 3, r / 6, x, y, r);
-    grad.addColorStop(0, `hsl(${hue}, 40%, 70%)`);
-    grad.addColorStop(1, `hsl(${hue - 4}, 36%, 52%)`);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.ellipse(x, y, r, r * 0.92, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  return new Promise((resolve) =>
-    canvas.toBlob((blob) => resolve(new File([blob], 'sample.jpg', { type: 'image/jpeg' })), 'image/jpeg', 0.9),
-  );
+   합성 이미지는 결과물이 가짜 얼룩으로 보여서, 준비된 실사 상품컷(배)을 그대로 쓴다.
+   시연 대본이 배 기준이라 품목은 배로 고정한다. */
+const SAMPLE_IMAGE_URL = '/img/products/pear.webp';
+
+async function sampleImageFile() {
+  const res = await fetch(SAMPLE_IMAGE_URL, { cache: 'force-cache' });
+  if (!res.ok) throw new Error('시연용 사진을 불러오지 못했습니다.');
+  const blob = await res.blob();
+  // prepareImage 가 어차피 JPEG 로 다시 인코딩하므로 webp 그대로 넘겨도 된다.
+  return new File([blob], 'demo-pear.webp', { type: blob.type || 'image/webp' });
 }
 
 /* ───────── 파이프라인 호출 ───────── */
@@ -219,6 +205,7 @@ async function analyzeForced(code) {
           features: state.pendingImage.features,
           pixels: state.pendingImage.pixels,
           productCode: code,
+          demo: state.demoPhoto,
         };
     const result = await api('/api/ai/analyze', { body: payload });
     if (result.analysisId) state.analysisId = result.analysisId;
@@ -329,8 +316,10 @@ function setQuantity(next) {
 }
 
 /* ───────── 이벤트 배선 ───────── */
-async function onFile(file) {
+async function onFile(file, options = {}) {
   if (!file) return;
+  // 시연용 경로로 들어온 사진은 서버가 파일명에 표식을 남기도록 알린다.
+  state.demoPhoto = options.demo === true;
   show('stepLoading');
   try {
     const prepared = await prepareImage(file);
@@ -340,7 +329,12 @@ async function onFile(file) {
     state.userPicked = false;
     $('#loadingPreview').src = prepared.dataUrl;
     $('#loadingPreview').hidden = false;
-    await analyze({ image: prepared.dataUrl, features: prepared.features, pixels: prepared.pixels });
+    await analyze({
+      image: prepared.dataUrl,
+      features: prepared.features,
+      pixels: prepared.pixels,
+      demo: state.demoPhoto,
+    });
   } catch (err) {
     toast(err.message ?? '사진을 읽지 못했습니다.');
     show('stepPhoto');
@@ -349,8 +343,12 @@ async function onFile(file) {
 
 $('#photoInput').addEventListener('change', (e) => onFile(e.target.files?.[0]));
 $('#sampleBtn').addEventListener('click', async () => {
-  toast('시연용 합성 이미지로 진행합니다(실제 사진 아님).');
-  onFile(await sampleImageFile());
+  toast('시연용 사진으로 진행합니다(농민이 찍은 실제 사진 아님).');
+  try {
+    onFile(await sampleImageFile(), { demo: true });
+  } catch (err) {
+    toast(err.message ?? '시연용 사진을 불러오지 못했습니다.');
+  }
 });
 
 $('#speakResult').addEventListener('click', () => repeatLast());
@@ -423,6 +421,7 @@ $('#doneAgain').addEventListener('click', () => {
   state.analysisId = null;
   state.imagePath = null;
   state.pendingImage = null;
+  state.demoPhoto = false;
   state.quantity = 5;
   $('#photoInput').value = '';
   $('#loadingPreview').hidden = true;

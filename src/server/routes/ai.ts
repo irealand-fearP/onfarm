@@ -16,6 +16,8 @@ interface AnalyzeBody {
   pixels?: string;
   /** 폴백 화면에서 사용자가 직접 고른 품목 */
   productCode?: string;
+  /** "사진 없이 시연" 경로로 올린 사진인가(실제 농민 촬영본이 아님) */
+  demo?: boolean;
 }
 
 const MODEL_PIXEL_BYTES = 224 * 224 * 3;
@@ -99,7 +101,7 @@ export function registerAiRoutes(router: Router): void {
       storedId = prev.id;
     } else if (body.image) {
       const parsed = parseDataUrl(body.image);
-      const saved = saveImage(parsed);
+      const saved = saveImage(parsed, { demo: body.demo === true });
       imagePath = saved.publicPath;
       imageBase64 = parsed.base64;
       mimeType = parsed.mimeType;

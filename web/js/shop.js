@@ -2,7 +2,7 @@
 // 서버 계약은 그대로다(GET /api/store/listings). 판매 중 목록을 한 번 받아
 // 화면에서 걸러야 "실제로 상품이 있는" 종류·품목·지역만 노출할 수 있다.
 import { $, api, el, money } from '/js/api.js';
-import { isHarvestedToday, isInspected, isRunningOut, mountCartBadges, photoImg } from '/js/shop-ui.js';
+import { isHarvestedToday, isInspected, isRunningOut, mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
 
 mountCartBadges();
 
@@ -213,7 +213,8 @@ function card(listing) {
   if (isInspected(listing)) {
     photo.append(el('span', { class: 'goods-stamp', text: '검수 완료' }));
   }
-  if (!listing.image_path?.startsWith('/uploads/')) {
+  // 배지 판정은 productPhoto 한 곳에만 둔다(시드 이미지 + 시연용 업로드 모두 포함).
+  if (productPhoto(listing).demo) {
     photo.append(el('span', { class: 'goods-demo', text: '시연용 이미지' }));
   }
 

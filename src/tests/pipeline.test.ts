@@ -21,18 +21,19 @@ function selection(primary: VisionProvider, fallback: VisionProvider = new Heuri
 }
 
 function pearFeatures(overrides: Partial<ImageFeatures> = {}): ImageFeatures {
-  const bins = new Array(12).fill(0.01);
-  bins[1] = 0.8; // 30~60도 = 노랑-연두
-  bins[2] = 0.1;
+  // 실제 배 상품컷에서 측정한 신호(15도 단위 24칸, 30~45도에 몰림)
+  const bins = new Array(24).fill(0.002);
+  bins[2] = 0.8;
+  bins[1] = 0.1;
   const sum = bins.reduce((a: number, b: number) => a + b, 0);
   return {
     width: 256,
     height: 192,
     hueHistogram: bins.map((b: number) => b / sum),
-    meanSaturation: 0.35,
-    meanValue: 0.62,
-    edgeDensity: 0.3,
-    hueConcentration: 0.72,
+    meanSaturation: 0.73,
+    meanValue: 0.86,
+    edgeDensity: 0.07,
+    hueConcentration: 0.9,
     ...overrides,
   };
 }

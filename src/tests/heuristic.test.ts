@@ -10,13 +10,13 @@ const catalog: CatalogItem[] = [
   { code: 'potato', name_ko: '감자', category: 'root', variety: '수미감자' },
 ];
 
-/** 특정 색상각에 몰린 히스토그램을 만든다(30도 단위 12칸). */
+/** 특정 색상각에 몰린 히스토그램을 만든다(15도 단위 24칸 — 실제 features.js 와 같은 해상도). */
 function histogramAt(hueDeg: number): number[] {
-  const bins = new Array(12).fill(0.01);
-  const idx = Math.floor(hueDeg / 30) % 12;
+  const bins = new Array(24).fill(0.002);
+  const idx = Math.floor(hueDeg / 15) % 24;
   bins[idx] = 0.8;
-  bins[(idx + 1) % 12] = 0.06;
-  bins[(idx + 11) % 12] = 0.06;
+  bins[(idx + 1) % 24] = 0.06;
+  bins[(idx + 23) % 24] = 0.06;
   const sum = bins.reduce((a, b) => a + b, 0);
   return bins.map((b) => b / sum);
 }
@@ -25,10 +25,10 @@ function features(overrides: Partial<ImageFeatures> = {}): ImageFeatures {
   return {
     width: 256,
     height: 192,
-    hueHistogram: histogramAt(55),
-    meanSaturation: 0.35,
-    meanValue: 0.62,
-    edgeDensity: 0.3,
+    hueHistogram: histogramAt(37),
+    meanSaturation: 0.73,
+    meanValue: 0.86,
+    edgeDensity: 0.07,
     hueConcentration: 0.7,
     ...overrides,
   };
@@ -37,17 +37,17 @@ function features(overrides: Partial<ImageFeatures> = {}): ImageFeatures {
 describe('로컬 색·질감 판정', () => {
   it('대표 색상각을 최빈 구간 근처에서 찾는다', () => {
     const hue = dominantHue(histogramAt(210));
-    assert.ok(Math.abs(hue - 225) < 20, `예상 210~225 근처, 실제 ${hue}`);
+    assert.ok(Math.abs(hue - 217) < 20, `예상 210~225 근처, 실제 ${hue}`);
   });
 
-  it('노란-연두 계열이면 배가 1순위', () => {
+  it('배 표피색(황금빛 갈색) 신호면 배가 1순위', () => {
     const ranked = scoreCandidates(features(), catalog.map((c) => c.code));
     assert.equal(ranked[0]?.code, 'pear');
   });
 
   it('진한 빨강 + 높은 채도면 사과가 배보다 앞선다', () => {
     const ranked = scoreCandidates(
-      features({ hueHistogram: histogramAt(5), meanSaturation: 0.75, meanValue: 0.55 }),
+      features({ hueHistogram: histogramAt(3), meanSaturation: 0.65, meanValue: 0.88, edgeDensity: 0.12 }),
       catalog.map((c) => c.code),
     );
     assert.equal(ranked[0]?.code, 'apple');
@@ -56,7 +56,7 @@ describe('로컬 색·질감 판정', () => {
 
   it('주황 + 아주 높은 채도면 감귤', () => {
     const ranked = scoreCandidates(
-      features({ hueHistogram: histogramAt(30), meanSaturation: 0.9, meanValue: 0.75 }),
+      features({ hueHistogram: histogramAt(31), meanSaturation: 0.88, meanValue: 0.91, edgeDensity: 0.06 }),
       catalog.map((c) => c.code),
     );
     assert.equal(ranked[0]?.code, 'mandarin');
@@ -78,10 +78,12 @@ describe('로컬 색·질감 판정', () => {
 
   it('어두운 사진은 같은 색이어도 신뢰도가 낮아진다', async () => {
     const provider = new HeuristicVisionProvider();
-    const bright = await provider.analyzeProduct({ features: features(), catalog });
+    // 품목 하나로 좁혀 후보 경쟁(softmax)의 영향을 빼고, 사진 품질에 따른 신뢰도 감점만 본다.
+    const onlyPear = catalog.filter((c) => c.code === 'pear');
+    const bright = await provider.analyzeProduct({ features: features(), catalog: onlyPear });
     const dark = await provider.analyzeProduct({
-      features: features({ meanValue: 0.1, meanSaturation: 0.35 }),
-      catalog,
+      features: features({ meanValue: 0.1 }),
+      catalog: onlyPear,
     });
     assert.ok(dark.confidence < bright.confidence, `어두운 사진 ${dark.confidence} < 밝은 사진 ${bright.confidence}`);
     assert.equal(dark.quality_hint, '확인필요');

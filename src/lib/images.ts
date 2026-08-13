@@ -68,11 +68,15 @@ export interface SavedImage {
   absolutePath: string;
 }
 
-export function saveImage(image: ParsedImage): SavedImage {
+/** 시연용 사진으로 올린 파일에 붙는 접두사. 소비자 화면이 이 이름만 보고 배지를 붙인다. */
+export const DEMO_PREFIX = 'demo-';
+
+export function saveImage(image: ParsedImage, options: { demo?: boolean } = {}): SavedImage {
   const dir = uploadsDir();
   mkdirSync(dir, { recursive: true });
   const ext = ALLOWED[image.mimeType] ?? '.jpg';
-  const name = `${randomUUID()}${ext}`;
+  // 시연용은 파일명에 표식을 남긴다. DB 컬럼·API 형식을 건드리지 않고 구분하기 위함.
+  const name = `${options.demo ? DEMO_PREFIX : ''}${randomUUID()}${ext}`;
   const absolutePath = join(dir, name);
   writeFileSync(absolutePath, Buffer.from(image.base64, 'base64'));
   return { publicPath: `/uploads/${name}`, absolutePath };

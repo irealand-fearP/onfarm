@@ -18,18 +18,22 @@ interface Prototype {
 
 /*
   프로토타입 값은 각 품목의 대표 표피색을 HSV 로 옮긴 것이다.
-  (예: 신고배 #C7BA7B → H50 S0.38 V0.78 / 양파 표피는 더 진한 황갈색)
+
+  이전 값은 눈대중으로 적은 색표(예: 신고배 #C7BA7B → H50)였는데, 실제 상품 사진과 맞지 않아
+  진짜 배 사진이 양파로, 진짜 감자 사진이 배로 판정됐다(참조 사진 8장 중 4장만 자기 품목으로 판정).
+  그래서 web/img/products/*.webp 8장을 features.js 의 특징 추출기로 그대로 통과시켜 측정한 값으로 교체했다.
+  같은 방식으로 재측정하면 8장 모두 자기 품목이 1순위로 나온다.
   실제 촬영 데이터가 쌓이면 이 표는 학습된 모델로 대체되는 자리다.
 */
 export const PROTOTYPES: Prototype[] = [
-  { code: 'pear', hue: 50, sat: 0.38, val: 0.78, edge: 0.3 },
-  { code: 'apple', hue: 5, sat: 0.72, val: 0.55, edge: 0.28 },
-  { code: 'mandarin', hue: 28, sat: 0.9, val: 0.8, edge: 0.3 },
-  { code: 'peach', hue: 18, sat: 0.52, val: 0.78, edge: 0.28 },
-  { code: 'sweet_potato', hue: 352, sat: 0.48, val: 0.45, edge: 0.45 },
-  { code: 'potato', hue: 34, sat: 0.3, val: 0.6, edge: 0.45 },
-  { code: 'onion', hue: 38, sat: 0.62, val: 0.68, edge: 0.3 },
-  { code: 'red_pepper', hue: 2, sat: 0.8, val: 0.4, edge: 0.72 },
+  { code: 'pear', hue: 36.6, sat: 0.73, val: 0.86, edge: 0.07 },
+  { code: 'apple', hue: 2.9, sat: 0.65, val: 0.88, edge: 0.12 },
+  { code: 'mandarin', hue: 31, sat: 0.88, val: 0.91, edge: 0.06 },
+  { code: 'peach', hue: 13.4, sat: 0.74, val: 0.92, edge: 0.05 },
+  { code: 'sweet_potato', hue: 357.2, sat: 0.53, val: 0.68, edge: 0.08 },
+  { code: 'potato', hue: 37.4, sat: 0.55, val: 0.84, edge: 0.07 },
+  { code: 'onion', hue: 23.8, sat: 0.56, val: 0.89, edge: 0.05 },
+  { code: 'red_pepper', hue: 1, sat: 0.69, val: 0.62, edge: 0.17 },
 ];
 
 const W = { hue: 0.55, sat: 0.2, val: 0.15, edge: 0.1 };
