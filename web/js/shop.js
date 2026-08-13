@@ -3,8 +3,10 @@
 // 화면에서 걸러야 "실제로 상품이 있는" 종류·품목·지역만 노출할 수 있다.
 import { $, api, el, money } from '/js/api.js';
 import { isHarvestedToday, isInspected, isRunningOut, mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
+import { mountDemoNav } from '/js/demo-nav.js';
 
 mountCartBadges();
+mountDemoNav('#demoNavSlot');
 
 const cfg = await api('/api/config').catch(() => ({ products: [], allProducts: [] }));
 const state = { category: '', product: '', region: '', query: '', quick: '' };

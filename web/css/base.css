@@ -368,3 +368,104 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ───────── 시연 이동 메뉴(판매자·소비자·거점 공통) ───────── */
+/* 발표자용 보조 수단이다. 각 화면의 주 동선을 밀어내지 않도록 작게 둔다. */
+.demo-nav {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.demo-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--t3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.demo-nav-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--t2);
+}
+
+/* 팝오버 — 화면을 통째로 바꾸지 않고 헤더 아래에 뜬다. */
+.demo-nav-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 176px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.demo-nav-panel[hidden] {
+  display: none;
+}
+
+.demo-nav-title {
+  margin: 2px 6px 4px;
+  color: var(--t3);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.demo-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  color: var(--t1);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.demo-nav-item:hover {
+  background: var(--surface-soft);
+}
+
+/* 지금 보고 있는 화면은 링크가 아니라 표시다(눌러도 갈 곳이 없다). */
+.demo-nav-item.is-here {
+  color: var(--t3);
+}
+
+.demo-nav-item.is-here:hover {
+  background: transparent;
+}
+
+.demo-nav-item em {
+  color: var(--accent-strong);
+  font-size: 10.5px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.demo-nav-close {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  background: transparent;
+  color: var(--t2);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}

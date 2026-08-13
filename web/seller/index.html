@@ -19,8 +19,10 @@
       <header class="s-head">
         <span class="who" id="whoName">불러오는 중</span>
         <div class="s-head-actions">
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단 — 어르신 주 동선보다 작게 둔다) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
           <button class="s-chip density-toggle" id="densityBtn" type="button">가⁻</button>
-          <button class="s-chip" id="swapBtn" type="button">농가 바꾸기</button>
+          <button class="s-chip" id="swapBtn" type="button" aria-expanded="false" aria-controls="swapList">농가 바꾸기</button>
         </div>
       </header>
 
@@ -44,8 +46,17 @@
           <span class="t2" id="todoSummary">불러오는 중</span>
         </a>
 
-        <!-- 농가 바꾸기 — 농민 계정만 큰 카드로 보여준다. -->
-        <section class="swap-list" id="swapList" hidden aria-label="농가 바꾸기"></section>
+        <!-- 농가 바꾸기 — 농민 계정만 큰 카드로 보여준다.
+             한 번 열면 닫을 수 없어 "오늘 할 일"과 뒤섞여 보이던 문제가 있어,
+             테두리로 묶고 제목·닫기 버튼을 둬서 목록의 시작과 끝이 분명하게 했다. -->
+        <section class="swap-list" id="swapList" hidden aria-labelledby="swapTitle">
+          <div class="swap-head">
+            <h2 id="swapTitle">농가 바꾸기</h2>
+            <button class="swap-close" id="swapCloseBtn" type="button">닫기</button>
+          </div>
+          <div class="swap-cands" id="swapCands"></div>
+          <p class="swap-foot">바꿀 농가를 고르면 그 농가로 다시 로그인합니다.</p>
+        </section>
 
         <p class="demo-note">시연용 계정으로 자동 로그인되어 있습니다.</p>
       </div>
@@ -55,8 +66,10 @@
       import { api, requireRole, money, el, $, startAutoRefresh, toast, mountModeBanner } from '/js/api.js';
       import { speak, canSpeak } from '/js/speak.js';
       import { mountDensityToggle } from '/js/seller-density.js';
+      import { mountDemoNav } from '/js/demo-nav.js';
 
       mountDensityToggle('#densityBtn');
+      mountDemoNav('#demoNavSlot');
       void mountModeBanner('#modeBanner');
 
       $('#micText').textContent = canSpeak()
@@ -99,20 +112,38 @@
       });
 
       // 농가 바꾸기 — 농민 계정만 추려 큰 카드로 보여준다(계정 아홉 개 목록이라는 벽을 만들지 않는다).
+      // 닫는 방법은 세 가지다: 같은 버튼 다시 누르기 · 패널 안 닫기 버튼 · Esc.
       let swapLoaded = false;
+
+      function setSwapOpen(open) {
+        $('#swapList').hidden = !open;
+        $('#swapBtn').setAttribute('aria-expanded', String(open));
+      }
+
+      function closeSwap() {
+        setSwapOpen(false);
+        $('#swapBtn').focus();
+      }
+
+      $('#swapCloseBtn').addEventListener('click', closeSwap);
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !$('#swapList').hidden) closeSwap();
+      });
+
       $('#swapBtn').addEventListener('click', async () => {
         const box = $('#swapList');
         if (!box.hidden) {
-          box.hidden = true;
+          setSwapOpen(false);
           return;
         }
-        box.hidden = false;
+        setSwapOpen(true);
         if (swapLoaded) return;
         try {
           const { accounts } = await api('/api/accounts');
-          box.replaceChildren();
+          const list = $('#swapCands');
+          list.replaceChildren();
           for (const account of accounts.filter((a) => a.role === 'farmer')) {
-            box.append(
+            list.append(
               el('button', {
                 class: 'cand',
                 type: 'button',

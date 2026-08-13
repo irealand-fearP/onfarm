@@ -23,6 +23,8 @@
         </a>
         <nav class="top-actions" aria-label="계정 메뉴">
           <span class="badge badge-muted" id="who">불러오는 중</span>
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
           <a class="nav-link" href="/login" aria-label="계정 바꾸기">
             <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.6-4 2.8-6 6.5-6s5.9 2 6.5 6" /></svg>
             <span class="nav-label">계정 바꾸기</span>
@@ -88,6 +90,9 @@
 
     <script type="module">
       import { $, api, el, money, toast, fulfillmentLabel, mountModeBanner, startAutoRefresh } from '/js/api.js';
+      import { mountDemoNav } from '/js/demo-nav.js';
+
+      mountDemoNav('#demoNavSlot');
 
       await mountModeBanner('#modeBanner');
       let session = null;

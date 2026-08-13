@@ -927,9 +927,52 @@ body.seller p {
   font-size: var(--fs-xs);
 }
 
-/* 농가 바꾸기 — 농민 계정만 큰 카드로 */
+/* 농가 바꾸기 — 농민 계정만 큰 카드로.
+   테두리로 묶어 "여기부터 여기까지가 농가 목록"임을 눈으로 알 수 있게 한다. */
 .swap-list {
   display: flex;
   flex-direction: column;
   gap: var(--gap-sm);
+  padding: var(--gap-sm);
+  border: 2px solid var(--line-strong);
+  border-radius: calc(16px * var(--u));
+  background: var(--surface-soft);
+}
+
+.swap-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.swap-head h2 {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.swap-close {
+  min-height: calc(40px * var(--u));
+  padding: 0 calc(14px * var(--u));
+  border: 1px solid var(--line-strong);
+  border-radius: calc(11px * var(--u));
+  background: var(--surface);
+  color: var(--t2);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.swap-cands {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.swap-foot {
+  margin: 0;
+  color: var(--t3);
+  font-size: var(--fs-xs);
 }
