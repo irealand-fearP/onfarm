@@ -1,0 +1,576 @@
+<title>온팜 두 개의 문</title>
+<style>
+:root{
+  --bg:#FFFFFF;
+  --bg-2:#F2F4F6;
+  --bg-3:#F9FAFB;
+  --surface:#FFFFFF;
+  --line:#E5E8EB;
+  --line-2:#D1D6DB;
+  --t1:#191F28;
+  --t2:#4E5968;
+  --t3:#8B95A1;
+  --t4:#B0B8C1;
+  --brand:#00C46A;
+  --brand-press:#00AC5C;
+  --brand-tint:#E4F9EE;
+  --brand-ink:#00874A;
+  --alert:#FF4D5E;
+  --peach:#FFE3D2;
+  --peach-2:#FFD0B5;
+  --lilac:#EAE4FF;
+  --butter:#FFF1C9;
+  --sky:#DCEEFF;
+  --shadow:0 1px 3px rgba(25,31,40,.06);
+  --shadow-lg:0 4px 12px rgba(25,31,40,.08),0 24px 48px rgba(25,31,40,.10);
+  --phone-ink:#FFFFFF;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#17171C;
+    --bg-2:#1F1F25;
+    --bg-3:#202027;
+    --surface:#26262E;
+    --line:#33333B;
+    --line-2:#41414B;
+    --t1:#F1F3F5;
+    --t2:#B6BDC5;
+    --t3:#878E96;
+    --t4:#5F666E;
+    --brand:#20D982;
+    --brand-press:#17BE70;
+    --brand-tint:#0F2A1D;
+    --brand-ink:#6BEAAC;
+    --alert:#FF6B77;
+    --peach:#3A2A20;
+    --peach-2:#4A3527;
+    --lilac:#2A2540;
+    --butter:#3A3320;
+    --sky:#1E2B3A;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+    --shadow-lg:0 4px 12px rgba(0,0,0,.5),0 24px 48px rgba(0,0,0,.55);
+    --phone-ink:#0C1711;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17171C;
+  --bg-2:#1F1F25;
+  --bg-3:#202027;
+  --surface:#26262E;
+  --line:#33333B;
+  --line-2:#41414B;
+  --t1:#F1F3F5;
+  --t2:#B6BDC5;
+  --t3:#878E96;
+  --t4:#5F666E;
+  --brand:#20D982;
+  --brand-press:#17BE70;
+  --brand-tint:#0F2A1D;
+  --brand-ink:#6BEAAC;
+  --alert:#FF6B77;
+  --peach:#3A2A20;
+  --peach-2:#4A3527;
+  --lilac:#2A2540;
+  --butter:#3A3320;
+  --sky:#1E2B3A;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+  --shadow-lg:0 4px 12px rgba(0,0,0,.5),0 24px 48px rgba(0,0,0,.55);
+  --phone-ink:#0C1711;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--t1);
+  font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,-apple-system,sans-serif;
+  font-size:16px;line-height:1.6;word-break:keep-all;
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"tnum" 0;
+}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4{margin:0;line-height:1.28;letter-spacing:-.035em;text-wrap:balance}
+p{margin:0}
+.eyebrow{font-size:13px;font-weight:700;color:var(--brand);letter-spacing:-.01em}
+.lede{color:var(--t2);font-size:17px;line-height:1.7;max-width:64ch;letter-spacing:-.02em}
+
+header.top{padding:88px 0 64px}
+.top h1{font-size:clamp(36px,5.4vw,60px);font-weight:800;margin:16px 0 20px}
+.top h1 em{font-style:normal;color:var(--brand)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}
+.chip{
+  font-size:13.5px;font-weight:600;padding:8px 14px;border-radius:10px;
+  background:var(--bg-2);color:var(--t2);
+}
+.chip b{color:var(--t1);font-weight:700}
+
+section{padding:72px 0;border-top:1px solid var(--line)}
+.sec-head{margin-bottom:36px}
+.sec-head h2{font-size:clamp(25px,3.4vw,36px);font-weight:800;margin:12px 0 14px}
+
+.diag{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:12px}
+.diag div{background:var(--bg-2);border-radius:16px;padding:22px}
+.diag .n{font-size:13px;font-weight:800;color:var(--brand);font-variant-numeric:tabular-nums}
+.diag h4{font-size:16.5px;font-weight:700;margin:10px 0 8px}
+.diag p{font-size:14.5px;color:var(--t2);line-height:1.62;letter-spacing:-.015em}
+
+.rail{display:flex;gap:24px;overflow-x:auto;padding:4px 4px 28px;scroll-snap-type:x proximity}
+.rail::-webkit-scrollbar{height:8px}
+.rail::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:8px}
+.slot{flex:0 0 auto;width:290px;scroll-snap-align:start}
+.slot-cap{margin-bottom:16px;min-height:70px}
+.slot-cap .step{
+  display:inline-block;font-size:12px;font-weight:800;color:var(--brand);
+  background:var(--brand-tint);border-radius:7px;padding:4px 9px;
+  font-variant-numeric:tabular-nums;
+}
+.slot-cap h4{font-size:16px;font-weight:700;margin:10px 0 5px}
+.slot-cap p{font-size:13.5px;color:var(--t2);line-height:1.55;letter-spacing:-.015em}
+
+.phone{
+  background:var(--surface);border-radius:30px;box-shadow:var(--shadow-lg);
+  overflow:hidden;height:668px;display:flex;flex-direction:column;
+  border:1px solid var(--line);
+}
+.phone.seller{font-size:17px}
+.phone.shop{font-size:14px}
+.bar{
+  height:30px;flex:0 0 30px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;font-size:11px;font-weight:700;color:var(--t1);
+  font-variant-numeric:tabular-nums;letter-spacing:0;
+}
+.screen{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* ─── 판매자 ─── */
+.s-head{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 16px}
+.s-head .who{font-size:22px;font-weight:800;letter-spacing:-.04em}
+.s-head .swap{font-size:13px;font-weight:600;color:var(--t2);background:var(--bg-2);border-radius:9px;padding:7px 12px}
+.s-body{flex:1;padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
+.shoot{
+  flex:1;border-radius:22px;background:var(--brand);color:var(--phone-ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;text-align:center;padding:22px;
+}
+.shoot .lens{width:72px;height:72px;border-radius:22px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center}
+.shoot .lens::after{content:"";width:30px;height:30px;border-radius:50%;border:4px solid var(--phone-ink)}
+.shoot .big{font-size:32px;font-weight:800;letter-spacing:-.05em}
+.shoot .sub{font-size:15px;font-weight:500;opacity:.82;letter-spacing:-.02em}
+.mic{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--t3);justify-content:center}
+.mic .dot{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.todo{background:var(--bg-2);border-radius:16px;padding:14px 16px}
+.todo .t{display:flex;align-items:center;justify-content:space-between;font-size:16px;font-weight:700}
+.todo .badge{background:var(--alert);color:#fff;border-radius:999px;font-size:12px;font-weight:800;padding:2px 8px;min-width:22px;text-align:center}
+.todo .t2{font-size:13.5px;color:var(--t2);margin-top:4px;letter-spacing:-.015em}
+
+.prog{padding:6px 18px 0}
+.prog .pt{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--t3)}
+.prog .pt b{color:var(--t1);font-weight:700}
+.prog .pb{height:5px;border-radius:5px;background:var(--bg-2);margin-top:9px;overflow:hidden}
+.prog .pb i{display:block;height:100%;background:var(--brand);border-radius:5px}
+.ask{font-size:26px;font-weight:800;padding:20px 18px 6px;letter-spacing:-.045em}
+.cands{padding:10px 18px;display:flex;flex-direction:column;gap:9px;flex:1}
+.cand{display:flex;align-items:center;gap:13px;border-radius:16px;padding:13px 14px;background:var(--bg-2)}
+.cand.on{background:var(--brand-tint);box-shadow:inset 0 0 0 2px var(--brand)}
+.cand .no{
+  width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--surface);
+  color:var(--t2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;
+}
+.cand.on .no{background:var(--brand);color:var(--phone-ink)}
+.cand .nm{display:block;font-size:20px;font-weight:800;letter-spacing:-.04em;line-height:1.25}
+.cand .cf{display:block;font-size:12.5px;color:var(--t3);margin-top:2px;font-weight:500}
+.cand.on .cf{color:var(--brand-ink);font-weight:600}
+.orb{width:40px;height:40px;flex:0 0 40px;border-radius:12px}
+.orb.pear{background:linear-gradient(145deg,#E8E08F,#B5A44A)}
+.orb.potato{background:linear-gradient(145deg,#D6B588,#9E7748)}
+.orb.onion{background:linear-gradient(145deg,#F2DFC4,#C09A6C)}
+.orb.tan{background:linear-gradient(145deg,#FFC濃6B,#EE8A18)}
+.orb.tan{background:linear-gradient(145deg,#FFC46B,#EE8A18)}
+.orb.sweet{background:linear-gradient(145deg,#BA5C80,#7A2B49)}
+.orb.apple{background:linear-gradient(145deg,#F0705F,#C02F29)}
+.foot{padding:10px 18px 18px;display:flex;flex-direction:column;gap:8px}
+.btn{border-radius:14px;padding:18px;text-align:center;font-weight:800;font-size:19px;background:var(--brand);color:var(--phone-ink);letter-spacing:-.03em}
+.btn.ghost{background:var(--bg-2);color:var(--t2);font-size:16px;padding:14px}
+.replay{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--t3)}
+
+.qty-wrap{flex:1;display:flex;flex-direction:column;padding:14px 18px 0;gap:14px}
+.qty-card{background:var(--bg-2);border-radius:16px;padding:14px 16px}
+.qty-card .lbl{font-size:13px;color:var(--t3);font-weight:600}
+.qty-card .val{font-size:18px;font-weight:800;margin-top:3px;letter-spacing:-.035em}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stepper .pm{
+  width:72px;height:72px;flex:0 0 72px;border-radius:20px;background:var(--bg-2);
+  color:var(--t1);font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+.stepper .num{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.05em;text-align:center;line-height:1.05}
+.stepper .num span{display:block;font-size:14px;font-weight:600;color:var(--t3);letter-spacing:-.02em;margin-top:2px}
+.boxes{display:flex;gap:6px;justify-content:center}
+.boxes i{width:24px;height:20px;border-radius:5px;background:var(--line-2);display:block}
+.sum{background:var(--brand-tint);border-radius:14px;padding:15px 16px;display:flex;align-items:baseline;justify-content:space-between}
+.sum .k{font-size:14px;color:var(--brand-ink);font-weight:700}
+.sum .v{font-size:26px;font-weight:800;color:var(--brand-ink);font-variant-numeric:tabular-nums;letter-spacing:-.045em}
+
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.done .tick{width:80px;height:80px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center}
+.done .tick::after{content:"";width:30px;height:16px;border-left:5px solid var(--phone-ink);border-bottom:5px solid var(--phone-ink);transform:rotate(-45deg) translate(3px,-4px)}
+.done h3{font-size:28px;font-weight:800;letter-spacing:-.05em}
+.done p{font-size:15.5px;color:var(--t2);letter-spacing:-.02em}
+
+/* ─── 소비자 ─── */
+.c-head{padding:8px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.c-head .logo{font-size:19px;font-weight:800;letter-spacing:-.05em;color:var(--t1)}
+.c-head .logo i{color:var(--brand);font-style:normal}
+.c-head .ico{display:flex;gap:12px;font-size:12px;color:var(--t2);font-weight:600}
+.c-search{margin:0 16px;background:var(--bg-2);border-radius:12px;padding:11px 14px;font-size:13.5px;color:var(--t3);font-weight:500}
+.promo{
+  margin:14px 16px 0;border-radius:16px;padding:15px 16px;
+  background:linear-gradient(118deg,var(--peach),var(--peach-2));
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.promo .pt1{display:block;font-size:12px;font-weight:800;color:#C2410C;letter-spacing:-.02em}
+.promo .pt2{display:block;font-size:15.5px;font-weight:800;color:#7C2D12;margin-top:3px;letter-spacing:-.035em;line-height:1.35}
+:root[data-theme="dark"] .promo .pt1,:root:not([data-theme="light"]) .promo .pt1{color:#F9A66C}
+:root[data-theme="dark"] .promo .pt2,:root:not([data-theme="light"]) .promo .pt2{color:#FFD9BC}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]) .promo .pt1{color:#C2410C}
+  :root:not([data-theme="dark"]) .promo .pt2{color:#7C2D12}
+}
+.promo .blob{width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:linear-gradient(145deg,#FFB27A,#F17A3C)}
+.quick{display:flex;gap:8px;padding:12px 16px 0}
+.quick div{
+  flex:1;border-radius:14px;padding:12px 10px;text-align:center;
+}
+.quick .q1{background:var(--brand-tint)}
+.quick .q2{background:var(--lilac)}
+.quick .q3{background:var(--butter)}
+.quick i{display:block;width:26px;height:26px;border-radius:9px;margin:0 auto 7px}
+.quick .q1 i{background:var(--brand)}
+.quick .q2 i{background:#9C86F0}
+.quick .q3 i{background:#F2B93B}
+.quick b{display:block;font-size:11.5px;font-weight:700;color:var(--t1);letter-spacing:-.025em}
+.c-tabs{display:flex;gap:6px;padding:16px 16px 6px;overflow:hidden}
+.c-tabs span{font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:999px;background:var(--bg-2);color:var(--t2);white-space:nowrap}
+.c-tabs span.on{background:var(--t1);color:var(--bg);font-weight:700}
+.grid2{padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;overflow:hidden;flex:1}
+.card .ph{aspect-ratio:1/1;border-radius:14px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-2)}
+.card .ph.t-mint{background:var(--brand-tint)}
+.card .ph.t-peach{background:var(--peach)}
+.card .ph.t-lilac{background:var(--lilac)}
+.card .ph.t-butter{background:var(--butter)}
+.card .ph .orb{width:66%;height:66%;flex:none;border-radius:50%}
+.card .stamp{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.94);border-radius:6px;font-size:10px;font-weight:800;padding:3px 7px;color:var(--brand-ink)}
+:root[data-theme="dark"] .card .stamp,
+:root:not([data-theme="light"]) .card .stamp{background:rgba(0,0,0,.7);color:var(--brand)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .card .stamp{background:rgba(255,255,255,.94);color:var(--brand-ink)}}
+.card .farm{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--t3);margin-top:9px;font-weight:600}
+.card .face{width:16px;height:16px;border-radius:50%;flex:0 0 16px;background:linear-gradient(140deg,#9AA5B1,#5C6670)}
+.card .nm{font-size:13.5px;font-weight:600;margin-top:3px;line-height:1.4;letter-spacing:-.03em;color:var(--t1);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.card .un{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .pr{font-size:17px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.card .un{font-size:11.5px;color:var(--t3);font-weight:500}
+.tabbar{
+  border-top:1px solid var(--line);display:flex;padding:9px 0 12px;background:var(--surface);
+}
+.tabbar span{flex:1;text-align:center;font-size:10.5px;font-weight:600;color:var(--t4)}
+.tabbar span.on{color:var(--brand);font-weight:700}
+.tabbar span b{display:block;font-size:16px;font-weight:400;margin-bottom:2px}
+
+.d-hero{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg-2);flex:0 0 auto}
+.d-hero .orb{width:56%;height:56%;flex:none;border-radius:50%}
+.d-body{padding:16px;display:flex;flex-direction:column;gap:13px;flex:1;overflow:hidden}
+.d-body h3{font-size:19px;font-weight:800;line-height:1.38;letter-spacing:-.04em}
+.grower{display:flex;gap:11px;align-items:center;background:var(--bg-2);border-radius:14px;padding:12px}
+.grower .face{width:38px;height:38px;border-radius:50%;flex:0 0 38px;background:linear-gradient(140deg,#9AA5B1,#5C6670)}
+.grower .g1{display:block;font-size:13.5px;font-weight:700;letter-spacing:-.025em}
+.grower .g2{display:block;font-size:11.5px;color:var(--t3);margin-top:2px;font-weight:500}
+.tl{display:flex;flex-direction:column;gap:11px}
+.tl .row{display:flex;gap:10px;align-items:flex-start;font-size:12.5px}
+.tl .pip{width:14px;height:14px;border-radius:50%;flex:0 0 14px;margin-top:2px;background:var(--brand)}
+.tl .pip.wait{background:var(--bg-2);box-shadow:inset 0 0 0 2px var(--line-2)}
+.tl .k{font-weight:700;letter-spacing:-.02em}
+.tl .v{color:var(--t3);font-size:11.5px;font-weight:500}
+.buybar{border-top:1px solid var(--line);padding:12px 16px 14px;display:flex;gap:10px;align-items:center}
+.buybar .p{flex:1}
+.buybar .p b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.045em}
+.buybar .p span{display:block;font-size:11.5px;color:var(--t3);font-weight:500}
+.buybar .go{background:var(--brand);color:var(--phone-ink);border-radius:12px;padding:14px 26px;font-weight:800;font-size:15px;letter-spacing:-.03em}
+
+/* 구조 */
+.arch{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:12px}
+.node{border-radius:18px;padding:24px;background:var(--bg-2)}
+.node .u{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--t3);font-weight:600}
+.node h4{font-size:19px;font-weight:800;margin:10px 0 12px}
+.node ul{margin:0;padding-left:18px;color:var(--t2);font-size:14.5px;line-height:1.8;letter-spacing:-.02em}
+.node.core{background:var(--brand)}
+.node.core .u{color:color-mix(in srgb,var(--phone-ink) 62%,transparent)}
+.node.core h4,.node.core ul{color:var(--phone-ink)}
+
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+.tbl th,.tbl td{text-align:left;padding:14px;border-bottom:1px solid var(--line);vertical-align:top;letter-spacing:-.02em}
+.tbl th{font-size:12.5px;color:var(--t3);font-weight:700}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl .no{color:var(--t3)}
+.tbl .yes{color:var(--brand);font-weight:700}
+.scroll{overflow-x:auto}
+
+.swatch{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.sw{border-radius:12px;overflow:hidden;background:var(--bg-2);width:118px}
+.sw i{display:block;height:52px}
+.sw span{display:block;padding:8px 10px;font-size:11px;font-weight:700;color:var(--t2);font-family:ui-monospace,Menlo,monospace}
+.sw em{display:block;padding:0 10px 9px;font-size:11.5px;color:var(--t3);font-style:normal;font-weight:600;font-family:inherit}
+
+.note{margin-top:20px;background:var(--bg-2);border-radius:14px;padding:16px 18px;color:var(--t2);font-size:14.5px;max-width:70ch;letter-spacing:-.02em}
+.note b{color:var(--t1)}
+footer{padding:48px 0 72px;color:var(--t3);font-size:13.5px;border-top:1px solid var(--line)}
+@media (max-width:640px){.wrap{padding:0 18px}section{padding:52px 0}header.top{padding:56px 0 44px}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">ON-FARM 개편 시안 · v2</p>
+    <h1>문을 두 개로 나눕니다.<br><em>파는 사람</em>과 <em>사는 사람</em>은<br>같은 화면을 쓰지 않습니다.</h1>
+    <p class="lede">지금 온팜은 좋은 기능이 잘못된 문 뒤에 숨어 있습니다. 등록은 이미 탭 다섯 번·타이핑 없이 끝나는데, 어르신이 그 화면까지 도달하지 못합니다. 기능을 더하지 않고 <b>입구와 밀도</b>만 다시 설계했습니다.</p>
+    <div class="meta">
+      <span class="chip">서버 <b>1개</b></span>
+      <span class="chip">DB <b>1개</b> · 주문·정산 그대로</span>
+      <span class="chip">입구 <b>2개</b></span>
+      <span class="chip">목적 <b>공모전 시연</b></span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">디자인 방향</p>
+      <h2>밝은 그린 하나에 파스텔 보조색</h2>
+      <p class="lede">버튼과 강조는 <b>쨍한 연둣빛 그린</b> 하나로 통일하고, 배너와 분류 타일에만 파스텔을 얇게 깝니다. 글자와 배경은 전부 무채색이라 화면이 붕 뜨지 않으면서도 화사합니다.</p>
+    </div>
+    <div class="swatch">
+      <div class="sw"><i style="background:#FFFFFF;box-shadow:inset 0 0 0 1px var(--line)"></i><span>#FFFFFF</span><em>기본 배경</em></div>
+      <div class="sw"><i style="background:#F2F4F6"></i><span>#F2F4F6</span><em>카드·구분 면</em></div>
+      <div class="sw"><i style="background:#191F28"></i><span>#191F28</span><em>본문 글자</em></div>
+      <div class="sw"><i style="background:#00C46A"></i><span>#00C46A</span><em>브랜드 그린</em></div>
+      <div class="sw"><i style="background:#FFE3D2"></i><span>#FFE3D2</span><em>배너 피치</em></div>
+      <div class="sw"><i style="background:#EAE4FF"></i><span>#EAE4FF</span><em>타일 라일락</em></div>
+      <div class="sw"><i style="background:#FFF1C9"></i><span>#FFF1C9</span><em>타일 버터</em></div>
+      <div class="sw"><i style="background:#FF4D5E"></i><span>#FF4D5E</span><em>알림 배지만</em></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">진단</p>
+      <h2>고칠 것은 네 가지뿐입니다</h2>
+      <p class="lede">직접 띄워서 확인한 결과입니다. 음성 안내·큰 버튼·자동 가격 생성은 이미 잘 만들어져 있어 그대로 둡니다.</p>
+    </div>
+    <div class="diag">
+      <div><p class="n">01</p><h4>판매자에게 소비자 화면이 첫 문</h4><p>주소를 치면 장터가 뜹니다. 농민은 자기 화면을 스스로 찾아가야 합니다.</p></div>
+      <div><p class="n">02</p><h4>로그인이 벽이 됩니다</h4><p>판매자 화면으로 직행해도 계정 아홉 개 목록이 먼저 뜹니다. 어르신은 여기서 멈춥니다.</p></div>
+      <div><p class="n">03</p><h4>홈에 정보가 너무 많습니다</h4><p>핵심 버튼 아래로 주문·상품·정산·설명이 이어집니다. 등록이 메뉴 다섯 개 중 하나로 묻힙니다.</p></div>
+      <div><p class="n">04</p><h4>상품이 전부 일러스트입니다</h4><p>카드마다 “실제 사진 아님”이 붙습니다. 직거래의 핵심인 신뢰가 첫 화면에서 깎입니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">판매자 · seller.온팜</p>
+      <h2>홈을 없애고, 접속하면 곧장 등록</h2>
+      <p class="lede">어르신에게 홈 화면은 “고르는 부담”입니다. 문을 열면 이미 등록 1단계입니다. 로그인 화면도, 하단 탭 다섯 개도 없습니다. 본문 19px·버튼 68px 이상은 유지하고, 화면당 결정은 <b>하나씩만</b> 묻습니다.</p>
+    </div>
+    <div class="rail">
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 1</span><h4>접속 즉시</h4><p>로그인 없음. 화면 절반이 사진 버튼입니다.</p></div>
+        <div class="phone seller">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="s-head"><span class="who">김복순님</span><span class="swap">농가 바꾸기</span></div>
+            <div class="s-body">
+              <div class="shoot"><div class="lens"></div><div class="big">사진 찍기</div><div class="sub">찍으면 나머지는 저희가 합니다</div></div>
+              <p class="mic"><span class="dot"></span>“사진 찍어 주세요” 음성 안내 중</p>
+              <div class="todo"><div class="t"><span>오늘 할 일</span><span class="badge">2</span></div><p class="t2">보낼 주문 2건 · 받을 돈 46,000원</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 2</span><h4>이게 맞나요</h4><p>후보가 하나여도 반드시 고르게 합니다. 오등록이 줄어듭니다.</p></div>
+        <div class="phone seller">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="prog"><div class="pt"><span><b>2 / 3</b> 품목 고르기</span><span>거의 다 됐어요</span></div><div class="pb"><i style="width:66%"></i></div></div>
+            <p class="ask">어느 것인가요?</p>
+            <div class="cands">
+              <div class="cand on"><span class="no">1</span><span class="orb pear"></span><span><span class="nm">배</span><span class="cf">가장 비슷해요</span></span></div>
+              <div class="cand"><span class="no">2</span><span class="orb onion"></span><span><span class="nm">양파</span><span class="cf">비슷할 수 있어요</span></span></div>
+              <div class="cand"><span class="no">3</span><span class="orb potato"></span><span><span class="nm">감자</span><span class="cf">비슷할 수 있어요</span></span></div>
+              <p class="replay">🔊 다시 들려주세요</p>
+            </div>
+            <div class="foot"><div class="btn">1번 배가 맞아요</div><div class="btn ghost">셋 다 아니에요</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 3</span><h4>몇 상자인가요</h4><p>최종 확인을 같은 화면 아래로 합쳤습니다. 탭이 한 번 줄어듭니다.</p></div>
+        <div class="phone seller">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="prog"><div class="pt"><span><b>3 / 3</b> 수량 확인</span><span>마지막이에요</span></div><div class="pb"><i style="width:100%"></i></div></div>
+            <div class="qty-wrap">
+              <div class="qty-card"><p class="lbl">복순이네 배농장 · 천안 성환읍</p><p class="val">배 · 5kg 한 상자 · 29,000원</p></div>
+              <div class="stepper"><div class="pm">−</div><div class="num">3<span>상자</span></div><div class="pm">+</div></div>
+              <div class="boxes"><i></i><i></i><i></i></div>
+              <p class="replay">🎙 “세 상자”라고 말해도 됩니다</p>
+              <div class="sum"><span class="k">받을 돈</span><span class="v">87,000원</span></div>
+            </div>
+            <div class="foot"><div class="btn">이대로 팔기</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 4</span><h4>끝났습니다</h4><p>다음 행동을 두 개로만 제시합니다.</p></div>
+        <div class="phone seller">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="done">
+              <div class="tick"></div>
+              <h3>다 됐습니다</h3>
+              <p>배 3상자를 지금부터 팝니다</p>
+              <div class="sum" style="width:100%"><span class="k">팔리면 받을 돈</span><span class="v">87,000원</span></div>
+            </div>
+            <div class="foot"><div class="btn">하나 더 올리기</div><div class="btn ghost">그만하기</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><b>탭 5번 → 4번.</b> 로그인 한 번과 최종 확인 한 번을 없앴습니다. 대신 “품목 고르기”는 남겼습니다. 후보가 하나여도 고르게 하는 그 한 번이 오등록을 막는 안전장치라, 줄이면 안 됩니다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">소비자 · 온팜</p>
+      <h2>농산물이 아니라 사람을 먼저 보여줍니다</h2>
+      <p class="lede">일러스트를 걷어내고 실사 이미지를 씁니다. 대신 “시연용 이미지”라고 정직하게 표기해 프로젝트의 원칙을 지킵니다. 카드마다 생산자와 거점 검수 상태를 올려, 가격보다 신뢰가 먼저 읽히게 했습니다.</p>
+    </div>
+    <div class="rail">
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 1</span><h4>오늘의 산지</h4><p>카드마다 농가 이름과 검수 배지가 붙습니다.</p></div>
+        <div class="phone shop">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="c-head"><span class="logo">ON<i>·</i>FARM</span><span class="ico">알림 · 장바구니</span></div>
+            <div class="c-search">🔍 배, 감자, 농가 이름</div>
+            <div class="promo">
+              <span><span class="pt1">오늘 아침 수확</span><span class="pt2">해 뜨자마자 딴 것만<br>모아 봤어요</span></span>
+              <span class="blob"></span>
+            </div>
+            <div class="quick">
+              <div class="q1"><i></i><b>검수 완료</b></div>
+              <div class="q2"><i></i><b>오늘 수확</b></div>
+              <div class="q3"><i></i><b>마감 임박</b></div>
+            </div>
+            <div class="c-tabs"><span class="on">전체</span><span>충남</span><span>충북</span><span>제주</span><span>배</span></div>
+            <div class="grid2">
+              <div class="card"><div class="ph t-butter"><span class="stamp">검수 완료</span><span class="orb pear"></span></div><p class="farm"><span class="face"></span>복순이네 배농장</p><p class="nm">오늘 딴 천안 신고배</p><p class="pr">29,000원</p><p class="un">5kg 한 상자 · 8개 남음</p></div>
+              <div class="card"><div class="ph t-peach"><span class="stamp">검수 완료</span><span class="orb tan"></span></div><p class="farm"><span class="face"></span>한라감귤원</p><p class="nm">서귀포 노지감귤</p><p class="pr">18,000원</p><p class="un">3kg 한 상자 · 10개 남음</p></div>
+              <div class="card"><div class="ph t-lilac"><span class="stamp">검수 완료</span><span class="orb sweet"></span></div><p class="farm"><span class="face"></span>정자네 텃밭</p><p class="nm">괴산 호박고구마</p><p class="pr">15,000원</p><p class="un">3kg 한 상자 · 5개 남음</p></div>
+              <div class="card"><div class="ph t-mint"><span class="stamp">검수 완료</span><span class="orb apple"></span></div><p class="farm"><span class="face"></span>만수농원</p><p class="nm">충주 앙성 부사</p><p class="pr">32,000원</p><p class="un">5kg 한 상자 · 6개 남음</p></div>
+            </div>
+            <div class="tabbar"><span class="on"><b>⌂</b>홈</span><span><b>⌕</b>검색</span><span><b>♡</b>찜</span><span><b>▤</b>주문</span><span><b>○</b>내정보</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 2</span><h4>누가 길렀는지</h4><p>생산자 카드를 사진 바로 아래로 올렸습니다.</p></div>
+        <div class="phone shop">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="d-hero t-butter" style="background:var(--butter)"><span class="orb pear"></span><span class="stamp" style="position:absolute;left:12px;top:12px">시연용 이미지</span></div>
+            <div class="d-body">
+              <h3>천안 성환읍에서 08월 12일 딴 신고배</h3>
+              <div class="grower"><span class="face"></span><span><span class="g1">김복순 · 복순이네 배농장</span><span class="g2">충남 천안시 성환읍 · 성환거점 배송</span></span></div>
+              <div class="tl">
+                <div class="row"><span class="pip"></span><span><span class="k">AI 품목 확인</span><br><span class="v">배 · 참고 판정 (등급은 확정 아님)</span></span></div>
+                <div class="row"><span class="pip"></span><span><span class="k">거점 실물 검수</span><br><span class="v">성환거점 담당자가 직접 보고 상급 확정</span></span></div>
+                <div class="row"><span class="pip wait"></span><span><span class="k">배송 준비</span><br><span class="v">주문하면 거점에서 포장합니다</span></span></div>
+              </div>
+            </div>
+            <div class="buybar"><span class="p"><b>29,000원</b><span>5kg 한 상자</span></span><span class="go">담기</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="slot-cap"><span class="step">화면 3</span><h4>주문 뒤에도 보입니다</h4><p>거점이 어디까지 처리했는지 계속 확인합니다.</p></div>
+        <div class="phone shop">
+          <div class="bar"><span>9:41</span><span>●●●</span></div>
+          <div class="screen">
+            <div class="c-head"><span class="logo">주문 내역</span><span class="ico">240813-004192</span></div>
+            <div class="d-body">
+              <div class="grower"><span class="orb pear" style="width:38px;height:38px;flex:0 0 38px;border-radius:10px"></span><span><span class="g1">천안 신고배 5kg · 1상자</span><span class="g2">복순이네 배농장 · 29,000원</span></span></div>
+              <div class="tl">
+                <div class="row"><span class="pip"></span><span><span class="k">주문 접수</span><br><span class="v">08월 13일 09:12</span></span></div>
+                <div class="row"><span class="pip"></span><span><span class="k">농가 준비 완료</span><br><span class="v">김복순님이 거점으로 보냈습니다</span></span></div>
+                <div class="row"><span class="pip"></span><span><span class="k">거점 입고·검수</span><br><span class="v">성환거점 · 상급 확정</span></span></div>
+                <div class="row"><span class="pip wait"></span><span><span class="k">배송 중</span><br><span class="v">대기 중</span></span></div>
+                <div class="row"><span class="pip wait"></span><span><span class="k">배송 완료</span><br><span class="v">대기 중</span></span></div>
+              </div>
+            </div>
+            <div class="tabbar"><span><b>⌂</b>홈</span><span><b>⌕</b>검색</span><span><b>♡</b>찜</span><span class="on"><b>▤</b>주문</span><span><b>○</b>내정보</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><b>정직성 원칙은 그대로 지킵니다.</b> 실사 이미지에는 “시연용 이미지” 표기를 붙이고, AI 등급은 계속 “참고 판정”, 확정 등급은 거점 검수 결과로만 표시합니다. 이 원칙이 심사에서 가장 강한 무기라 훼손하지 않습니다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">구조</p>
+      <h2>화면은 셋, 서버와 DB는 하나</h2>
+      <p class="lede">도메인을 사면 주소로 갈리고, 없으면 경로로 갈립니다. 어느 쪽이든 같은 서버·같은 DB라 주문과 정산이 세 화면에서 그대로 이어집니다.</p>
+    </div>
+    <div class="arch">
+      <div class="node"><p class="u">seller.온팜 · /seller</p><h4>판매자</h4><ul><li>첫 화면이 곧 등록 1단계</li><li>로그인 화면 없음</li><li>본문 19px · 버튼 68px 이상</li><li>음성 안내·음성 수량 입력</li></ul></div>
+      <div class="node core"><p class="u">서버 1 · SQLite 1</p><h4>공용 엔진</h4><ul><li>표준 SKU가 가격의 유일한 출처</li><li>재고 차감은 한 트랜잭션</li><li>AI 참고 등급 ↔ 거점 확정 등급 분리</li><li>역할별 접근 제어</li></ul></div>
+      <div class="node"><p class="u">온팜 · /shop</p><h4>소비자</h4><ul><li>실사 이미지 + 생산자 노출</li><li>검수 타임라인 상시 표시</li><li>구매 3탭 · 하단 탭바</li><li>본문 16px 표준 밀도</li></ul></div>
+    </div>
+    <p class="note">거점 화면은 이번에 기능을 바꾸지 않습니다. 다만 지금 거점 CSS가 소비자 CSS 파일 안에 얹혀 있어, 소비자 화면을 고치면 거점이 함께 깨집니다. <b>파일 분리만</b> 먼저 합니다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head"><p class="eyebrow">작업 범위</p><h2>무엇을 건드리고, 무엇을 남기나</h2></div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>영역</th><th>조치</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr><td>등록 파이프라인</td><td class="no">그대로 둠</td><td>사진→인식→SKU→문안 5단계가 이미 견고하고 테스트가 덮고 있음</td></tr>
+          <tr><td>음성 안내·수량 인식</td><td class="no">그대로 둠</td><td>낭독 속도, “일번/이번” 교정, “다섯 상자” 파싱까지 완성도가 높음</td></tr>
+          <tr><td>가격·등급 원칙</td><td class="no">그대로 둠</td><td>심사에서 가장 강한 차별점</td></tr>
+          <tr><td>진입 라우팅</td><td class="yes">새로 만듦</td><td>주소로 판매자·소비자를 가름</td></tr>
+          <tr><td>판매자 화면</td><td class="yes">새로 만듦</td><td>홈 삭제, 등록을 첫 화면으로, 하단 탭 제거</td></tr>
+          <tr><td>소비자 화면</td><td class="yes">전면 개편</td><td>실사 이미지, 생산자·검수 전면 배치</td></tr>
+          <tr><td>CSS</td><td class="yes">3개로 분리</td><td>거점이 소비자 파일에 얹혀 있어 개편 시 동반 파손</td></tr>
+          <tr><td>거점 화면</td><td class="no">기능 유지</td><td>CSS만 떼어냄</td></tr>
+          <tr><td>결제·본인확인</td><td class="no">범위 밖</td><td>시연 목적에 불필요</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">화면은 시안이며 실제 구현 시 여백과 문구가 다듬어집니다. 상품 이미지는 색·형태만 표현한 자리표시로, 확정되면 실사 이미지로 교체합니다.</div>
+</footer>
