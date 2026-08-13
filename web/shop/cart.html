@@ -22,6 +22,8 @@
         <span class="shop-top-title">장바구니</span>
         <div class="shop-top-actions">
           <span class="shop-top-title" id="who"></span>
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
         </div>
       </header>
 
@@ -52,8 +54,10 @@
       import { $, api, el, money, me, toast } from '/js/api.js';
       import { clearCart, readCart, setQuantity, writeCart } from '/js/cart.js';
       import { mountCartBadges, photoImg } from '/js/shop-ui.js';
+      import { mountDemoNav } from '/js/demo-nav.js';
 
       mountCartBadges();
+      mountDemoNav('#demoNavSlot');
 
       const session = await me();
       $('#who').textContent = session?.user?.role === 'consumer' ? `${session.user.name}님` : '로그인 필요';

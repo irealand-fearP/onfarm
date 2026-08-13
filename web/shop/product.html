@@ -21,6 +21,8 @@
         </a>
         <span class="shop-top-title" id="topTitle">상품 정보</span>
         <div class="shop-top-actions">
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
           <a class="icon-button" href="/shop/cart" aria-label="장바구니">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7M9 20h.01M17 20h.01" /></svg>
             <span class="cart-badge" data-cart-count hidden>0</span>
@@ -43,8 +45,10 @@
       import { $, api, el, money } from '/js/api.js';
       import { addToCart } from '/js/cart.js';
       import { mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
+      import { mountDemoNav } from '/js/demo-nav.js';
 
       mountCartBadges();
+      mountDemoNav('#demoNavSlot');
       const id = Number(new URLSearchParams(location.search).get('id'));
       const main = $('#mainContent');
 

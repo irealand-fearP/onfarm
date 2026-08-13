@@ -405,7 +405,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 176px;
+  width: 224px;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -455,6 +455,102 @@ a {
   font-size: 10.5px;
   font-style: normal;
   font-weight: 700;
+}
+
+/* 데이터 초기화 — 이동 항목과 성격이 달라 선으로 끊어 둔다(잘못 누르지 않게). */
+.demo-nav-sep {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+.demo-nav-reset {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.demo-nav-reset[hidden] {
+  display: none;
+}
+
+.demo-nav-reset:hover {
+  border-color: var(--danger);
+}
+
+.demo-nav-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: var(--danger-tint);
+}
+
+.demo-nav-confirm[hidden] {
+  display: none;
+}
+
+.demo-nav-confirm p {
+  margin: 0;
+  color: var(--t1);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.demo-nav-confirm-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.demo-nav-confirm-actions button {
+  flex: 1 1 0;
+  min-height: 34px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.demo-nav-cancel {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--t2);
+}
+
+.demo-nav-danger {
+  border: 0;
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.demo-nav-danger:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.demo-nav-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.demo-nav-error[hidden] {
+  display: none;
 }
 
 .demo-nav-close {

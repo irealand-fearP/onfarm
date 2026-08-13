@@ -19,6 +19,8 @@
         <span class="shop-top-title">주문 내역</span>
         <div class="shop-top-actions">
           <span class="shop-top-title" id="hint"></span>
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
         </div>
       </header>
 
@@ -50,8 +52,45 @@
       import { $, api, dateTimeKst, el, money, me, fulfillmentLabel, toast, startAutoRefresh } from '/js/api.js';
       import { readCart, writeCart } from '/js/cart.js';
       import { mountCartBadges } from '/js/shop-ui.js';
+      import { mountDemoNav, goToDemoTarget } from '/js/demo-nav.js';
 
       mountCartBadges();
+      mountDemoNav('#demoNavSlot');
+
+      // 상태별로 "다음에 누가 무엇을 하는지".
+      // 주문 직후 '주문 접수'에서 멈춰 있는 건 정상이지만, 화면이 그 사실을 말해주지 않으면
+      // 시연이 막힌 것처럼 보인다. 다음 주체와 그 역할 화면으로 가는 길을 함께 둔다.
+      const NEXT_STEP = {
+        farmer_preparing: { who: '생산자', what: '상품을 준비해 거점으로 보냅니다', site: 'seller', go: '판매자 화면으로' },
+        ready_for_hub: { who: '거점', what: '들어온 상품의 입고를 확인합니다', site: 'hub', go: '거점 화면으로' },
+        hub_received: { who: '거점', what: '실물을 검수해 등급을 확정합니다', site: 'hub', go: '거점 화면으로' },
+        hub_passed: { who: '거점', what: '포장을 마치고 배송을 시작합니다', site: 'hub', go: '거점 화면으로' },
+        ready_to_ship: { who: '거점', what: '배송이 끝나면 배송 완료로 바꿉니다', site: 'hub', go: '거점 화면으로' },
+        delivered: { who: '생산자', what: '정산 예정 금액을 확인합니다', site: 'seller', go: '판매자 화면으로' },
+      };
+
+      function nextStepHint(item) {
+        // 반려된 건은 다음 단계가 아니라 환불 안내가 이어지므로 여기서는 다루지 않는다.
+        if (item.has_rejection) return null;
+        const next = NEXT_STEP[item.fulfillment_status];
+        if (!next) return null;
+
+        return el('p', { class: 'next-step' }, [
+          el('span', { class: 'next-step-text' }, [
+            '다음 단계 — ',
+            el('strong', { text: next.who }),
+            `가 ${next.what}.`,
+          ]),
+          // 시연 편의: 시연 메뉴와 같은 이동 수단(역할 로그인 + 이동)을 재사용한다.
+          el('button', {
+            class: 'next-step-go',
+            type: 'button',
+            text: next.go,
+            'aria-label': `${item.title} · ${next.go} 이동`,
+            onclick: () => void goToDemoTarget(next.site),
+          }),
+        ]);
+      }
 
       // 주문 상품 한 건이 지나는 6단계. 반려되면 그 자리에서 멈추고 붉게 표시한다.
       const ORDER_STEPS = [
@@ -156,6 +195,7 @@
                 ]),
               ]),
               orderTrack(item),
+              nextStepHint(item),
               item.has_rejection
                 ? el('div', { class: 'rejection' }, [
                     el('p', {}, [el('strong', { text: '반려 사유 · ' }), item.rejection_note || '사유가 등록되지 않았습니다.']),

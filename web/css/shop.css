@@ -1177,6 +1177,51 @@ body.shop img {
   font-weight: 500;
 }
 
+/* 타임라인 아래 "다음 단계" 안내 — 지금 멈춰 있는 게 아니라 누구 차례인지 알려준다. */
+.next-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--brand-tint);
+}
+
+.next-step-text {
+  flex: 1 1 180px;
+  color: var(--t1);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.next-step-text strong {
+  color: var(--brand-strong);
+  font-weight: 800;
+}
+
+.next-step-go {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--brand-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--brand-strong);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.next-step-go:hover {
+  background: var(--surface-soft);
+}
+
 /* 표 형태의 근거 공개 */
 .fact-card {
   padding: 14px;

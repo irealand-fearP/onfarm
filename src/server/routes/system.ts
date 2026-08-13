@@ -86,16 +86,22 @@ export function registerSystemRoutes(router: Router): void {
   /**
    * 시연 직전에 데이터를 초기 상태로 되돌린다.
    *
+   * 이것은 **시연 전용 장치**다. 운영 서비스에는 있으면 안 되는 기능이므로
+   * 켜고 끄는 스위치를 코드 밖(환경변수)에 둔다.
+   *
    * 되돌릴 수 없는 동작이라 두 겹으로 막는다.
-   *  - loopback 요청만 허용 (원격에서 남의 데모를 지울 수 없게)
+   *  - DEMO_RESET_ENABLED 가 켜져 있을 때만 허용 (기본 true — 시연 배포에서 쓰려고)
    *  - 본문에 confirm 문자열 요구 (다른 사이트가 자동 제출하는 폼 한 방에 지워지지 않게)
+   *
+   * 예전에는 요청지 IP 가 loopback 인지로 막았다. 그런데 프록시 뒤(Vercel)에서는
+   * remoteAddress 가 내부 주소로 보여 **우연히** 통과했다. 즉 의도한 보호도 아니고
+   * 의도한 허용도 아니었다. 우연에 기대지 않도록 명시적인 스위치로 바꾼다.
+   *
    * DB 파일을 지우지 않고 표만 비운다 — 진행 중인 요청이 닫힌 핸들을 잡는 사고를 없애기 위함.
    */
   router.post('/api/demo/reset', async (ctx) => {
-    const remote = ctx.req.socket.remoteAddress ?? '';
-    const isLocal = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
-    if (!isLocal) {
-      throw new HttpError(403, '데모 초기화는 로컬에서만 가능합니다.', 'forbidden');
+    if (!config.demoResetEnabled) {
+      throw new HttpError(403, '데모 초기화가 꺼져 있습니다.', 'forbidden');
     }
 
     const body = await ctx.body<{ confirm?: string }>();

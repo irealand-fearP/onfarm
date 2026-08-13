@@ -90,6 +90,12 @@
       import { $, api, mountModeBanner, toast } from '/js/api.js';
 
       await mountModeBanner('#modeBanner');
+
+      // 다른 화면의 시연 메뉴에서 초기화하면 세션이 사라져 이곳으로 돌아온다.
+      // 무슨 일이 있었는지 도착한 화면에서도 한 번 더 말해준다.
+      if (new URLSearchParams(location.search).get('reset') === '1') {
+        toast('데이터를 초기 상태로 되돌렸습니다. 역할을 다시 골라 주세요.');
+      }
       const config = await api('/api/config');
       $('#cfgProvider').textContent = config.ai.provider;
       $('#cfgOffline').textContent = config.ai.offline ? '없음 · 로컬 판정' : '있음 · 외부 API';

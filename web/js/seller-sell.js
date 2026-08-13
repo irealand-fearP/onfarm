@@ -6,6 +6,7 @@ import { prepareImage } from '/js/features.js';
 import { canListen, listenQuantity, repeatLast, speak } from '/js/speak.js';
 import { speakPrice, speakWeight, sinoNumber, nativeCount } from '/js/shared/korean.js';
 import { mountDensityToggle } from '/js/seller-density.js';
+import { mountDemoNav } from '/js/demo-nav.js';
 
 const state = {
   session: null,
@@ -442,6 +443,7 @@ $('#backBtn').addEventListener('click', () => {
 
 /* ───────── 부팅 ───────── */
 mountDensityToggle('#densityBtn');
+mountDemoNav('#demoNavSlot');
 const cfg = await mountModeBanner('#modeBanner');
 state.catalog = cfg?.products ?? [];
 state.session = await requireRole('farmer');
