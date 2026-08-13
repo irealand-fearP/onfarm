@@ -205,109 +205,6 @@ body.shop img {
   cursor: pointer;
 }
 
-/* ───────── 피치 배너 ───────── */
-.shop-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 14px 16px 0;
-  padding: 16px;
-  border-radius: 16px;
-  background: var(--peach);
-}
-
-.shop-banner .b1 {
-  display: block;
-  color: var(--t2);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.shop-banner .b2 {
-  display: block;
-  margin-top: 4px;
-  color: var(--t1);
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.38;
-}
-
-/* 아침 해 — 배너의 피치 위에 얹히므로 브랜드 그린이 아니라 따뜻한 버터색을 쓴다. */
-.shop-banner .sun {
-  flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--butter);
-  box-shadow: 0 0 0 6px var(--butter);
-  opacity: 0.75;
-}
-
-/* ───────── 퀵 타일 3개 ───────── */
-/* 장식이 아니라 실제 목록 필터다. 눌린 상태를 aria-pressed 로 알린다. */
-.quick-tiles {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px 0;
-}
-
-.quick-tile {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 8px;
-  border: 2px solid transparent;
-  border-radius: 14px;
-  color: var(--t1);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  text-align: center;
-  cursor: pointer;
-}
-
-.quick-tile i {
-  display: block;
-  width: 26px;
-  height: 26px;
-  margin: 0 auto 7px;
-  border-radius: 9px;
-}
-
-.quick-tile .qn {
-  display: block;
-}
-
-.quick-tile[data-quick='inspected'] {
-  background: var(--brand-tint);
-}
-
-.quick-tile[data-quick='inspected'] i {
-  background: var(--brand);
-}
-
-.quick-tile[data-quick='today'] {
-  background: var(--lilac);
-}
-
-.quick-tile[data-quick='today'] i {
-  background: var(--lilac-ink);
-}
-
-.quick-tile[data-quick='last'] {
-  background: var(--butter);
-}
-
-.quick-tile[data-quick='last'] i {
-  background: var(--butter-ink);
-}
-
-.quick-tile[aria-pressed='true'] {
-  border-color: var(--t1);
-}
-
 /* ───────── 지역·품목 칩 ───────── */
 .chip-row {
   display: flex;
@@ -630,13 +527,66 @@ body.shop img {
   text-overflow: ellipsis;
 }
 
-/* ───────── 산지 추천 배너 3종(홈 하단) ───────── */
+/* ───────── 산지 추천 배너 3종 캐러셀(검색바 아래) ───────── */
 /* 사진은 왼쪽 약 40%가 비어 있는 1800×675 원본이다. 그 여백 위에 HTML 문구를 얹는다.
-   슬라이더가 아니라 세로로 이어지는 정적 링크 3개다. */
-.home-promos {
-  display: grid;
-  gap: 12px;
-  margin: 24px 16px 0;
+   가로로 미끄러지는 슬라이드 3장이며, 높이는 aspect-ratio 로 미리 확보해 이미지 로딩 중에도 화면이 밀리지 않는다. */
+.promo-carousel {
+  margin: 14px 16px 0;
+}
+
+.promo-viewport {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+/* touch-action: pan-y — 세로 스크롤은 브라우저에 맡기고 가로만 스와이프로 받는다. */
+.promo-track {
+  display: flex;
+  touch-action: pan-y;
+  transition: transform 420ms ease;
+}
+
+.promo-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+/* 점 인디케이터 */
+.promo-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 0 0;
+}
+
+.promo-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--line);
+  cursor: pointer;
+  transition: width 200ms ease, background 200ms ease;
+}
+
+.promo-dot[aria-current='true'] {
+  width: 18px;
+  border-radius: 999px;
+  background: var(--brand);
+}
+
+.promo-dot:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 움직임을 줄이고 싶다는 설정이면 전환 애니메이션을 없앤다(자동 순환도 JS에서 멈춘다). */
+@media (prefers-reduced-motion: reduce) {
+  .promo-track,
+  .promo-dot {
+    transition: none;
+  }
 }
 
 .home-promo {

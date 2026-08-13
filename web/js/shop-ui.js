@@ -35,20 +35,6 @@ export function isInspected(listing) {
   return ['hub_passed', 'ready_to_ship', 'delivered'].includes(listing.inspection_status);
 }
 
-/** 오늘 수확분인가. harvested_on 은 KST 기준 YYYY-MM-DD 문자열이다. */
-export function isHarvestedToday(listing) {
-  return listing.harvested_on === todayKst();
-}
-
-/** 잔량이 얼마 남지 않았는가(마감 임박). */
-export function isRunningOut(listing) {
-  return listing.remaining_quantity > 0 && listing.remaining_quantity <= 3;
-}
-
-export function todayKst() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
-}
-
 /** 하단 탭바·상단 바의 장바구니 개수를 함께 갱신한다. */
 export function mountCartBadges(selector = '[data-cart-count]') {
   const render = () => {

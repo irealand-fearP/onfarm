@@ -2,14 +2,16 @@
 // 서버 계약은 그대로다(GET /api/store/listings). 판매 중 목록을 한 번 받아
 // 화면에서 걸러야 "실제로 상품이 있는" 종류·품목·지역만 노출할 수 있다.
 import { $, api, el, money } from '/js/api.js';
-import { isHarvestedToday, isInspected, isRunningOut, mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
+import { isInspected, mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
 import { mountDemoNav } from '/js/demo-nav.js';
+import { mountPromoCarousel } from '/js/promo-carousel.js';
 
 mountCartBadges();
 mountDemoNav('#demoNavSlot');
+mountPromoCarousel('#promoCarousel');
 
 const cfg = await api('/api/config').catch(() => ({ products: [], allProducts: [] }));
-const state = { category: '', product: '', region: '', query: '', quick: '' };
+const state = { category: '', product: '', region: '', query: '' };
 
 // products.category 값을 한국어로 노출한다. 노출 순서도 이 순서를 따른다.
 const CATEGORY_LABELS = [
@@ -23,18 +25,6 @@ const CATEGORY_LABELS = [
 const productByCode = new Map(
   [...cfg.products, ...(cfg.allProducts ?? [])].map((product) => [product.code, product]),
 );
-
-const QUICK_RULES = {
-  inspected: isInspected,
-  today: isHarvestedToday,
-  last: isRunningOut,
-};
-
-const QUICK_TITLES = {
-  inspected: '거점 검수 완료 상품',
-  today: '오늘 수확한 상품',
-  last: '마감 임박 상품',
-};
 
 // 준비 중 종류의 안내 문구(종류별로 다르게 쓸 수 있게 표에 둔다).
 const COMING_SOON_NOTES = {
@@ -202,12 +192,6 @@ function renderAllFilters() {
   renderRegionChips();
 }
 
-function renderQuickTiles() {
-  for (const tile of document.querySelectorAll('.quick-tile')) {
-    tile.setAttribute('aria-pressed', String(tile.dataset.quick === state.quick));
-  }
-}
-
 function card(listing) {
   const region = `${listing.region_sigungu}${listing.region_detail ? ` ${listing.region_detail}` : ''}`;
   const photo = el('div', { class: 'goods-photo' }, [photoImg(listing)]);
@@ -234,7 +218,6 @@ function card(listing) {
 
 function headline() {
   if (state.query) return `“${state.query}” 검색 결과`;
-  if (state.quick) return QUICK_TITLES[state.quick];
   const categoryName = CATEGORY_LABELS.find(([code]) => code === state.category)?.[1] ?? '';
   const label = [state.region, state.product ? productName(state.product) : categoryName]
     .filter(Boolean)
@@ -264,11 +247,9 @@ function load() {
   $('#comingSoon').hidden = true;
 
   const keyword = state.query.toLocaleLowerCase('ko-KR');
-  const rule = QUICK_RULES[state.quick];
 
   const listings = allListings.filter((listing) => {
     if (!matchCategory(listing) || !matchProduct(listing) || !matchRegion(listing)) return false;
-    if (rule && !rule(listing)) return false;
     if (!keyword) return true;
     return [listing.title, listing.product_name, listing.farm_name, listing.region_sido, listing.region_sigungu]
       .filter(Boolean)
@@ -292,14 +273,6 @@ $('#searchForm').addEventListener('submit', (event) => {
   load();
 });
 
-for (const tile of document.querySelectorAll('.quick-tile')) {
-  tile.addEventListener('click', () => {
-    state.quick = state.quick === tile.dataset.quick ? '' : tile.dataset.quick;
-    renderQuickTiles();
-    load();
-  });
-}
-
 // 탭바의 "검색"은 별도 화면 대신 이 화면의 검색창으로 데려간다(없는 화면을 만들지 않는다).
 $('#tabSearch')?.addEventListener('click', () => {
   $('#searchInput').focus();
@@ -311,10 +284,8 @@ $('#resetFilters')?.addEventListener('click', () => {
   state.category = '';
   state.product = '';
   state.region = '';
-  state.quick = '';
   state.query = '';
   $('#searchInput').value = '';
-  renderQuickTiles();
   renderAllFilters();
   load();
 });
@@ -328,7 +299,7 @@ $('#comingSoonBack')?.addEventListener('click', () => {
   load();
 });
 
-/** 홈 하단 배너 등 외부 링크에서 들어올 때 ?category= 로 종류 탭을 미리 골라 준다.
+/** 홈 상단 배너 등 외부 링크에서 들어올 때 ?category= 로 종류 탭을 미리 골라 준다.
  *  품목 표에 없는 값이면 조용히 무시하고 전체 목록을 보여준다(에러 화면을 띄우지 않는다). */
 function applyCategoryFromUrl() {
   const code = new URLSearchParams(location.search).get('category');
@@ -337,7 +308,6 @@ function applyCategoryFromUrl() {
   if (CATEGORY_LABELS.some(([known]) => known === code) && registered.has(code)) state.category = code;
 }
 
-renderQuickTiles();
 await fetchListings();
 applyCategoryFromUrl();
 renderAllFilters();

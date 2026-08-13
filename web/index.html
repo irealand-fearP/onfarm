@@ -37,26 +37,57 @@
           <button type="submit">찾기</button>
         </form>
 
-        <section class="shop-banner" aria-label="오늘 아침 수확">
-          <span>
-            <span class="b1">오늘 아침 수확</span>
-            <span class="b2">해 뜨자마자 딴 것만<br />모아 봤어요</span>
-          </span>
-          <span class="sun" aria-hidden="true"></span>
-        </section>
+        <!-- 산지 추천 배너 3종 캐러셀 — 4초 간격 자동 순환.
+             문구는 이미지가 아니라 HTML이며, 링크는 홈의 종류 필터(?category=)로 연결한다.
+             자동으로 바뀌는 영역이라 aria-live="off"(스크린리더가 계속 읽지 않게)로 둔다. -->
+        <section
+          class="promo-carousel"
+          id="promoCarousel"
+          aria-label="ON-FARM 산지 추천"
+          aria-roledescription="carousel"
+          aria-live="off"
+        >
+          <div class="promo-viewport">
+            <div class="promo-track" id="promoTrack">
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="1 / 3">
+                <a class="home-promo home-promo--fruit" href="/shop?category=fruit">
+                  <img src="/img/banners/banner-01-seasonal-fruit.webp" alt="" width="1800" height="675" decoding="async" />
+                  <span class="home-promo-copy">
+                    <small>산지에서 바로</small>
+                    <strong>오늘 만나는<br />제철 과일</strong>
+                    <span>과일 보러 가기 <b aria-hidden="true">›</b></span>
+                  </span>
+                </a>
+              </div>
 
-        <!-- 퀵 타일은 장식이 아니라 실제 목록 필터다. -->
-        <div class="quick-tiles" id="quickTiles" role="group" aria-label="빠른 조건">
-          <button class="quick-tile" type="button" data-quick="inspected" aria-pressed="false">
-            <i aria-hidden="true"></i><span class="qn">검수 완료</span>
-          </button>
-          <button class="quick-tile" type="button" data-quick="today" aria-pressed="false">
-            <i aria-hidden="true"></i><span class="qn">오늘 수확</span>
-          </button>
-          <button class="quick-tile" type="button" data-quick="last" aria-pressed="false">
-            <i aria-hidden="true"></i><span class="qn">마감 임박</span>
-          </button>
-        </div>
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="2 / 3">
+                <a class="home-promo home-promo--field" href="/shop?category=root">
+                  <img src="/img/banners/banner-02-field-harvest.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
+                  <span class="home-promo-copy">
+                    <small>농부가 고른 햇작물</small>
+                    <strong>든든한 식탁을<br />산지의 맛으로</strong>
+                    <span>햇작물 보러 가기 <b aria-hidden="true">›</b></span>
+                  </span>
+                </a>
+              </div>
+
+              <!-- 수산물은 아직 판매 물량이 없어 눌러도 "준비 중" 안내가 뜬다.
+                   배너가 지금 살 수 있다고 오해시키지 않도록 문구 옆에 준비 중 표시를 함께 둔다. -->
+              <div class="promo-slide" role="group" aria-roledescription="슬라이드" aria-label="3 / 3">
+                <a class="home-promo home-promo--abalone" href="/shop?category=seafood">
+                  <img src="/img/banners/banner-03-fresh-abalone.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
+                  <span class="home-promo-copy">
+                    <small>바다에서 바로 <em class="home-promo-soon">준비 중</em></small>
+                    <strong>싱싱한 전복을<br />우리 집 식탁으로</strong>
+                    <span>전복 보러 가기 <b aria-hidden="true">›</b></span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="promo-dots" id="promoDots" role="group" aria-label="배너 이동"></div>
+        </section>
 
         <!-- 1단 종류 → 2단 품목 → 3단 지역 순서로 좁힌다(상위가 하위를 결정한다). -->
         <div class="cat-tabs" id="catTabs" role="group" aria-label="종류 선택"></div>
@@ -82,39 +113,6 @@
           <p>검색어를 줄이거나 필터를 초기화해 다시 확인해 주세요.</p>
           <button class="empty-reset" type="button" id="resetFilters">필터 초기화</button>
         </div>
-
-        <!-- 산지 추천 배너 3종 — 목록/준비중/빈목록 어느 상태에서도 본문 맨 아래에 오도록 main 끝에 둔다.
-             문구는 이미지가 아니라 HTML이며, 링크는 홈의 종류 필터(?category=)로 연결한다. -->
-        <section class="home-promos" aria-label="ON-FARM 산지 추천">
-          <a class="home-promo home-promo--fruit" href="/shop?category=fruit">
-            <img src="/img/banners/banner-01-seasonal-fruit.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
-            <span class="home-promo-copy">
-              <small>산지에서 바로</small>
-              <strong>오늘 만나는<br />제철 과일</strong>
-              <span>과일 보러 가기 <b aria-hidden="true">›</b></span>
-            </span>
-          </a>
-
-          <a class="home-promo home-promo--field" href="/shop?category=root">
-            <img src="/img/banners/banner-02-field-harvest.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
-            <span class="home-promo-copy">
-              <small>농부가 고른 햇작물</small>
-              <strong>든든한 식탁을<br />산지의 맛으로</strong>
-              <span>햇작물 보러 가기 <b aria-hidden="true">›</b></span>
-            </span>
-          </a>
-
-          <!-- 수산물은 아직 판매 물량이 없어 눌러도 "준비 중" 안내가 뜬다.
-               배너가 지금 살 수 있다고 오해시키지 않도록 문구 옆에 준비 중 표시를 함께 둔다. -->
-          <a class="home-promo home-promo--abalone" href="/shop?category=seafood">
-            <img src="/img/banners/banner-03-fresh-abalone.webp" alt="" width="1800" height="675" loading="lazy" decoding="async" />
-            <span class="home-promo-copy">
-              <small>바다에서 바로 <em class="home-promo-soon">준비 중</em></small>
-              <strong>싱싱한 전복을<br />우리 집 식탁으로</strong>
-              <span>전복 보러 가기 <b aria-hidden="true">›</b></span>
-            </span>
-          </a>
-        </section>
       </main>
 
       <nav class="tabbar" aria-label="주요 메뉴">
