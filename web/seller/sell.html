@@ -46,7 +46,12 @@
       <section class="sell-step" id="stepPhoto">
         <div>
           <h1 class="ask">수확한 것을 찍어 주세요</h1>
-          <p class="ask-sub">농산물이 화면 가운데 잘 보이면 됩니다.</p>
+          <!--
+            "꽉 차게" 는 예의상 하는 말이 아니라 측정에서 나온 조건이다.
+            농산물이 화면을 꽉 채우면 5품목 전부 100% 로 맞히지만,
+            화면의 4분의 1만 차지하면 감자는 후보 3개 안에도 들어오지 못했다.
+          -->
+          <p class="ask-sub">농산물을 화면에 <b>꽉 차게</b>, 가운데 두고 찍어 주세요.</p>
         </div>
 
         <label class="photo-drop" for="photoInput">
@@ -57,7 +62,7 @@
             </svg>
           </span>
           <strong>사진 찍기 또는 고르기</strong>
-          <span>상자·망·봉 전체가 보이도록 찍어 주세요</span>
+          <span>상자·망·봉이 화면에 꽉 차게 찍어 주세요</span>
         </label>
         <input type="file" id="photoInput" accept="image/*" capture="environment" class="visually-hidden" />
 

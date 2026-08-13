@@ -77,6 +77,21 @@ describe('CNN provider — 등급 사용 가능 판단', () => {
   it('수치가 없으면 쓰지 않는다', () => {
     assert.equal(gradeIsUsable(meta({ weight_only_grade_baseline: undefined })), false);
   });
+
+  it('전체 평균이 통과해도 그 품목이 기준선을 못 넘으면 막는다(양파)', () => {
+    // 전체 0.7 > 0.61 로 통과하지만, 양파는 0.388 로 중량 기준선 0.738 에 못 미친다.
+    const m = meta({
+      val_object_level: { grade: 0.7 },
+      weight_only_grade_baseline: 0.61,
+      per_item: {
+        양파: { grade_object_acc: 0.388, weight_only_baseline: 0.738, grade_usable: false },
+        배: { grade_object_acc: 1, weight_only_baseline: 0.438, grade_usable: true },
+      },
+    });
+    assert.equal(gradeIsUsable(m, '양파'), false);
+    assert.equal(gradeIsUsable(m, '배'), true);
+    assert.equal(gradeIsUsable(m, '사과'), true, 'per_item 이 없는 품목은 전체 평균으로 판단한다');
+  });
 });
 
 describe('CNN provider — 입력 텐서 변환', () => {
