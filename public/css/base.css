@@ -1,33 +1,152 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+/* 폰트는 저장소에 포함한다 — 심사장 네트워크가 끊겨도 글꼴이 깨지지 않아야 한다(CDN 금지). */
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/Pretendard-800.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ON-FARM 공통 기반 — 역할이 달라도 같은 서비스로 느껴지는 최소 디자인 언어 */
+/* 색은 여기 정의된 토큰만 거쳐 쓴다. 미디어쿼리 안에서만 존재하는 색은 만들지 않는다. */
 :root {
-  --ink: #1e1e1c;
-  --ink-soft: #454540;
-  --muted: #73736d;
-  --paper: #f7f7f3;
-  --surface: #ffffff;
-  --surface-soft: #efefeb;
-  --line: #deded8;
-  --line-strong: #c5c5bd;
-  --brand: #00754a;
-  --brand-strong: #005f3c;
-  --brand-tint: #e4f3ec;
-  --accent: #00754a;
-  --accent-strong: #005f3c;
-  --accent-tint: #e4f3ec;
-  --warn: #775000;
-  --warn-tint: #fff2d2;
-  --danger: #9f2f28;
-  --danger-tint: #fae8e5;
-  --info: #2d5f87;
-  --info-tint: #e9f2f8;
+  /* 팔레트 (라이트) */
+  --bg: #ffffff;
+  --bg-2: #f2f4f6;
+  --t1: #191f28;
+  --t2: #4e5968;
+  --t3: #8b95a1;
+  --brand: #00c46a;
+  --brand-tint: #e4f9ee;
+  --alert: #ff4d5e;
+  --peach: #ffe3d2;
+  --lilac: #eae4ff;
+  --butter: #fff1c9;
+
+  /* 파생 토큰 — 글자로 쓸 수 있는 진한 브랜드색과 경계선 */
+  --brand-strong: #009a53;
+  --line: #e5e8eb;
+  --line-strong: #d1d6db;
+
+  /* 기존 화면(farmer.css·store.css)이 쓰던 이름은 별칭으로 유지한다. */
+  --ink: var(--t1);
+  --ink-soft: var(--t2);
+  --muted: var(--t3);
+  --paper: var(--bg-2);
+  --surface: var(--bg);
+  --surface-soft: var(--bg-2);
+  --accent: var(--brand);
+  --accent-strong: var(--brand-strong);
+  --accent-tint: var(--brand-tint);
+  --warn: #8a5a00;
+  --warn-tint: var(--butter);
+  --danger: #d6293c;
+  --danger-tint: #ffe9ec;
+  --info: #3d4bb5;
+  --info-tint: var(--lilac);
+
   --radius-sm: 6px;
   --radius: 12px;
   --radius-lg: 20px;
-  --shadow: 0 10px 28px rgba(22, 50, 35, 0.08);
-  --shadow-lg: 0 20px 54px rgba(22, 50, 35, 0.12);
-  --font: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --shadow: 0 10px 28px rgba(25, 31, 40, 0.08);
+  --shadow-lg: 0 20px 54px rgba(25, 31, 40, 0.12);
+  --focus: #00a66b;
+  --on-brand: #ffffff;
+  --toast-bg: #191f28;
+  --toast-fg: #ffffff;
+  --font: Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}
+
+/* 다크 — 시스템 설정을 따르되 사용자가 라이트를 고르면 무시한다. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #16181a;
+    --bg-2: #202325;
+    --t1: #eceff1;
+    --t2: #b0b8c1;
+    --t3: #8a929b;
+    --brand: #00d477;
+    --brand-tint: #10382a;
+    --alert: #ff6b78;
+    --peach: #4a3226;
+    --lilac: #322c4a;
+    --butter: #433a1e;
+
+    --brand-strong: #4fe6a2;
+    --line: #2c3033;
+    --line-strong: #3c4247;
+
+    --paper: var(--bg);
+    --surface: var(--bg-2);
+    --surface-soft: #2a2e31;
+    --warn: #e6b74d;
+    --danger: #ff6b78;
+    --danger-tint: #3a2124;
+    --info: #a79dff;
+    --shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 20px 54px rgba(0, 0, 0, 0.55);
+    --focus: #4fe6a2;
+    --on-brand: #06251a;
+    --toast-bg: #2a2e31;
+    --toast-fg: #ffffff;
+  }
+}
+
+/* 사용자가 직접 다크를 고른 경우 — 시스템 설정과 무관하게 적용된다. */
+:root[data-theme='dark'] {
+  --bg: #16181a;
+  --bg-2: #202325;
+  --t1: #eceff1;
+  --t2: #b0b8c1;
+  --t3: #8a929b;
+  --brand: #00d477;
+  --brand-tint: #10382a;
+  --alert: #ff6b78;
+  --peach: #4a3226;
+  --lilac: #322c4a;
+  --butter: #433a1e;
+
+  --brand-strong: #4fe6a2;
+  --line: #2c3033;
+  --line-strong: #3c4247;
+
+  --paper: var(--bg);
+  --surface: var(--bg-2);
+  --surface-soft: #2a2e31;
+  --warn: #e6b74d;
+  --danger: #ff6b78;
+  --danger-tint: #3a2124;
+  --info: #a79dff;
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 54px rgba(0, 0, 0, 0.55);
+  --focus: #4fe6a2;
+  --on-brand: #06251a;
+  --toast-bg: #2a2e31;
+  --toast-fg: #ffffff;
 }
 
 *,
@@ -82,13 +201,13 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid #00a66b;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 
 ::selection {
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
 }
 
 [hidden] {
@@ -112,7 +231,7 @@ a {
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--ink);
-  color: #fff;
+  color: var(--surface);
   font-size: 15px;
   font-weight: 800;
   text-decoration: none;
@@ -137,9 +256,9 @@ a {
 /* AI와 데모 상태는 작게 보이되 숨기지 않는다. */
 .mode-banner {
   padding: 8px 18px;
-  border-bottom: 1px solid #e5c985;
+  border-bottom: 1px solid var(--line-strong);
   background: var(--warn-tint);
-  color: #664400;
+  color: var(--warn);
   font-size: 13px;
   font-weight: 700;
   line-height: 1.45;
@@ -206,9 +325,9 @@ a {
   max-width: calc(100vw - 32px);
   padding: 12px 18px;
   border-radius: 12px;
-  background: #1a2921;
+  background: var(--toast-bg);
   box-shadow: var(--shadow-lg);
-  color: #fff;
+  color: var(--toast-fg);
   font-size: 15px;
   font-weight: 700;
   text-align: center;

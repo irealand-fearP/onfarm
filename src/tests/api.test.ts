@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, describe, it } from 'node:test';
+import { request as httpRequest } from 'node:http';
 
 /* 실제 데이터 폴더를 건드리지 않도록 임시 경로를 먼저 잡고 동적 import 한다. */
 const workDir = mkdtempSync(join(tmpdir(), 'onfarm-test-'));
@@ -21,6 +22,24 @@ const server = createApp();
 await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
 const port = (server.address() as AddressInfo).port;
 const base = `http://127.0.0.1:${port}`;
+
+
+/** host 헤더를 직접 지정해야 하는 도메인 분기 검증용 요청 */
+function rawGet(path: string, host: string): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const req = httpRequest(
+      { host: '127.0.0.1', port, path, method: 'GET', headers: { host } },
+      (res) => {
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => (body += chunk));
+        res.on('end', () => resolve({ status: res.statusCode ?? 0, body }));
+      },
+    );
+    req.on('error', reject);
+    req.end();
+  });
+}
 
 const PNG_1X1 =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
@@ -647,6 +666,44 @@ describe('HTTP — 정적 화면', () => {
     ]) {
       const res = await fetch(`${base}${path}`);
       assert.equal(res.status, 200, `${path} 가 ${res.status}`);
+    }
+  });
+
+  it('판매자·소비자 새 주소가 각각 열린다', async () => {
+    for (const path of ['/seller', '/seller/sell', '/seller/listings', '/seller/orders', '/seller/settlement', '/shop', '/shop/product', '/shop/cart', '/shop/orders']) {
+      const res = await fetch(`${base}${path}`);
+      assert.equal(res.status, 200, `${path} 가 ${res.status}`);
+    }
+  });
+
+  it('옛 주소는 새 주소로 301 리다이렉트한다', async () => {
+    const cases: [string, string][] = [
+      ['/farmer', '/seller'],
+      ['/farmer/sell', '/seller/sell'],
+      ['/store', '/shop'],
+      ['/store/product', '/shop/product'],
+    ];
+    for (const [from, to] of cases) {
+      const res = await fetch(`${base}${from}`, { redirect: 'manual' });
+      assert.equal(res.status, 301, `${from} 가 ${res.status}`);
+      assert.equal(res.headers.get('location'), to);
+    }
+  });
+
+  it('seller.* 도메인은 경로 없이도 판매자 화면을 준다', async () => {
+    // fetch 는 host 헤더 지정을 막으므로 저수준 http 로 요청한다.
+    const { status, body } = await rawGet('/', `seller.example.com:${port}`);
+    assert.equal(status, 200);
+    assert.match(body, /farmer\.css/);
+  });
+
+  it('판매자 사이트는 세션이 없으면 자동 로그인 쿠키를 내려준다', async () => {
+    const seller = await fetch(`${base}/seller`);
+    assert.match(seller.headers.get('set-cookie') ?? '', /onfarm_session=/);
+    // 소비자·거점 화면에는 적용하지 않는다.
+    for (const path of ['/shop', '/hub']) {
+      const res = await fetch(`${base}${path}`);
+      assert.equal(res.headers.get('set-cookie'), null, `${path} 에 세션이 발급됨`);
     }
   });
 

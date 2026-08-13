@@ -130,6 +130,7 @@ const MIME: Record<string, string> = {
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
   '.txt': 'text/plain; charset=utf-8',
+  '.woff2': 'font/woff2',
 };
 
 /** 디렉터리 밖으로 나가는 경로를 막고 파일을 스트리밍한다. */
