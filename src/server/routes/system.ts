@@ -10,6 +10,7 @@ import { HttpError } from '../../lib/http.js';
 import type { Router } from '../../lib/http.js';
 import { requireRole } from '../../lib/session.js';
 import { clearAnalyses } from '../analysis-store.js';
+import { all } from '../../db/index.js';
 
 export const BRAND = {
   name: 'ON-FARM',
@@ -44,6 +45,13 @@ export function registerSystemRoutes(router: Router): void {
         degradedReason: provider.degradedReason,
         configured: config.ai.provider,
       },
+      // 소비자 홈 종류 탭용. 비활성 품목(예: 전복)도 포함해야 "준비 중" 탭을 만들 수 있고,
+      // 나중에 그 품목 상품이 올라오면 코드 수정 없이 정상 탭으로 승격된다.
+      // (판매 등록 후보인 products 는 활성 품목만 그대로 둔다.)
+      allProducts: all<{ code: string; name_ko: string; category: string }>(
+        db(),
+        'SELECT code, name_ko, category FROM products ORDER BY id',
+      ).map((row) => ({ code: row.code, name: row.name_ko, category: row.category })),
       products: catalog(db()).map((p) => ({
         code: p.code,
         name: p.name_ko,
