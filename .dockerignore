@@ -1,0 +1,9 @@
+node_modules
+dist
+data
+.git
+.vercel
+docs/design/상품이미지-원본
+notebooks
+tools/__pycache__
+*.log
