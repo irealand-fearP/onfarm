@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#00c46a" />
+    <meta name="description" content="올린 상품의 재고를 더하고 판매를 멈추거나 다시 여는 ON-FARM 판매자 상품 화면" />
+    <title>ON-FARM · 내 상품</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/seller.css" />
+  </head>
+  <body class="seller">
+    <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
+
+    <main class="s-page" id="mainContent">
+      <header class="s-head">
+        <a class="s-chip" href="/seller">← 처음으로</a>
+        <div class="s-head-actions">
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
+          <button class="s-chip density-toggle" id="densityBtn" type="button">가⁻</button>
+        </div>
+      </header>
+
+      <h1 class="s-title">내 상품</h1>
+      <p class="s-title-sub" id="summary">상품을 불러오는 중입니다</p>
+
+      <section class="s-group" aria-labelledby="tSelling">
+        <h2 id="tSelling">판매 중<span class="n" id="nSelling"></span></h2>
+        <div id="listSelling"></div>
+      </section>
+
+      <section class="s-group" aria-labelledby="tStopped">
+        <h2 id="tStopped">판매 중지·완판<span class="n" id="nStopped"></span></h2>
+        <div id="listStopped"></div>
+      </section>
+
+      <a class="btn ghost" href="/seller/sell">사진으로 상품 더 올리기</a>
+
+      <a class="s-home" href="/seller">처음으로</a>
+    </main>
+
+    <script type="module">
+      import { api, requireRole, money, el, $, inspectionLabel, toast } from '/js/api.js';
+      import { photoImg } from '/js/product-photo.js';
+      import { mountDensityToggle } from '/js/seller-density.js';
+      import { mountDemoNav } from '/js/demo-nav.js';
+
+      mountDensityToggle('#densityBtn');
+      mountDemoNav('#demoNavSlot');
+      await requireRole('farmer');
+
+      async function manageListing(id, body, button) {
+        button.disabled = true;
+        try {
+          await api(`/api/farmer/listings/${id}/manage`, { body });
+          await loadListings();
+        } catch (error) {
+          button.disabled = false;
+          toast(error instanceof Error ? error.message : '처리하지 못했습니다.');
+        }
+      }
+
+      function listingActions(listing) {
+        if (listing.inspection_status !== 'ai_checked' || listing.has_rejection) return null;
+
+        const actions = [];
+        const maxStock = 999 - listing.quantity;
+        if (maxStock > 0) {
+          const inputId = `stock-${listing.id}`;
+          const input = el('input', {
+            id: inputId,
+            name: 'quantity',
+            type: 'number',
+            min: '1',
+            max: String(maxStock),
+            step: '1',
+            inputmode: 'numeric',
+            placeholder: '추가 수량',
+            required: '',
+          });
+          const addButton = el('button', { class: 'mini-btn primary', type: 'submit', text: '재고 추가' });
+          actions.push(
+            el('form', {
+              class: 'stock-form',
+              onsubmit: (event) => {
+                event.preventDefault();
+                manageListing(listing.id, { action: 'add_stock', quantity: Number(input.value) }, addButton);
+              },
+            }, [
+              el('label', { class: 'visually-hidden', for: inputId, text: `${listing.title} 추가 수량` }),
+              input,
+              addButton,
+            ]),
+          );
+        }
+
+        const toggleAction = listing.status === 'active'
+          ? { action: 'pause', label: '판매 중지' }
+          : listing.status === 'closed' && listing.remaining_quantity > 0
+            ? { action: 'resume', label: '판매 재개' }
+            : null;
+        if (toggleAction) {
+          const toggleButton = el('button', {
+            class: `mini-btn${toggleAction.action === 'resume' ? ' primary' : ''}`,
+            type: 'button',
+            text: toggleAction.label,
+            'aria-label': `${listing.title} ${toggleAction.label}`,
+          });
+          toggleButton.addEventListener('click', () => {
+            manageListing(listing.id, { action: toggleAction.action }, toggleButton);
+          });
+          actions.push(toggleButton);
+        }
+        return actions.length ? el('div', { class: 'row-actions' }, actions) : null;
+      }
+
+      function listingCard(listing) {
+        const sold = listing.quantity - listing.remaining_quantity;
+        return el('article', { class: 'card' }, [
+          el('div', { class: 'card-head' }, [
+            el('div', {}, [
+              el('h3', { text: listing.title }),
+              el('p', { class: 'meta', text: `${listing.sku_label} · ${money(listing.unit_price)}` }),
+            ]),
+            // 소비자 화면과 같은 사진 규칙을 쓴다(판정은 product-photo.js 한 곳).
+            photoImg(listing, listing.title, { class: 's-thumb', width: '56', height: '56' }),
+          ]),
+          el('p', { class: 'meta', text: `남은 수량 ${listing.remaining_quantity} · 판매 ${sold}` }),
+          el('div', {
+            class: 'stock-bar',
+            role: 'img',
+            'aria-label': `${listing.title} 판매 ${sold}개, 남은 수량 ${listing.remaining_quantity}개`,
+          }, [
+            el('i', { style: `width:${listing.quantity ? Math.round((sold / listing.quantity) * 100) : 0}%` }),
+          ]),
+          el('div', { class: 'badge-row' }, [
+            el('span', {
+              class: listing.status === 'active' ? 'badge badge-ai' : 'badge badge-muted',
+              text: listing.status === 'active' ? '판매 중' : listing.status === 'sold_out' ? '완판' : '판매 종료',
+            }),
+            el('span', { class: 'badge badge-hub', text: inspectionLabel(listing.inspection_status) }),
+          ]),
+          listingActions(listing),
+        ]);
+      }
+
+      /** 한 묶음을 그린다. 비어 있으면 비었다고 적는다. */
+      function paintGroup(boxId, countId, rows, emptyText) {
+        const box = $(boxId);
+        box.replaceChildren();
+        $(countId).textContent = `${rows.length}개`;
+        if (!rows.length) {
+          box.append(el('p', { class: 'empty', text: emptyText }));
+          return;
+        }
+        for (const listing of rows) box.append(listingCard(listing));
+      }
+
+      async function loadListings() {
+        const { listings } = await api('/api/farmer/listings');
+        const selling = listings.filter((listing) => listing.status === 'active');
+        const stopped = listings.filter((listing) => listing.status !== 'active');
+
+        $('#summary').textContent = listings.length
+          ? `전체 ${listings.length}개 상품 중 ${selling.length}개를 판매하고 있습니다.`
+          : '아직 올린 상품이 없습니다. 사진 한 장으로 첫 상품을 올려 보세요.';
+
+        paintGroup('#listSelling', '#nSelling', selling, '지금 판매 중인 상품이 없습니다.');
+        paintGroup('#listStopped', '#nStopped', stopped, '중지하거나 완판된 상품이 없습니다.');
+      }
+
+      await loadListings();
+    </script>
+  </body>
+</html>

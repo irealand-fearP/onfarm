@@ -26,11 +26,21 @@ function sharedModuleDir(): string {
 const SELLER_PAGES: Record<string, string> = {
   '/seller': 'seller/index.html',
   '/seller/sell': 'seller/sell.html',
-  '/seller/todo': 'seller/todo.html',
+  '/seller/orders': 'seller/orders.html',
+  '/seller/products': 'seller/products.html',
+  '/seller/money': 'seller/money.html',
 };
 
-/** 판매자 화면 3개로 합쳐진 옛 화면들 — 전부 '오늘 할 일' 한 페이지로 흡수됐다. */
-const MERGED_INTO_TODO = new Set(['/seller/listings', '/seller/orders', '/seller/settlement']);
+/**
+ * 옮겨진 판매자 화면 → 새 주소.
+ * '오늘 할 일'(/seller/todo) 한 페이지에 주문·상품·정산을 다 넣었더니 주문이 늘면
+ * 감당이 안 돼 셋으로 갈랐다. 기존 링크·북마크가 깨지지 않게 301 로 보낸다.
+ */
+const MOVED_SELLER_PAGES: Record<string, string> = {
+  '/seller/todo': '/seller/orders',
+  '/seller/listings': '/seller/products',
+  '/seller/settlement': '/seller/money',
+};
 
 const SHOP_PAGES: Record<string, string> = {
   '/': 'index.html',
@@ -87,10 +97,9 @@ export function legacyRedirect(pathname: string): string | null {
     else if (pathname.startsWith(`${from}/`)) moved = to + pathname.slice(from.length);
     if (moved) break;
   }
-  // 합쳐진 판매자 화면은 한 번에 '오늘 할 일'로 보낸다(리다이렉트를 두 번 타지 않게).
+  // 옮겨진 판매자 화면은 한 번에 최종 주소로 보낸다(리다이렉트를 두 번 타지 않게).
   const target = moved ?? pathname;
-  if (MERGED_INTO_TODO.has(target)) return '/seller/todo';
-  return moved;
+  return MOVED_SELLER_PAGES[target] ?? moved;
 }
 
 /**

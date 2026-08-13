@@ -670,7 +670,7 @@ describe('HTTP — 정적 화면', () => {
   });
 
   it('판매자·소비자 새 주소가 각각 열린다', async () => {
-    for (const path of ['/seller', '/seller/sell', '/seller/listings', '/seller/orders', '/seller/settlement', '/shop', '/shop/product', '/shop/cart', '/shop/orders']) {
+    for (const path of ['/seller', '/seller/sell', '/seller/orders', '/seller/products', '/seller/money', '/shop', '/shop/product', '/shop/cart', '/shop/orders']) {
       const res = await fetch(`${base}${path}`);
       assert.equal(res.status, 200, `${path} 가 ${res.status}`);
     }
@@ -682,6 +682,12 @@ describe('HTTP — 정적 화면', () => {
       ['/farmer/sell', '/seller/sell'],
       ['/store', '/shop'],
       ['/store/product', '/shop/product'],
+      // 판매자 화면을 주문·상품·정산으로 가른 뒤의 옛 주소들.
+      // 리다이렉트는 한 번만 탄다(/farmer/todo → /seller/orders 로 직행).
+      ['/seller/todo', '/seller/orders'],
+      ['/farmer/todo', '/seller/orders'],
+      ['/seller/listings', '/seller/products'],
+      ['/seller/settlement', '/seller/money'],
     ];
     for (const [from, to] of cases) {
       const res = await fetch(`${base}${from}`, { redirect: 'manual' });

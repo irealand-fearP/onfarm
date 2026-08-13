@@ -3,6 +3,7 @@
 // 화면에서 걸러야 "실제로 상품이 있는" 종류·품목·지역만 노출할 수 있다.
 import { $, api, el, money } from '/js/api.js';
 import { isInspected, mountCartBadges, photoImg, productPhoto } from '/js/shop-ui.js';
+import { PHOTO_FALLBACK } from '/js/product-photo.js';
 import { mountDemoNav } from '/js/demo-nav.js';
 import { mountPromoCarousel } from '/js/promo-carousel.js';
 import { mountEdgeScrollers } from '/js/edge-scroll.js';
@@ -22,7 +23,9 @@ const state = { category: '', product: '', region: '', query: '', page: 1 };
 const CATEGORY_LABELS = [
   ['fruit', '과일'],
   ['vegetable', '채소'],
-  ['grain', '쌀'],
+  // 코드는 grain 그대로 두고 라벨만 바꾼다(?category=grain 링크·데이터에 영향 없음).
+  // 홈 캐러셀 3번 배너의 "쌀·잡곡" 표기와 맞춘다.
+  ['grain', '쌀·잡곡'],
   ['seafood', '수산물'],
 ];
 
@@ -131,7 +134,7 @@ function itemButton(code, label, photoCode) {
           loading: 'lazy',
           onerror: (event) => {
             event.currentTarget.onerror = null;
-            event.currentTarget.src = '/img/sample/placeholder.svg';
+            event.currentTarget.src = PHOTO_FALLBACK;
           },
         })
       : el('span', { class: 'item-all', text: '전체', 'aria-hidden': 'true' }),

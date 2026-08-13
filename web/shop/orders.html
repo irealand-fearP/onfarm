@@ -60,14 +60,34 @@
       // 상태별로 "다음에 누가 무엇을 하는지".
       // 주문 직후 '주문 접수'에서 멈춰 있는 건 정상이지만, 화면이 그 사실을 말해주지 않으면
       // 시연이 막힌 것처럼 보인다. 다음 주체와 그 역할 화면으로 가는 길을 함께 둔다.
+      // josa 는 받침에 따라 달라서 표에 함께 적어 둔다("거점가"처럼 어색해지지 않게).
       const NEXT_STEP = {
-        farmer_preparing: { who: '생산자', what: '상품을 준비해 거점으로 보냅니다', site: 'seller', go: '판매자 화면으로' },
-        ready_for_hub: { who: '거점', what: '들어온 상품의 입고를 확인합니다', site: 'hub', go: '거점 화면으로' },
-        hub_received: { who: '거점', what: '실물을 검수해 등급을 확정합니다', site: 'hub', go: '거점 화면으로' },
-        hub_passed: { who: '거점', what: '포장을 마치고 배송을 시작합니다', site: 'hub', go: '거점 화면으로' },
-        ready_to_ship: { who: '거점', what: '배송이 끝나면 배송 완료로 바꿉니다', site: 'hub', go: '거점 화면으로' },
-        delivered: { who: '생산자', what: '정산 예정 금액을 확인합니다', site: 'seller', go: '판매자 화면으로' },
+        farmer_preparing: { who: '생산자', josa: '가', what: '상품을 준비해 거점으로 보냅니다', site: 'seller', go: '판매자 화면으로' },
+        ready_for_hub: { who: '거점', josa: '이', what: '들어온 상품의 입고를 확인합니다', site: 'hub', go: '거점 화면으로' },
+        hub_received: { who: '거점', josa: '이', what: '실물을 검수해 등급을 확정합니다', site: 'hub', go: '거점 화면으로' },
+        hub_passed: { who: '거점', josa: '이', what: '포장을 마치고 배송을 시작합니다', site: 'hub', go: '거점 화면으로' },
+        ready_to_ship: { who: '거점', josa: '이', what: '배송이 끝나면 배송 완료로 바꿉니다', site: 'hub', go: '거점 화면으로' },
+        delivered: { who: '생산자', josa: '가', what: '정산 예정 금액을 확인합니다', site: 'seller', go: '판매자 화면으로' },
       };
+
+      // 그 상품의 생산자와 거점이 누구인지.
+      // 기본 농민·기본 거점 담당자로 넘어가면 방금 한 주문이 그 화면에 없어서 또 막힌다.
+      // (API 를 늘리지 않고 이미 있는 /api/store/listings/:id 를 쓴다.)
+      const originCache = new Map();
+      async function originOf(listingId) {
+        if (!originCache.has(listingId)) {
+          originCache.set(
+            listingId,
+            api(`/api/store/listings/${listingId}`)
+              .then((data) => ({
+                name: data.listing?.farmer_name ?? null,
+                hubName: data.listing?.hub_name ?? null,
+              }))
+              .catch(() => ({ name: null, hubName: null })),
+          );
+        }
+        return originCache.get(listingId);
+      }
 
       function nextStepHint(item) {
         // 반려된 건은 다음 단계가 아니라 환불 안내가 이어지므로 여기서는 다루지 않는다.
@@ -79,7 +99,7 @@
           el('span', { class: 'next-step-text' }, [
             '다음 단계 — ',
             el('strong', { text: next.who }),
-            `가 ${next.what}.`,
+            `${next.josa} ${next.what}.`,
           ]),
           // 시연 편의: 시연 메뉴와 같은 이동 수단(역할 로그인 + 이동)을 재사용한다.
           el('button', {
@@ -87,7 +107,18 @@
             type: 'button',
             text: next.go,
             'aria-label': `${item.title} · ${next.go} 이동`,
-            onclick: () => void goToDemoTarget(next.site),
+            onclick: async (event) => {
+              const button = event.currentTarget;
+              button.disabled = true;
+              const origin = await originOf(item.listing_id);
+              await goToDemoTarget(
+                next.site,
+                next.site === 'seller'
+                  ? (origin.name ? { name: origin.name } : {})
+                  : (origin.hubName ? { hubName: origin.hubName } : {}),
+              );
+              button.disabled = false;
+            },
           }),
         ]);
       }

@@ -237,6 +237,161 @@ body.seller p {
   text-align: center;
 }
 
+/* ───────── 시작 화면의 큰 항목 3개 ─────────
+   주문·상품·정산을 한 페이지에 몰아넣지 않고 여기서 갈라진다.
+   어르신이 읽고 바로 누를 수 있어야 하므로 항목 자체가 주 버튼만큼 크고,
+   건수·금액이 항목 안에 함께 보인다(0이면 0 이라고 보인다). */
+.s-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.s-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  min-height: var(--btn-h);
+  padding: calc(13px * var(--u)) calc(16px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.s-menu-item:active {
+  background: var(--surface-soft);
+}
+
+/* 큰 요소 옆의 작은 보조 정보 — 밀도 리듬을 만들어 휑해 보이지 않게 한다. */
+.s-menu-item .ic {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: calc(46px * var(--u));
+  height: calc(46px * var(--u));
+  border-radius: calc(15px * var(--u));
+  background: var(--brand-tint);
+}
+
+.s-menu-item .ic svg {
+  width: calc(24px * var(--u));
+  height: calc(24px * var(--u));
+  fill: none;
+  stroke: var(--brand-strong);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.s-menu-item .tx {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: calc(2px * var(--u));
+}
+
+.s-menu-item .nm {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--t2);
+}
+
+.s-menu-item .vl {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 0건·0원은 흐리게 — "없다"는 사실이 보여야 하되 눈길을 끌 필요는 없다. */
+.s-menu-item .vl.is-zero {
+  color: var(--t3);
+}
+
+.s-menu-item .go {
+  flex: 0 0 auto;
+  color: var(--t3);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+/* ───────── 하위 화면 공통 ───────── */
+.s-title {
+  font-size: var(--fs-title);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.s-title-sub {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+/* 하위 화면에서 시작 화면으로 돌아가는 큰 버튼.
+   상단의 작은 칩만으로는 어르신이 되돌아갈 길을 못 찾는다. */
+.s-home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-h);
+  margin-top: var(--gap);
+  padding: 0 var(--pad);
+  border: calc(2px * var(--u)) solid var(--line-strong);
+  border-radius: var(--radius-btn);
+  background: var(--surface);
+  color: var(--t1);
+  font-size: var(--fs-body);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.s-home:active {
+  background: var(--surface-soft);
+}
+
+/* 상태별 묶음 — 주문이 늘어도 지금 손댈 것과 기다리는 것이 섞이지 않게 한다. */
+.s-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  padding-top: var(--gap);
+}
+
+.s-group > h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+
+.s-group > h2 .n {
+  color: var(--t3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-group > .sec-sub {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+/* 상품 사진 — 소비자 화면과 같은 실사 상품컷을 쓴다(판정은 product-photo.js 한 곳). */
+.s-thumb {
+  flex: 0 0 auto;
+  width: calc(56px * var(--u));
+  height: calc(56px * var(--u));
+  border: 1px solid var(--photo-line);
+  border-radius: calc(12px * var(--u));
+  background: var(--photo-bg);
+  object-fit: cover;
+}
+
 /* ───────── 버튼 ───────── */
 .s-foot {
   display: flex;

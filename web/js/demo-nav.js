@@ -34,26 +34,46 @@ function loadAccounts() {
 }
 
 /**
+ * 이 담당자가 그 거점 사람인가.
+ * 시드 담당자 이름은 '<지역>거점 담당자' 이고 거점 이름에 그 지역이 들어 있다
+ * (예: '포항거점 담당자' ↔ '포항 구룡포 수산 거점').
+ * /api/accounts 응답에 거점 정보를 더하면 API 형식이 바뀌므로, 시연 한정으로
+ * 이름의 지역 낱말을 맞춰 본다. 못 찾으면 그냥 첫 담당자로 떨어진다.
+ */
+function worksAtHub(operatorName, hubName) {
+  const keyword = String(operatorName).replace(/거점\s*담당자$/, '').trim();
+  return keyword.length > 1 && String(hubName).includes(keyword);
+}
+
+/**
  * 시연 목적지로 이동한다. 역할이 정해진 목적지는 그 역할 계정으로 먼저 로그인한다.
  * 이름이 지정된 계정을 우선 찾고, 없으면 같은 역할의 아무 계정이나 쓴다.
  * @param {string} key TARGETS 의 key
- * @param {string} [to] 이동할 주소(생략하면 목적지 기본 주소)
+ * @param {{to?: string, name?: string, hubName?: string}} [options]
+ *   to      이동할 주소(생략하면 목적지 기본 주소)
+ *   name    로그인할 계정 이름. 특정 주문의 생산자처럼 "이 사람이어야 하는" 경우에 쓴다.
+ *           (기본 농민으로 가면 그 주문이 안 보여서 또 막힌다)
+ *   hubName 그 주문을 맡은 거점 이름. 거점 담당자는 자기 거점 물량만 보므로
+ *           엉뚱한 담당자로 가면 화면이 비어 또 막힌다.
  */
-export async function goToDemoTarget(key, to) {
+export async function goToDemoTarget(key, options = {}) {
   const target = TARGETS.find((item) => item.key === key);
   if (!target) return;
-  const href = to ?? target.href;
+  const href = options.to ?? target.href;
 
   if (!target.role) {
     location.href = href;
     return;
   }
 
+  const wanted = options.name ?? target.name;
   try {
     const accounts = await loadAccounts();
+    const sameRole = accounts.filter((row) => row.role === target.role);
     const account =
-      accounts.find((row) => row.role === target.role && (!target.name || row.name === target.name)) ??
-      accounts.find((row) => row.role === target.role);
+      (options.hubName ? sameRole.find((row) => worksAtHub(row.name, options.hubName)) : null) ??
+      sameRole.find((row) => !wanted || row.name === wanted) ??
+      sameRole[0];
     if (!account) {
       toast('시연 계정을 찾지 못했습니다. 데이터 초기화를 먼저 해주세요.');
       return;

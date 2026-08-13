@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#00c46a" />
+    <meta name="description" content="보낼 주문·거점 처리 중·완료를 상태별로 나눠 보는 ON-FARM 판매자 주문 화면" />
+    <title>ON-FARM · 주문</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/img/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/seller.css" />
+  </head>
+  <body class="seller">
+    <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
+
+    <main class="s-page" id="mainContent">
+      <header class="s-head">
+        <a class="s-chip" href="/seller">← 처음으로</a>
+        <div class="s-head-actions">
+          <!-- 시연 이동 메뉴가 붙는 자리(발표자용 보조 수단) -->
+          <span class="demo-nav-slot" id="demoNavSlot"></span>
+          <button class="s-chip density-toggle" id="densityBtn" type="button">가⁻</button>
+        </div>
+      </header>
+
+      <h1 class="s-title">주문</h1>
+      <p class="s-title-sub" id="summary">주문을 불러오는 중입니다</p>
+
+      <!-- 상태별로 묶는다. 주문이 늘어도 "지금 손댈 것"이 맨 위에 남는다. -->
+      <section class="s-group" id="gRejected" aria-labelledby="tRejected" hidden>
+        <h2 id="tRejected">검수 반려<span class="n" id="nRejected"></span></h2>
+        <p class="sec-sub">거점이 돌려보낸 주문입니다. 사유를 확인해 주세요.</p>
+        <div id="listRejected"></div>
+      </section>
+
+      <section class="s-group" aria-labelledby="tPending">
+        <h2 id="tPending">보낼 주문<span class="n" id="nPending"></span></h2>
+        <p class="sec-sub">상품을 준비해 거점에 가져다 놓고 "준비 완료"를 눌러 주세요.</p>
+        <div id="listPending"></div>
+      </section>
+
+      <section class="s-group" aria-labelledby="tHub">
+        <h2 id="tHub">거점 처리 중<span class="n" id="nHub"></span></h2>
+        <p class="sec-sub">거점이 검수하고 배송합니다. 판매자가 하실 일은 없습니다.</p>
+        <div id="listHub"></div>
+      </section>
+
+      <section class="s-group" aria-labelledby="tDone">
+        <h2 id="tDone">완료<span class="n" id="nDone"></span></h2>
+        <p class="sec-sub">배송이 끝난 주문입니다. 정산은 "받을 돈"에서 확인하세요.</p>
+        <div id="listDone"></div>
+      </section>
+
+      <p class="note-panel">포장과 배송은 거점이 돕습니다. 상품을 준비해 지역 거점에 가져다 놓으시면 됩니다.</p>
+
+      <a class="s-home" href="/seller">처음으로</a>
+    </main>
+
+    <script type="module">
+      import { api, requireRole, money, el, $, fulfillmentLabel, toast, startAutoRefresh } from '/js/api.js';
+      import { speak } from '/js/speak.js';
+      import { mountDensityToggle } from '/js/seller-density.js';
+      import { mountDemoNav } from '/js/demo-nav.js';
+
+      mountDensityToggle('#densityBtn');
+      mountDemoNav('#demoNavSlot');
+      await requireRole('farmer');
+
+      /** 거점이 처리 중인 단계들 — 판매자가 손댈 것이 없는 구간이다. */
+      const HUB_STAGES = ['ready_for_hub', 'hub_received', 'hub_passed', 'ready_to_ship'];
+
+      function hubGuide(order) {
+        if (!order.hub_name || !order.hub_address) {
+          return el('p', { class: 'hub-guide', text: '상품을 준비해 지역 거점에 가져다 놓아 주세요.' });
+        }
+
+        const copyButton = el('button', {
+          class: 'mini-btn',
+          type: 'button',
+          text: '거점 주소 복사',
+          'aria-label': `${order.hub_name} 주소 복사`,
+          onclick: async () => {
+            try {
+              await navigator.clipboard.writeText(order.hub_address);
+              toast('거점 주소를 복사했습니다.');
+            } catch {
+              toast('주소를 복사하지 못했습니다.');
+            }
+          },
+        });
+
+        const readyButton = order.fulfillment_status === 'farmer_preparing'
+          ? el('button', {
+              class: 'mini-btn primary',
+              type: 'button',
+              text: '준비 완료',
+              'aria-label': `${order.title} 준비 완료 처리`,
+              onclick: async (event) => {
+                const button = event.currentTarget;
+                button.disabled = true;
+                button.textContent = '처리 중…';
+                try {
+                  await api(`/api/farmer/order-items/${order.id}/ready`, { body: {} });
+                  toast('거점에 입고 대기로 전달했습니다.');
+                  orderSignature = '';
+                  await refreshOrders();
+                } catch (error) {
+                  toast(error.message);
+                  button.disabled = false;
+                  button.textContent = '준비 완료';
+                }
+              },
+            })
+          : null;
+
+        return el('div', { class: 'hub-guide', 'aria-label': '전달할 거점' }, [
+          el('strong', { text: `가져갈 곳 · ${order.hub_name}` }),
+          el('address', { text: order.hub_address }),
+          el('p', {
+            text: order.fulfillment_status === 'farmer_preparing'
+              ? '포장을 마친 뒤 준비 완료를 눌러주세요.'
+              : '준비 완료했습니다. 거점의 입고 확인을 기다리고 있습니다.',
+          }),
+          el('div', { class: 'row-actions' }, [copyButton, readyButton]),
+        ]);
+      }
+
+      function orderCard(order) {
+        const rejected = Boolean(order.has_rejection);
+        const needsAttention = order.fulfillment_status === 'farmer_preparing' && !rejected;
+        const statusLabel = rejected ? '검수 반려' : fulfillmentLabel(order.fulfillment_status);
+
+        return el('article', { class: `card${needsAttention ? ' attention' : ''}` }, [
+          el('div', { class: 'card-head' }, [
+            el('div', {}, [
+              el('p', { class: 'meta', text: `주문 ${order.order_no}` }),
+              el('h3', { text: order.title }),
+            ]),
+            el('span', {
+              class: rejected ? 'badge badge-danger' : needsAttention ? 'badge badge-hint' : 'badge badge-hub',
+              text: rejected ? '검수 반려' : needsAttention ? '준비 필요' : statusLabel,
+            }),
+          ]),
+          el('p', { class: 'amount', text: money(order.amount) }),
+          el('dl', { class: 'kv-list' }, [
+            el('div', { class: 'kv' }, [
+              el('dt', { text: '준비할 수량' }),
+              el('dd', { text: `${order.quantity} × ${order.sku_label}` }),
+            ]),
+            el('div', { class: 'kv' }, [
+              el('dt', { text: '진행 상태' }),
+              el('dd', { text: statusLabel }),
+            ]),
+            rejected
+              ? el('div', { class: 'kv' }, [
+                  el('dt', { text: '반려 사유' }),
+                  el('dd', { text: order.rejection_note || '거점에 확인해주세요.' }),
+                ])
+              : null,
+          ]),
+          !rejected && (order.fulfillment_status === 'farmer_preparing' || order.fulfillment_status === 'ready_for_hub')
+            ? hubGuide(order)
+            : null,
+        ]);
+      }
+
+      /** 한 묶음을 그린다. 비어 있으면 비었다고 적는다(빈 자리를 숨기지 않는다). */
+      function paintGroup(boxId, countId, rows, emptyText) {
+        const box = $(boxId);
+        box.replaceChildren();
+        $(countId).textContent = `${rows.length}건`;
+        if (!rows.length) {
+          box.append(el('p', { class: 'empty', text: emptyText }));
+          return;
+        }
+        for (const order of rows) box.append(orderCard(order));
+      }
+
+      let orderSignature = '';
+      let previousPendingIds = null;
+
+      async function loadOrders() {
+        const { orders } = await api('/api/farmer/orders');
+        const signature = JSON.stringify(
+          orders.map((order) => [order.id, order.fulfillment_status, order.has_rejection, order.rejection_note]),
+        );
+        if (signature === orderSignature) return;
+
+        const rejected = orders.filter((order) => order.has_rejection);
+        const pending = orders.filter(
+          (order) => order.fulfillment_status === 'farmer_preparing' && !order.has_rejection,
+        );
+        const inHub = orders.filter(
+          (order) => HUB_STAGES.includes(order.fulfillment_status) && !order.has_rejection,
+        );
+        const done = orders.filter(
+          (order) => order.fulfillment_status === 'delivered' && !order.has_rejection,
+        );
+
+        // 새로 들어온 주문이 있을 때만 음성으로 알린다(같은 주문을 반복해서 읽지 않는다).
+        const pendingIds = new Set(pending.map((order) => order.id));
+        const newPendingCount = previousPendingIds === null
+          ? pendingIds.size
+          : [...pendingIds].filter((id) => !previousPendingIds.has(id)).length;
+        previousPendingIds = pendingIds;
+
+        const rejectedSummary = rejected.length ? ` 반려된 주문은 ${rejected.length}건입니다.` : '';
+        $('#summary').textContent = orders.length
+          ? `전체 ${orders.length}건 · 지금 보낼 주문 ${pending.length}건${rejectedSummary}`
+          : '아직 들어온 주문이 없습니다.';
+        if (newPendingCount > 0) speak(`준비할 주문이 ${pending.length}건 있습니다.${rejectedSummary}`);
+
+        $('#gRejected').hidden = rejected.length === 0;
+        paintGroup('#listRejected', '#nRejected', rejected, '반려된 주문이 없습니다.');
+        paintGroup('#listPending', '#nPending', pending, '지금 보낼 주문이 없습니다.');
+        paintGroup('#listHub', '#nHub', inHub, '거점에서 처리 중인 주문이 없습니다.');
+        paintGroup('#listDone', '#nDone', done, '아직 배송 완료된 주문이 없습니다.');
+
+        orderSignature = signature;
+      }
+
+      const refreshOrders = startAutoRefresh(loadOrders);
+      await refreshOrders();
+    </script>
+  </body>
+</html>

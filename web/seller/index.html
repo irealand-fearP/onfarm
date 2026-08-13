@@ -41,10 +41,43 @@
 
         <p class="mic" id="micLine"><span class="dot" aria-hidden="true"></span><span id="micText">음성 안내 준비 중</span></p>
 
-        <a class="todo-card" href="/seller/todo" id="todoCard">
-          <span class="t"><span>오늘 할 일</span><span class="count-badge" id="todoBadge" hidden>0</span></span>
-          <span class="t2" id="todoSummary">불러오는 중</span>
-        </a>
+        <!-- 큰 항목 3개 — 주문·상품·정산이 각각 제 화면으로 갈라진다.
+             건수·금액을 항목 안에 함께 둬서 눌러보지 않아도 오늘 상태를 알 수 있다. -->
+        <nav class="s-menu" aria-label="판매자 메뉴">
+          <a class="s-menu-item" href="/seller/orders">
+            <span class="ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z" /><path d="m3 7.5 9 4.5 9-4.5M12 12v9" /></svg>
+            </span>
+            <span class="tx">
+              <span class="nm">보낼 주문</span>
+              <span class="vl" id="mOrders">세는 중</span>
+            </span>
+            <span class="count-badge" id="orderBadge" hidden>0</span>
+            <span class="go" aria-hidden="true">›</span>
+          </a>
+
+          <a class="s-menu-item" href="/seller/products">
+            <span class="ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /></svg>
+            </span>
+            <span class="tx">
+              <span class="nm">판매 중 상품</span>
+              <span class="vl" id="mProducts">세는 중</span>
+            </span>
+            <span class="go" aria-hidden="true">›</span>
+          </a>
+
+          <a class="s-menu-item" href="/seller/money">
+            <span class="ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 6h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3Z" /><path d="M8 10.5 10 15l2-4.5 2 4.5 2-4.5M8.5 13h7" /></svg>
+            </span>
+            <span class="tx">
+              <span class="nm">받을 돈</span>
+              <span class="vl" id="mMoney">세는 중</span>
+            </span>
+            <span class="go" aria-hidden="true">›</span>
+          </a>
+        </nav>
 
         <!-- 농가 바꾸기 — 농민 계정만 큰 카드로 보여준다.
              한 번 열면 닫을 수 없어 "오늘 할 일"과 뒤섞여 보이던 문제가 있어,
@@ -81,24 +114,35 @@
         $('#whoName').textContent = `${session.user.name}님`;
       }
 
+      /** 0 이어도 흐리게 표시할 뿐 감추지 않는다 — "없다"는 것도 알아야 할 사실이다. */
+      function setCount(id, text, zero) {
+        const node = $(id);
+        node.textContent = text;
+        node.classList.toggle('is-zero', zero);
+      }
+
       let summarySignature = '';
       async function loadSummary() {
-        const [orders, settle] = await Promise.all([
+        const [orders, listings, settle] = await Promise.all([
           api('/api/farmer/orders'),
+          api('/api/farmer/listings'),
           api('/api/farmer/settlements'),
         ]);
         const pending = orders.orders.filter(
           (order) => order.fulfillment_status === 'farmer_preparing' && !order.has_rejection,
         );
-        const signature = `${pending.length}:${settle.summary.pendingNet}`;
+        const active = listings.listings.filter((listing) => listing.status === 'active');
+        const signature = `${pending.length}:${active.length}:${settle.summary.pendingNet}`;
         if (signature === summarySignature) return;
         summarySignature = signature;
 
-        const badge = $('#todoBadge');
+        const badge = $('#orderBadge');
         badge.hidden = pending.length === 0;
         badge.textContent = String(pending.length);
-        $('#todoSummary').textContent =
-          `보낼 주문 ${pending.length}건 · 받을 돈 ${money(settle.summary.pendingNet)}`;
+
+        setCount('#mOrders', `${pending.length}건`, pending.length === 0);
+        setCount('#mProducts', `${active.length}개`, active.length === 0);
+        setCount('#mMoney', money(settle.summary.pendingNet), settle.summary.pendingNet === 0);
       }
 
       if (session) {

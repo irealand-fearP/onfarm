@@ -176,9 +176,9 @@ export function fulfillmentLabel(status) {
   return FULFILLMENT_STEPS.find(([key]) => key === status)?.[1] ?? status;
 }
 
-export function imageOf(listing) {
-  return listing.image_path || '/img/sample/placeholder.svg';
-}
+// imageOf() 는 없앴다. image_path 를 그대로 띄우는 바람에 판매자 화면만 옛 일러스트가
+// 보였다. 상품 사진은 판매자·소비자가 함께 쓰는 /js/product-photo.js 의 productPhoto()
+// 한 곳에서만 고른다.
 
 // PWA: 화면 껍데기만 캐시한다(설치형으로 쓰기 위함). 실패해도 앱 동작에는 영향이 없다.
 if ('serviceWorker' in navigator) {

@@ -21,11 +21,16 @@ interface SeedProduct {
  * 표준 품목/SKU 마스터.
  * 가격은 '운영자가 등록하는 정찰가' 자리다 — 실제 도입 시 지자체·직매장과 합의한 값으로 대체한다.
  * (여기 값은 시연용 가정값이며 시세를 주장하지 않는다)
+ *
+ * sample 은 products.sample_image 컬럼 값이다. 화면은 판매자·소비자 모두
+ * /js/product-photo.js 의 productPhoto() 로 실사 상품컷(/img/products/<code>.webp)을
+ * 고르므로 이 값은 카드에 쓰이지 않는다. 컬럼이 비면 안 되니 공용 플레이스홀더로 통일한다.
+ * (품목별 옛 일러스트는 아무 데서도 참조하지 않아 삭제했다.)
  */
 export const SEED_PRODUCTS: SeedProduct[] = [
   {
     code: 'pear', name_ko: '배', category: 'fruit', variety: '신고배', emoji: '🍐',
-    sample: '/img/sample/pear.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'pear_shingo_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 29000, isDefault: true },
       { code: 'pear_shingo_10kg', label: '10kg 한 상자', weight: 10, unit: 'kg', price: 52000 },
@@ -33,7 +38,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'apple', name_ko: '사과', category: 'fruit', variety: '부사', emoji: '🍎',
-    sample: '/img/sample/apple.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'apple_fuji_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 32000, isDefault: true },
       { code: 'apple_fuji_10kg', label: '10kg 한 상자', weight: 10, unit: 'kg', price: 58000 },
@@ -41,7 +46,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'sweet_potato', name_ko: '고구마', category: 'vegetable', variety: '호박고구마', emoji: '🍠',
-    sample: '/img/sample/sweet_potato.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'sweet_potato_3kg', label: '3kg 한 상자', weight: 3, unit: 'kg', price: 15000, isDefault: true },
       { code: 'sweet_potato_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 23000 },
@@ -49,7 +54,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'potato', name_ko: '감자', category: 'vegetable', variety: '수미감자', emoji: '🥔',
-    sample: '/img/sample/potato.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'potato_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 14000, isDefault: true },
       { code: 'potato_10kg', label: '10kg 한 상자', weight: 10, unit: 'kg', price: 25000 },
@@ -57,7 +62,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'onion', name_ko: '양파', category: 'vegetable', variety: '중만생종', emoji: '🧅',
-    sample: '/img/sample/onion.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'onion_3kg', label: '3kg 한 망', weight: 3, unit: 'kg', price: 9000, isDefault: true },
       { code: 'onion_10kg', label: '10kg 한 망', weight: 10, unit: 'kg', price: 22000 },
@@ -65,7 +70,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'mandarin', name_ko: '감귤', category: 'fruit', variety: '노지감귤', emoji: '🍊',
-    sample: '/img/sample/mandarin.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'mandarin_3kg', label: '3kg 한 상자', weight: 3, unit: 'kg', price: 18000, isDefault: true },
       { code: 'mandarin_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 27000 },
@@ -73,7 +78,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'red_pepper', name_ko: '건고추', category: 'vegetable', variety: '태양초', emoji: '🌶️',
-    sample: '/img/sample/red_pepper.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'red_pepper_600g', label: '600g 한 봉', weight: 0.6, unit: 'kg', price: 20000, isDefault: true },
       { code: 'red_pepper_1kg', label: '1kg 한 봉', weight: 1, unit: 'kg', price: 32000 },
@@ -81,7 +86,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     code: 'peach', name_ko: '복숭아', category: 'fruit', variety: '황도', emoji: '🍑',
-    sample: '/img/sample/peach.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'peach_4kg', label: '4kg 한 상자', weight: 4, unit: 'kg', price: 32000, isDefault: true },
       { code: 'peach_2kg', label: '2kg 한 상자', weight: 2, unit: 'kg', price: 19000 },
@@ -89,7 +94,6 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   },
   {
     // 쌀(곡물). 상품컷 /img/products/rice.webp 가 준비돼 정식 판매 품목으로 연다.
-    // sample_image 는 카드에 쓰이지 않지만(상품컷 우선) 컬럼이 비면 안 되므로 공용 플레이스홀더를 둔다.
     code: 'rice', name_ko: '쌀', category: 'grain', variety: '삼광', emoji: '🌾',
     sample: '/img/sample/placeholder.svg',
     skus: [
@@ -154,7 +158,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
   {
     // 전복도 함께 연다. 홈 캐러셀이 "전복 보러 가기"로 안내하므로 실제로 살 수 있어야 한다.
     code: 'abalone', name_ko: '전복', category: 'seafood', variety: '활전복', emoji: '🐚',
-    sample: '/img/sample/abalone.svg',
+    sample: '/img/sample/placeholder.svg',
     skus: [
       { code: 'abalone_1kg', label: '1kg (10미)', weight: 1, unit: 'kg', price: 45000, isDefault: true },
       { code: 'abalone_500g', label: '500g (5미)', weight: 0.5, unit: 'kg', price: 24000 },
