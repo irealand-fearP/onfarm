@@ -27,7 +27,7 @@ export interface Farm {
   hub_id: number | null;
 }
 
-export type ProductCategory = 'fruit' | 'vegetable' | 'root' | 'seafood';
+export type ProductCategory = 'fruit' | 'vegetable' | 'grain' | 'seafood';
 
 export interface Product {
   id: number;

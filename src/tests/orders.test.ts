@@ -245,8 +245,14 @@ describe('주문 생성', () => {
   it('검수 반려는 환불 예정으로 보이고 미지급 정산에서만 제외된다', () => {
     const db = freshDb();
     const consumer = consumerNamed(db);
-    const [listing] = firstTwoListings(db);
-    const other = listStoreListings(db).find(
+    // 이 테스트는 "한 농민의 두 상품"이 필요하다. 시드 첫 매물의 농민이 항상 2건을 가진 건 아니므로
+    // (품목이 늘면 첫 매물이 바뀐다) 순서에 기대지 않고 2건 이상 가진 농민을 찾아 쓴다.
+    const rows = listStoreListings(db);
+    const listing = rows.find(
+      (candidate) => rows.some((peer) => peer.farmer_id === candidate.farmer_id && peer.id !== candidate.id),
+    );
+    assert.ok(listing, '한 농민이 2건 이상 올린 시드 매물이 있어야 한다');
+    const other = rows.find(
       (candidate) => candidate.farmer_id === listing.farmer_id && candidate.id !== listing.id,
     );
     assert.ok(other, '같은 농민의 다른 상품이 있어야 한다');

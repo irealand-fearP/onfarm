@@ -530,7 +530,9 @@ body.shop img {
 /* ───────── 산지 추천 배너 3종 캐러셀(검색바 아래) ───────── */
 /* 사진은 왼쪽 약 40%가 비어 있는 1800×675 원본이다. 그 여백 위에 HTML 문구를 얹는다.
    가로로 미끄러지는 슬라이드 3장이며, 높이는 aspect-ratio 로 미리 확보해 이미지 로딩 중에도 화면이 밀리지 않는다. */
+/* 점을 배너 안쪽에 얹기 위한 기준 상자(position: relative). */
 .promo-carousel {
+  position: relative;
   margin: 14px 16px 0;
 }
 
@@ -551,12 +553,23 @@ body.shop img {
   min-width: 0;
 }
 
-/* 점 인디케이터 */
+/* 점 인디케이터 — 배너 아래가 아니라 배너 이미지 안쪽 하단에 얹는다(세로 공간 절약).
+   왼쪽 문구 영역(38%)을 피해 오른쪽 영역의 가운데에 둔다.
+   사진 위라 배경이 제각각이므로 반투명 검정 알약 + 흰 점으로 대비를 고정한다.
+   배너 링크(<a>) 바깥에 있는 형제 요소라 점을 눌러도 페이지 이동은 일어나지 않는다. */
 .promo-dots {
+  position: absolute;
+  left: 70%; /* 문구(왼쪽 38%)를 피한 오른쪽 영역의 가운데 */
+  bottom: 8px;
+  z-index: 2;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
-  gap: 7px;
-  padding: 9px 0 0;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
 }
 
 .promo-dot {
@@ -565,7 +578,7 @@ body.shop img {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--line);
+  background: rgba(255, 255, 255, 0.62);
   cursor: pointer;
   transition: width 200ms ease, background 200ms ease;
 }
@@ -573,7 +586,7 @@ body.shop img {
 .promo-dot[aria-current='true'] {
   width: 18px;
   border-radius: 999px;
-  background: var(--brand);
+  background: #ffffff;
 }
 
 .promo-dot:focus-visible {

@@ -7,7 +7,7 @@ const catalog: CatalogItem[] = [
   { code: 'pear', name_ko: '배', category: 'fruit', variety: '신고배' },
   { code: 'apple', name_ko: '사과', category: 'fruit', variety: '부사' },
   { code: 'mandarin', name_ko: '감귤', category: 'fruit', variety: '노지감귤' },
-  { code: 'potato', name_ko: '감자', category: 'root', variety: '수미감자' },
+  { code: 'potato', name_ko: '감자', category: 'vegetable', variety: '수미감자' },
 ];
 
 /** 특정 색상각에 몰린 히스토그램을 만든다(15도 단위 24칸 — 실제 features.js 와 같은 해상도). */

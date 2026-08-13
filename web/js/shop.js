@@ -17,7 +17,7 @@ const state = { category: '', product: '', region: '', query: '' };
 const CATEGORY_LABELS = [
   ['fruit', '과일'],
   ['vegetable', '채소'],
-  ['root', '뿌리채소'],
+  ['grain', '쌀'],
   ['seafood', '수산물'],
 ];
 
@@ -28,6 +28,7 @@ const productByCode = new Map(
 
 // 준비 중 종류의 안내 문구(종류별로 다르게 쓸 수 있게 표에 둔다).
 const COMING_SOON_NOTES = {
+  grain: '올해 햅쌀 물량을 산지와 준비하고 있습니다.',
   seafood: '지역 수협·어촌계와 연계해 곧 열립니다.',
 };
 
@@ -279,15 +280,30 @@ $('#tabSearch')?.addEventListener('click', () => {
   $('#searchForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
-// 필터 초기화 — 0건일 때 사용자가 한 번에 빠져나올 수 있게 한다.
-$('#resetFilters')?.addEventListener('click', () => {
+/** 검색어·종류·품목·지역을 모두 "전체"로 되돌린다(홈에 처음 들어온 상태).
+ *  주소의 ?category= 도 지운다 — 남겨 두면 새로고침 때 필터가 되살아나 초기화가 아니게 된다. */
+function resetAll() {
   state.category = '';
   state.product = '';
   state.region = '';
   state.query = '';
   $('#searchInput').value = '';
+  if (location.search) history.replaceState(null, '', location.pathname);
   renderAllFilters();
   load();
+}
+
+// 필터 초기화 — 0건일 때 사용자가 한 번에 빠져나올 수 있게 한다.
+$('#resetFilters')?.addEventListener('click', resetAll);
+
+// 검색창의 X(네이티브 지우기)도 같은 초기화로 묶는다.
+// 검색어만 지우면 필터는 남아 "초기화했다"는 느낌과 화면이 어긋나기 때문이다.
+// search 이벤트는 X를 눌렀을 때(그리고 엔터) 발생한다. 값이 빈 경우만 전체 초기화로 본다.
+$('#searchInput').addEventListener('search', (event) => {
+  if (event.currentTarget.value !== '') return;
+  resetAll();
+  // 지운 뒤 바로 다시 칠 수 있게 포커스는 검색창에 남긴다.
+  event.currentTarget.focus();
 });
 
 // 준비 중 안내에서 농산물(전체)로 되돌아가기.

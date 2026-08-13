@@ -40,7 +40,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     ],
   },
   {
-    code: 'sweet_potato', name_ko: '고구마', category: 'root', variety: '호박고구마', emoji: '🍠',
+    code: 'sweet_potato', name_ko: '고구마', category: 'vegetable', variety: '호박고구마', emoji: '🍠',
     sample: '/img/sample/sweet_potato.svg',
     skus: [
       { code: 'sweet_potato_3kg', label: '3kg 한 상자', weight: 3, unit: 'kg', price: 15000, isDefault: true },
@@ -48,7 +48,7 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     ],
   },
   {
-    code: 'potato', name_ko: '감자', category: 'root', variety: '수미감자', emoji: '🥔',
+    code: 'potato', name_ko: '감자', category: 'vegetable', variety: '수미감자', emoji: '🥔',
     sample: '/img/sample/potato.svg',
     skus: [
       { code: 'potato_5kg', label: '5kg 한 상자', weight: 5, unit: 'kg', price: 14000, isDefault: true },
@@ -88,6 +88,16 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     ],
   },
   {
+    // 쌀(곡물). 상품컷 /img/products/rice.webp 가 준비돼 정식 판매 품목으로 연다.
+    // sample_image 는 카드에 쓰이지 않지만(상품컷 우선) 컬럼이 비면 안 되므로 공용 플레이스홀더를 둔다.
+    code: 'rice', name_ko: '쌀', category: 'grain', variety: '삼광', emoji: '🌾',
+    sample: '/img/sample/placeholder.svg',
+    skus: [
+      { code: 'rice_samgwang_10kg', label: '10kg 한 포대', weight: 10, unit: 'kg', price: 33000, isDefault: true },
+      { code: 'rice_samgwang_20kg', label: '20kg 한 포대', weight: 20, unit: 'kg', price: 62000 },
+    ],
+  },
+  {
     // Phase 2 (수산물). 스키마·SKU 자리는 만들어 두되 MVP 에서는 비활성.
     code: 'abalone', name_ko: '전복', category: 'seafood', variety: null, emoji: '🐚',
     sample: '/img/sample/abalone.svg', active: 0,
@@ -116,6 +126,8 @@ const SEED_FARMERS: SeedFarmer[] = [
   { name: '이만수', phone: '010-1234-0002', farm: '만수농원', sido: '충북', sigungu: '충주시', detail: '앙성면', hubIndex: 1 },
   { name: '박정자', phone: '010-1234-0003', farm: '정자네 텃밭', sido: '충북', sigungu: '괴산군', detail: '칠성면', hubIndex: 1 },
   { name: '고영희', phone: '010-1234-0004', farm: '한라감귤원', sido: '제주', sigungu: '서귀포시', detail: '남원읍', hubIndex: 2 },
+  // 쌀은 과수원·감귤원이 팔면 어색해 벼농사 농가를 따로 둔다. 성환읍은 실제 벼 재배지이자 0번 거점 소재지라 지역·거점이 앞뒤가 맞는다.
+  { name: '정순임', phone: '010-1234-0005', farm: '성환들녘 쌀농사', sido: '충남', sigungu: '천안시', detail: '성환읍', hubIndex: 0 },
 ];
 
 /** 시연용 초기 매물: [농부 index, 품목 code, 수량, 며칠 전 수확] */
@@ -125,6 +137,7 @@ const SEED_LISTINGS: Array<[number, string, number, number]> = [
   [2, 'red_pepper', 12, 1],
   [3, 'mandarin', 10, 0],
   [2, 'sweet_potato', 5, 1],
+  [4, 'rice', 20, 3],
 ];
 
 function daysAgo(days: number): string {
