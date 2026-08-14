@@ -5,6 +5,7 @@
 const NATIVE_ONES: Record<string, number> = {
   한: 1, 하나: 1, 두: 2, 둘: 2, 세: 3, 셋: 3, 서: 3, 네: 4, 넷: 4, 너: 4,
   다섯: 5, 여섯: 6, 일곱: 7, 여덟: 8, 아홉: 9, 열: 10,
+  닷: 5, 엿: 6, // 어르신이 쓰는 옛 수사(닷 상자 = 다섯 상자)
   스물: 20, 스무: 20, 서른: 30, 마흔: 40, 쉰: 50,
 };
 
@@ -29,6 +30,56 @@ export function parseKoreanQuantity(input: string): number | null {
     return n >= 1 && n <= 999 ? n : null;
   }
 
+  // 2) 문장 맨 앞에서 세 본다.
+  const head = parseFromHead(text);
+  if (head !== null) return head;
+
+  // 3) STT 는 말 앞에 감탄사("어", "음")를 자주 붙인다 — 떼고 다시 본다.
+  const stripped = stripFillers(text);
+  if (stripped !== text) {
+    const afterFiller = parseFromHead(stripped);
+    if (afterFiller !== null) return afterFiller;
+  }
+
+  // 4) "사과 다섯 상자" 처럼 앞말이 붙은 문장 — 단위어 바로 앞의 수사를 찾는다.
+  //    단위어가 반드시 있어야 인정하므로 엉뚱한 말이 수량으로 둔갑하지 않는다.
+  return parseBeforeUnit(text);
+}
+
+/** STT 가 붙이는 군말. '네'·'예'는 수사(넷)와 헷갈려 일부러 넣지 않는다. */
+const FILLERS = ['어', '음', '아', '그', '저', '에', '흠', '자', '이제', '오늘은'];
+
+function stripFillers(text: string): string {
+  let rest = text;
+  for (let guard = 0; guard < FILLERS.length; guard += 1) {
+    const hit = FILLERS.find((f) => rest.startsWith(f) && rest.length > f.length);
+    if (!hit) break;
+    rest = rest.slice(hit.length);
+  }
+  return rest;
+}
+
+const UNIT_WORDS = /(상자|박스|개|봉|망|포)/;
+
+/** 수사 뒤에 올 수 있는 말 — 이 중 하나이거나 문장 끝일 때만 수량으로 본다. */
+const ALLOWED_TAIL = /^(상자|박스|개|봉|망|포|요|만|정도|쯤|입니다|이요|예요|주세요|$)/;
+
+function parseBeforeUnit(text: string): number | null {
+  const found = text.match(UNIT_WORDS);
+  if (!found || found.index === undefined) return null;
+  const unitAt = found.index;
+  // 단위어 앞 최대 4글자(스물다섯 = 4글자)까지 뒤로 물러나며 훑는다. 긴 쪽이 먼저다.
+  for (let start = Math.max(0, unitAt - 4); start < unitAt; start += 1) {
+    const value = parseFromHead(text.slice(start));
+    if (value !== null) return value;
+  }
+  return null;
+}
+
+/** 문장 맨 앞이 수사인 경우만 해석한다(예전 규칙 2~4). */
+function parseFromHead(text: string): number | null {
+  if (!text) return null;
+
   // 2) 고유어 십단위 + 일단위 (열두, 스물다섯 ...)
   for (let t = 0; t < TENS.length; t += 1) {
     const tens = TENS[t];
@@ -45,9 +96,12 @@ export function parseKoreanQuantity(input: string): number | null {
     }
   }
 
-  // 3) 단독 고유어 수사
+  // 3) 단독 고유어 수사.
+  //    뒤에 단위어·말끝(요/입니다…)이 오거나 그것으로 문장이 끝날 때만 인정한다.
+  //    ('네 알겠습니다' 의 '네' 가 4로 둔갑하던 오인식을 막는다)
   for (const [word, value] of Object.entries(NATIVE_ONES)) {
-    if (text.startsWith(word)) return value;
+    if (!text.startsWith(word)) continue;
+    if (ALLOWED_TAIL.test(text.slice(word.length))) return value;
   }
 
   // 4) 한자어 수사(일, 이, 삼 ...) — 단위어가 붙은 경우만 인정해 오인식을 줄인다.

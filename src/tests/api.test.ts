@@ -663,6 +663,7 @@ describe('HTTP — 정적 화면', () => {
       '/hub',
       '/manifest.webmanifest',
       '/js/shared/korean.js',
+      '/js/shared/speech-feedback.js',
     ]) {
       const res = await fetch(`${base}${path}`);
       assert.equal(res.status, 200, `${path} 가 ${res.status}`);

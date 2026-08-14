@@ -3,7 +3,7 @@
 // 기존 farmer-sell.js 의 로직(파이프라인 호출·TTS 낭독·STT 수량 입력)을 그대로 옮겨 쓴다.
 import { $, api, money, requireRole, mountModeBanner, toast, el } from '/js/api.js';
 import { prepareImage } from '/js/features.js';
-import { canListen, listenQuantity, repeatLast, speak } from '/js/speak.js';
+import { canListen, explainListenResult, listenQuantity, repeatLast, speak } from '/js/speak.js';
 import { speakPrice, speakWeight, sinoNumber, nativeCount } from '/js/shared/korean.js';
 import { mountDensityToggle } from '/js/seller-density.js';
 import { mountDemoNav } from '/js/demo-nav.js';
@@ -366,6 +366,14 @@ $('#manualRetake').addEventListener('click', () => show('stepPhoto'));
 $('#qtyMinus').addEventListener('click', () => setQuantity(state.quantity - 1));
 $('#qtyPlus').addEventListener('click', () => setQuantity(state.quantity + 1));
 
+/** 음성이 아예 안 되는 상황 — 마이크 버튼을 접고 + − 버튼 안내를 남긴다. */
+function showManualQtyHint() {
+  const btn = $('#voiceQty');
+  if (btn) btn.hidden = true;
+  const hint = $('#qtyManualHint');
+  if (hint) hint.hidden = false;
+}
+
 $('#voiceQty').addEventListener('click', async () => {
   const btn = $('#voiceQty');
   const label = $('#voiceQtyLabel');
@@ -373,15 +381,20 @@ $('#voiceQty').addEventListener('click', async () => {
   btn.classList.add('is-listening');
   label.textContent = '듣고 있습니다';
   try {
-    const { quantity, transcript } = await listenQuantity();
-    if (quantity) {
-      setQuantity(quantity);
-      speak(`${nativeCount(quantity)} ${unitWord(state.sku?.label)}로 하겠습니다.`, { force: true });
+    // 실패 원인(권한 거부·못 들음·해석 실패)에 따라 안내를 다르게 한다.
+    const feedback = explainListenResult(await listenQuantity());
+    if (feedback.ok) {
+      setQuantity(feedback.quantity);
+      speak(`${nativeCount(feedback.quantity)} ${unitWord(state.sku?.label)}로 하겠습니다.`, { force: true });
     } else {
-      toast(transcript ? `"${transcript}" 를 알아듣지 못했습니다.` : '잘 들리지 않았습니다.');
+      toast(feedback.message);
+      speak(feedback.message, { force: true });
+      if (feedback.showManualFallback) showManualQtyHint();
     }
-  } catch {
+  } catch (err) {
+    console.warn('[음성수량] 예외', err);
     toast('음성을 듣지 못했습니다. 버튼으로 수량을 골라 주세요.');
+    showManualQtyHint();
   } finally {
     btn.disabled = false;
     btn.classList.remove('is-listening');
@@ -447,6 +460,8 @@ mountDemoNav('#demoNavSlot');
 const cfg = await mountModeBanner('#modeBanner');
 state.catalog = cfg?.products ?? [];
 state.session = await requireRole('farmer');
+// 음성 인식은 Chrome·Edge + HTTPS 에서만 된다. 안 되면 버튼 안내를 대신 띄운다.
 if (canListen()) $('#voiceQty').hidden = false;
+else showManualQtyHint();
 renderManual();
 show('stepPhoto');

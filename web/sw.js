@@ -34,6 +34,7 @@ const SHELL = [
   '/js/seller-sell.js',
   '/js/seller-density.js',
   '/js/shared/korean.js',
+  '/js/shared/speech-feedback.js',
   '/img/icon.svg',
   '/img/sample/placeholder.svg',
 ];

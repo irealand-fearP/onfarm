@@ -7,7 +7,8 @@
  */
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { nativeCount, sinoNumber } from '../lib/korean.js';
+import { nativeCount, parseKoreanQuantity, sinoNumber } from '../lib/korean.js';
+import { describeListenOutcome } from '../lib/speech-feedback.js';
 
 describe('번호 낭독 — 한자어 수사', () => {
   it('한 자리 번호를 일·이·삼으로 읽는다', () => {
@@ -56,5 +57,63 @@ describe('개수 낭독 — 고유어 수사', () => {
     assert.equal(nativeCount(0), '0');
     assert.equal(nativeCount(150), '150');
     assert.equal(sinoNumber(0), '0');
+  });
+});
+
+/*
+ * 실제 STT(Web Speech API)가 뱉는 변형 입력.
+ * 브라우저는 말 앞에 감탄사("어", "음")를 붙이거나 문장째 돌려주는 일이 잦은데,
+ * 파서가 문장 맨 앞만 보고 있어 이런 입력을 통째로 놓쳤다.
+ */
+describe('음성 수량 인식 — STT 실제 변형 입력', () => {
+  it('말 앞에 붙는 감탄사를 무시한다', () => {
+    assert.equal(parseKoreanQuantity('아 다섯 상자'), 5);
+    assert.equal(parseKoreanQuantity('음 세 박스요'), 3);
+    assert.equal(parseKoreanQuantity('어 열두 상자'), 12);
+  });
+
+  it('앞말이 붙은 문장에서도 단위어 앞 수사를 찾아낸다', () => {
+    assert.equal(parseKoreanQuantity('사과 다섯 상자 팔게요'), 5);
+    assert.equal(parseKoreanQuantity('오늘은 스무 개만'), 20);
+  });
+
+  it('어르신이 쓰는 옛 수사(닷·엿)도 알아듣는다', () => {
+    assert.equal(parseKoreanQuantity('닷 상자'), 5);
+    assert.equal(parseKoreanQuantity('엿 상자'), 6);
+  });
+
+  it('수량이 아닌 말은 여전히 인식하지 않는다', () => {
+    assert.equal(parseKoreanQuantity('너무 많이요'), null);
+    assert.equal(parseKoreanQuantity('그냥 많이 주세요'), null);
+    assert.equal(parseKoreanQuantity('네 알겠습니다'), null);
+  });
+});
+
+describe('음성 인식 실패 안내 — 원인별로 다르게 말한다', () => {
+  it('아예 못 들은 경우와 알아듣지 못한 경우를 구분한다', () => {
+    const silent = describeListenOutcome({ status: 'no-speech' });
+    const unparsed = describeListenOutcome({ status: 'unparsed', transcript: '많이요' });
+    assert.notEqual(silent.message, unparsed.message);
+    assert.ok(unparsed.message.includes('많이요'), '들린 말을 그대로 보여 줘야 한다');
+  });
+
+  it('마이크 권한 거부·미지원은 버튼 사용을 안내한다', () => {
+    for (const status of ['not-allowed', 'unsupported'] as const) {
+      const out = describeListenOutcome({ status });
+      assert.equal(out.showManualFallback, true, `${status} 는 버튼 안내가 떠야 한다`);
+    }
+    assert.equal(describeListenOutcome({ status: 'no-speech' }).showManualFallback, false);
+  });
+
+  it('성공하면 수량을 그대로 돌려준다', () => {
+    const out = describeListenOutcome({ status: 'ok', quantity: 5, transcript: '다섯 상자' });
+    assert.equal(out.quantity, 5);
+    assert.equal(out.ok, true);
+  });
+
+  it('알 수 없는 오류도 삼키지 않고 코드를 남긴다', () => {
+    const out = describeListenOutcome({ status: 'error', errorCode: 'audio-capture' });
+    assert.equal(out.ok, false);
+    assert.ok(out.logLine.includes('audio-capture'));
   });
 });
