@@ -671,6 +671,130 @@ body.seller p {
   font-weight: 700;
 }
 
+/* ───────── 신뢰 단계별 후보 배치 ─────────
+   색·아이콘으로 단계를 구분하지 않는다(새 색 금지). 문장 종결어미와 '크기'만으로 말한다. */
+
+/* A(likely) — 1순위만 크게. 실측이 뒷받침하므로 강하게 제안해도 된다. */
+.cands.tier-likely .cand:first-child {
+  min-height: calc(var(--btn-h) * 1.4);
+}
+
+.cands.tier-likely .cand:first-child .nm {
+  font-size: var(--fs-title);
+}
+
+/* B(unsure) — 후보를 동등하게 늘어놓는다.
+   자신 없다고 말하면서 첫 칸만 크게 그리면 말과 화면이 어긋난다. */
+.cands.tier-unsure {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-content: start;
+}
+
+.cands.tier-unsure .cand {
+  min-height: var(--btn-h);
+}
+
+/* A 에서 2·3순위 위에 붙는 작은 라벨 */
+.cands-label {
+  margin: calc(6px * var(--u)) 0 calc(-4px * var(--u));
+  color: var(--t3);
+  font-size: var(--fs-xs);
+}
+
+/* '왜 자신이 없나요' · '왜 모르나요' — 접힌 자백 블록 */
+.why-unsure {
+  margin-top: calc(8px * var(--u));
+  padding: calc(10px * var(--u)) calc(12px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: calc(12px * var(--u));
+  background: var(--surface-soft);
+  font-size: var(--fs-sm);
+}
+
+.why-unsure > summary {
+  color: var(--t2);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.why-unsure ul {
+  margin: calc(8px * var(--u)) 0 0;
+  padding-left: calc(18px * var(--u));
+  color: var(--t2);
+}
+
+.why-unsure p {
+  margin: calc(8px * var(--u)) 0 0;
+  color: var(--t2);
+}
+
+/* '근거 보기' — 접혀 있어 어르신 사용을 방해하지 않고, 펼치면 심사 답변이 된다 */
+.link-basis {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--t2);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  text-decoration: underline;
+}
+
+.basis-panel {
+  margin-top: calc(8px * var(--u));
+  padding: calc(12px * var(--u)) calc(14px * var(--u));
+  border: 1px solid var(--line);
+  border-radius: calc(12px * var(--u));
+  background: var(--surface-soft);
+  font-size: var(--fs-xs);
+}
+
+.basis-block + .basis-block {
+  margin-top: calc(10px * var(--u));
+}
+
+.basis-block h3 {
+  margin: 0;
+  color: var(--t1);
+  font-size: var(--fs-sm);
+}
+
+.basis-block ul {
+  margin: calc(4px * var(--u)) 0 0;
+  padding-left: calc(16px * var(--u));
+  color: var(--t2);
+  line-height: 1.6;
+}
+
+.basis-foot {
+  margin: calc(10px * var(--u)) 0 0;
+  color: var(--t3);
+}
+
+/* C(unknown) — 목록 아래에 붙는 안내. 목록을 고르는 일이 먼저고, 설명은 그 다음이다. */
+.unknown-notice {
+  margin-top: calc(4px * var(--u));
+}
+
+.unknown-sub {
+  margin: 0;
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+/* 안내 ON 에서만 붙는 한 줄(펄스 강조 대신 문장으로만 돕는다) */
+.guide-extra {
+  margin: 0 0 calc(4px * var(--u));
+  color: var(--t2);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+body:not([data-guide='on']) .guide-extra {
+  display: none;
+}
+
 /* 품목 직접 고르기(폴백) — 이름만 있는 촘촘한 격자 */
 .manual-grid {
   display: grid;

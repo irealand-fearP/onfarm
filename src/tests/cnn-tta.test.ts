@@ -111,7 +111,7 @@ describe('다중 배율 판정 — 확률 합치기', () => {
   });
 
   it('신뢰도 상한은 합친 확률 위에도 그대로 걸린다', () => {
-    const meta = { val_object_level: { item: 0.8 } } as CnnMetadata;
+    const meta = { val_object_level: { item: 0.8 }, field_ceiling: 0.9 } as CnnMetadata;
     const fused = fuseItemProbs([[0.99, 0.01], [0.99, 0.01]]);
     assert.equal(capConfidence(fused[0]!, meta), 0.8);
   });

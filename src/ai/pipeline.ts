@@ -7,6 +7,8 @@ import { writeProduct } from './product-writer.js';
 import { analyzeQuality } from './quality-analysis.js';
 import { decideFlow } from './rule-engine.js';
 import type { FlowDecision } from './rule-engine.js';
+import { resolveTier } from './confidence-tier.js';
+import type { TierResult } from './confidence-tier.js';
 import { catalog, findProductByCode, matchSkus } from './sku-matcher.js';
 import type { SkuCandidate } from './sku-matcher.js';
 import type { ImageFeatures, RecognitionResult } from './types.js';
@@ -51,6 +53,11 @@ export interface PipelineResult {
    * 오등록을 줄이고, AI 가 단정하지 않는다는 설계와도 맞는다.
    */
   candidates: Candidate[];
+  /**
+   * 신뢰 단계(A/B/C). 화면은 이 값을 받아쓰기만 하고 임계값을 다시 계산하지 않는다
+   * — 근거가 두 곳으로 갈라지면 심사·유지보수 때 답할 수 없다.
+   */
+  tier: TierResult;
   product: Product | null;
   skus: SkuCandidate[];
   selectedSku: SkuCandidate | null;
@@ -190,7 +197,30 @@ export async function runPipeline(
   };
   push(recognition.product, recognition.confidence);
   for (const alt of recognition.alternatives ?? []) push(alt.product, alt.confidence);
-  const shown = candidates.filter((c) => c.sellable).slice(0, 3);
+  const sellableCandidates = candidates.filter((c) => c.sellable);
+
+  // STEP 4-b — 신뢰 단계. 사진별 신뢰도 숫자가 아니라 이 품목의 실측 적중률로 정한다.
+  // (사용자가 직접 고른 경우는 AI 추측이 아니므로 판정하지 않는다)
+  const tier = req.forcedProductCode
+    ? resolveTier({
+        provider: 'manual',
+        product: '',
+        productKo: recognition.product_ko,
+        candidateCount: 0,
+        signalQuality: localQuality.signalQuality,
+        detectedIssues: recognition.detected_issues,
+      })
+    : resolveTier({
+        provider: source,
+        product: recognition.product,
+        productKo: recognition.product_ko,
+        candidateCount: sellableCandidates.length,
+        signalQuality: localQuality.signalQuality,
+        detectedIssues: recognition.detected_issues,
+      });
+
+  // B(unsure) 에서만 후보를 4개까지 보여준다 — 접전이면 답이 4번째에 있을 수 있다.
+  const shown = sellableCandidates.slice(0, tier.tier === 'unsure' ? 4 : 3);
 
   // STEP 5 — 상품 문안 자동 생성
   const today = todayKst();
@@ -212,6 +242,7 @@ export async function runPipeline(
     recognition,
     decision,
     candidates: shown,
+    tier,
     product,
     skus,
     selectedSku,

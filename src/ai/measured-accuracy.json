@@ -1,0 +1,55 @@
+{
+  "measured_at": "2026-08-14",
+  "source": "outputs/provider_comparison.txt · outputs/confidence_calibration.txt (B. NEAREST 축소, 1,024장)",
+  "why_nearest": "브라우저 캔버스 축소가 실제 사용자 입력 경로다. 더 보수적인 쪽을 채택한다.",
+  "why_precision": "화면은 'X 같아요'라고 말한다. 그 문장이 맞을 확률은 재현율(진짜 X를 X로 맞힌 비율)이 아니라 정밀도(X라고 말했을 때 실제 X였던 비율)다. 감자는 재현율 100%지만 정밀도는 18%다 — 색표에 없는 8품목 사진이 대부분 감자로 흘러들기 때문이다. 단계 판정은 정밀도로만 한다.",
+  "sample_per_item": 64,
+  "sample_total": 1024,
+  "conditions": [
+    "학습과 같은 조건",
+    "어두운 곳",
+    "밝은 역광",
+    "흙·상자 배경",
+    "멀리서(작게)",
+    "기울여서",
+    "흔들림",
+    "그늘"
+  ],
+  "field_evaluated": false,
+  "caveats": [
+    "시험 사진 1,024장은 상품 사진 16장을 변형해 만든 것입니다. 품목당 원본은 1장뿐입니다.",
+    "지금 방식(색 기준)은 이 사진들에 맞춰 조정돼 있어, 실제보다 유리하게 나올 수 있습니다.",
+    "16품목이 같은 수로 섞인 시험입니다. 실제로 올라오는 품목 구성이 다르면 비율도 달라집니다.",
+    "실제 휴대폰으로 찍은 사진으로는 아직 시험하지 못했습니다. (표본 0장)"
+  ],
+  "tiers": {
+    "likely_min": 0.7,
+    "unknown_max": 0.3,
+    "min_signal_quality": 0.5
+  },
+  "heuristic": {
+    "peach": { "precision": 1.0, "predicted_n": 54, "correct_n": 54, "recall": 0.844 },
+    "apple": { "precision": 0.98, "predicted_n": 49, "correct_n": 48, "recall": 0.75 },
+    "red_pepper": { "precision": 0.873, "predicted_n": 63, "correct_n": 55, "recall": 0.859 },
+    "sweet_potato": { "precision": 0.517, "predicted_n": 116, "correct_n": 60, "recall": 0.938 },
+    "mandarin": { "precision": 0.5, "predicted_n": 112, "correct_n": 56, "recall": 0.875 },
+    "pear": { "precision": 0.491, "predicted_n": 114, "correct_n": 56, "recall": 0.875 },
+    "onion": { "precision": 0.4, "predicted_n": 160, "correct_n": 64, "recall": 1.0 },
+    "potato": { "precision": 0.18, "predicted_n": 356, "correct_n": 64, "recall": 1.0 },
+    "rice": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "garlic": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "grape": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "persimmon": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "mackerel": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "shrimp": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "squid": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 },
+    "abalone": { "precision": null, "predicted_n": 0, "correct_n": 0, "recall": 0.0 }
+  },
+  "cnn": {
+    "pear": { "precision": 0.982, "predicted_n": 57, "correct_n": 56, "recall": 0.875 },
+    "apple": { "precision": 0.696, "predicted_n": 92, "correct_n": 64, "recall": 1.0 },
+    "potato": { "precision": 0.249, "predicted_n": 225, "correct_n": 56, "recall": 0.875 },
+    "onion": { "precision": 0.209, "predicted_n": 306, "correct_n": 64, "recall": 1.0 },
+    "mandarin": { "precision": 0.186, "predicted_n": 344, "correct_n": 64, "recall": 1.0 }
+  }
+}

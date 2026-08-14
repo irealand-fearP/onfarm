@@ -79,5 +79,7 @@
       "n_objects": 80,
       "grade_usable": false
     }
-  }
+  },
+  "field_ceiling": 0.74,
+  "field_ceiling_note": "검증셋 val_object_level.item(=1.0)은 측정 기록이라 그대로 둔다. 이 값은 조건 시험(1,024장, 2026-08-14)에서 학습 5품목 CNN(TTA켬) top-1 적중률 0.74~0.95 중 보수적인 쪽을 실전 상한으로 잡은 것이다."
 }

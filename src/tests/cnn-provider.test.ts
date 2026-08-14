@@ -55,13 +55,24 @@ describe('CNN provider — 모델이 없을 때', () => {
 
 describe('CNN provider — 확신도 상한', () => {
   it('개체 단위 검증 정확도를 넘는 확신도를 잘라낸다', () => {
-    // 모델이 0.99 를 불러도 실측 상한(0.82)을 넘겨 표시하지 않는다
-    assert.equal(capConfidence(0.99, meta()), 0.82);
+    // 모델이 0.99 를 불러도 검증 상한(0.82)·실전 상한(0.74) 중 작은 쪽을 넘겨 표시하지 않는다
+    assert.equal(capConfidence(0.99, meta()), 0.74);
     assert.equal(capConfidence(0.5, meta()), 0.5);
+    // 검증 상한이 실전 상한보다 낮으면 그쪽이 이긴다(둘 중 작은 값)
+    assert.equal(capConfidence(0.99, meta({ val_object_level: { item: 0.6 } })), 0.6);
+  });
+
+  it('실전 상한이 명시돼 있으면 그 값을 쓴다 — 검증셋 측정 기록은 건드리지 않는다', () => {
+    // val_object_level.item = 1.0 은 '검증셋에서 실제로 측정된 값' 이라 낮춰 적으면 기록 훼손이다.
+    // 대신 field_ceiling 을 따로 두고 둘 중 작은 값을 쓴다.
+    const m = meta({ val_object_level: { item: 1.0 }, field_ceiling: 0.5 });
+    assert.equal(capConfidence(0.99, m), 0.5);
+    assert.equal(m.val_object_level?.item, 1.0);
   });
 
   it('메타데이터에 수치가 없으면 보수적인 기본값을 쓴다', () => {
-    assert.equal(capConfidence(0.99, meta({ val_object_level: {} })), 0.8);
+    // 검증 상한 기본값 0.8 과 실전 상한 기본값 0.74 중 작은 쪽
+    assert.equal(capConfidence(0.99, meta({ val_object_level: {} })), 0.74);
   });
 });
 

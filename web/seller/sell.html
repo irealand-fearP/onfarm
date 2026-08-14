@@ -90,19 +90,37 @@
       <!-- ③ 품목 고르기 (후보가 1개여도 반드시 고르게 한다 — 오등록 방지) -->
       <section class="sell-step" id="stepResult" hidden>
         <div>
-          <h1 class="ask">어느 것인가요?</h1>
+          <!-- 문구는 tier 에 따라 seller-sell.js 가 갈아 끼운다(A 평서형 / B 의문형). -->
+          <h1 class="ask" id="resultTitle">어느 것인가요?</h1>
           <p class="ask-sub" id="resultSub"></p>
         </div>
 
+        <!-- A 에서만 1순위 카드 바로 아래로 옮겨 붙는다(seller-sell.js). -->
         <div class="cands" id="candidateGrid"></div>
+        <p class="cands-label" id="candsLabel" hidden>다른 것이라면</p>
         <p class="guide-hint"></p>
+
+        <!-- B(자신 없음)에서만 보이는 자백 블록. 왜 자신이 없는지를 사진 근거로 말한다. -->
+        <details class="why-unsure" id="whyUnsure" hidden>
+          <summary>왜 자신이 없나요?</summary>
+          <ul id="whyUnsureList"></ul>
+        </details>
+
+        <!-- B 에서는 전체 목록이 '실패 버튼' 이 아니라 정상 경로라서 후보 바로 아래로 승격된다. -->
+        <button class="btn" id="resultPickAll" type="button" hidden>전체 목록에서 고르기</button>
 
         <div class="badge-row">
           <span class="badge badge-ai" id="badgeSource">AI 확인</span>
-          <span class="badge badge-hint" id="badgeQuality">AI 품질 참고</span>
-          <span class="badge badge-muted" id="badgeConfidence"></span>
+          <span class="badge badge-hint" id="badgePhoto">사진 상태: 보통</span>
+          <button class="link-basis" id="basisToggle" type="button" aria-expanded="false" aria-controls="basisPanel">
+            근거 보기 ›
+          </button>
         </div>
+        <div class="basis-panel" id="basisPanel" hidden></div>
         <p class="price-note" id="resultBasis"></p>
+        <p class="price-note" id="humanNote">
+          고르신 내용으로 등록됩니다. 가격과 등급은 AI가 정하지 않고, 검수에서 사람이 확인합니다.
+        </p>
 
         <div class="s-foot">
           <div class="assist-row">
@@ -119,11 +137,25 @@
       <!-- ③-C 전체 품목 직접 선택 -->
       <section class="sell-step" id="stepManual" hidden>
         <div>
-          <h1 class="ask">무엇을 파실까요?</h1>
-          <p class="ask-sub">농산물 이름을 눌러 주세요.</p>
+          <h1 class="ask" id="manualTitle">무엇을 파실까요?</h1>
+          <p class="ask-sub" id="manualSub">농산물 이름을 눌러 주세요.</p>
         </div>
         <div class="manual-grid" id="manualGrid"></div>
+        <!--
+          C(모르겠음) 로 들어왔을 때만 켜지는 블록.
+          어르신은 AI 가 실패하면 사진도 날아갔다고 생각한다 — 사진이 그대로 쓰인다고 먼저 말해 준다.
+        -->
+        <div class="unknown-notice" id="unknownNotice" hidden>
+          <p class="unknown-sub">사진은 그대로 쓰입니다. 다시 찍지 않으셔도 돼요.</p>
+          <details class="why-unsure" id="whyUnknown">
+            <summary>왜 모르나요?</summary>
+            <p id="whyUnknownText"></p>
+          </details>
+        </div>
         <p class="guide-hint"></p>
+        <p class="price-note">
+          고르신 내용으로 등록됩니다. 가격과 등급은 AI가 정하지 않고, 검수에서 사람이 확인합니다.
+        </p>
         <div class="s-foot">
           <button class="btn ghost" id="manualRetake" type="button">사진 다시 찍기</button>
         </div>

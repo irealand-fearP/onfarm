@@ -173,3 +173,24 @@ export function nativeCount(n: number): string {
   if (n === 20) return '스무';
   return `${NATIVE_COUNT_TENS[tens] ?? ''}${NATIVE_COUNT_ONES[ones] ?? ''}` || String(n);
 }
+
+/**
+ * 받침 유무에 따라 조사를 고른다. "감자(으)로", "감자은" 같은 표기는 어르신 화면에서
+ * 기계가 쓴 문장처럼 읽히므로 쓰지 않는다.
+ */
+export function josa(word: string, withFinal: string, withoutFinal: string): string {
+  const last = word.at(-1) ?? '';
+  const code = last.charCodeAt(0);
+  // 한글 음절이 아니면(숫자·영문) 보수적으로 받침 있는 쪽을 쓴다.
+  if (Number.isNaN(code) || code < 0xac00 || code > 0xd7a3) return withFinal;
+  return (code - 0xac00) % 28 === 0 ? withoutFinal : withFinal;
+}
+
+/** '로/으로' 전용. 받침 ㄹ 은 '로' 를 쓴다(쌀로, 전복으로, 감자로). */
+export function josaRo(word: string): string {
+  const last = word.at(-1) ?? '';
+  const code = last.charCodeAt(0);
+  if (Number.isNaN(code) || code < 0xac00 || code > 0xd7a3) return '으로';
+  const jong = (code - 0xac00) % 28;
+  return jong === 0 || jong === 8 ? '로' : '으로';
+}

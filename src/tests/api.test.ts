@@ -665,6 +665,7 @@ describe('HTTP — 정적 화면', () => {
       '/js/shared/korean.js',
       '/js/shared/speech-feedback.js',
       '/js/shared/sell-steps.js',
+      '/js/shared/confidence-tier-view.js',
       '/js/shared/seller-guide-state.js',
     ]) {
       const res = await fetch(`${base}${path}`);

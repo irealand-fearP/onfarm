@@ -5,8 +5,13 @@ import type { ImageFeatures, RecognitionResult, VisionInput, VisionProvider } fr
  * 외부 API 없이 동작하는 규칙 기반 품목 후보 산출기.
  *
  * 색상(H) · 채도(S) · 명도(V) · 에지밀도의 프로토타입 거리로 점수를 매기고
- * softmax 로 후보 확률을 만든다. 딥러닝 모델이 아니며, 신뢰도 상한을 0.86 으로 잠가
- * '확신하는 판정'처럼 보이지 않게 한다. 향후 CV 모델로 교체되는 자리다.
+ * softmax 로 후보 확률을 만든다. 딥러닝 모델이 아니며, 향후 CV 모델로 교체되는 자리다.
+ *
+ * ★ 여기서 나오는 confidence 는 '맞을 확률' 이 아니다 ★
+ * 실측(outputs/confidence_calibration.txt)에서 이 값의 상위 50% 구간 적중률은 43.9%,
+ * 하위 50% 는 45.3% 로 오히려 역전됐다. 즉 순서에 정보가 없다. 그래서 화면에는 이 숫자를
+ * 표시하지 않고(퍼센트 폐기), 신뢰 단계는 품목별 실측 적중률(confidence-tier.ts)로만 정한다.
+ * 이 값의 용도는 후보 정렬과 rule-engine 분기뿐이다.
  */
 interface Prototype {
   code: string;
@@ -37,6 +42,12 @@ export const PROTOTYPES: Prototype[] = [
 ];
 
 const W = { hue: 0.55, sat: 0.2, val: 0.15, edge: 0.1 };
+/*
+  후보 정렬용 점수의 표시 상한. '정확도' 가 아니다.
+  1,024건 실측에서 관측된 최댓값은 0.461 로, 이 상한은 한 번도 걸리지 않았다(장식에 가깝다).
+  그래도 남기는 이유: 프로토타입 표가 바뀌어 특정 품목의 확률이 1 에 가까워졌을 때
+  화면·API 가 '거의 확신' 으로 보이는 경로를 막는 마지막 방어선이기 때문이다.
+*/
 const MAX_CONFIDENCE = 0.86;
 
 function circularDistance(a: number, b: number): number {
@@ -151,7 +162,8 @@ export class HeuristicVisionProvider implements VisionProvider {
       confidence: Number(confidence.toFixed(3)),
       detected_issues: quality.issues,
       description_basis: quality.basis,
-      alternatives: ranked.slice(1, 3).map((c) => {
+      // B(unsure) 단계에서 후보를 4칸까지 보여주므로 대안은 3개까지 넘긴다.
+      alternatives: ranked.slice(1, 4).map((c) => {
         const alt = input.catalog.find((x) => x.code === c.code);
         return {
           product: c.code,

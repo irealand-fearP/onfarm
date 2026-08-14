@@ -31,6 +31,11 @@ export interface CnnMetadata {
   img_size: number;
   normalize: { mean: number[]; std: number[] };
   val_object_level?: { item?: number; grade?: number; n_objects?: number };
+  /**
+   * 실전 신뢰도 상한. val_object_level 은 검증셋 '측정 기록' 이라 손대지 않고,
+   * 실제 촬영 조건에서 관측된 상한을 여기 따로 적는다(capConfidence 가 둘 중 작은 값을 쓴다).
+   */
+  field_ceiling?: number;
   weight_only_grade_baseline?: number;
   mean_confidence_when_wrong?: number | null;
   per_item?: Record<string, ItemEvidence>;
@@ -55,10 +60,20 @@ export function loadMetadata(dir: string): CnnMetadata {
  * 학습 데이터는 스튜디오 촬영이고 독립 표본은 개체 수(1,258개)뿐이라, 실제 폰 사진에서의
  * 정확도는 검증셋 수치보다 낮을 수밖에 없다. 그래서 **개체 단위 검증 정확도**를 상한으로 잡는다.
  * (한바구니에서 provider 확률을 재검증 없이 믿었다가 안전장치가 통째로 우회된 전례가 있다)
+ *
+ * 그런데 val_object_level.item = 1.0 이라 Math.min(raw, 1.0) 은 아무것도 자르지 않았다
+ * (실측 관측 최댓값 0.962 — outputs/confidence_calibration.txt).
+ * 이 1.0 은 '검증셋에서 실제로 측정된 값' 이므로 임의로 낮춰 적으면 측정 기록이 훼손된다.
+ * 그래서 metadata 의 측정치는 그대로 두고, **실전 상한(field_ceiling)** 을 별도 필드로 두어
+ * 둘 중 작은 값을 쓴다. 기본값 0.74 는 우리 조건 시험에서 학습 5품목 CNN(TTA켬)이 보인
+ * top-1 적중률(0.74~0.95) 중 보수적인 쪽이다.
  */
+const DEFAULT_FIELD_CEILING = 0.74;
+
 export function capConfidence(raw: number, meta: CnnMetadata): number {
-  const ceiling = meta.val_object_level?.item ?? 0.8;
-  return Math.max(0, Math.min(raw, ceiling));
+  const validationCeiling = meta.val_object_level?.item ?? 0.8;
+  const fieldCeiling = meta.field_ceiling ?? DEFAULT_FIELD_CEILING;
+  return Math.max(0, Math.min(raw, validationCeiling, fieldCeiling));
 }
 
 /**

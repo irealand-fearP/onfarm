@@ -9,6 +9,7 @@ import { mountDensityToggle } from '/js/seller-density.js';
 import { mountDemoNav } from '/js/demo-nav.js';
 import { STEP_PROGRESS, guideStepIndex, stepFocus } from '/js/shared/sell-steps.js';
 import { bumpSellCount, guideOn, renderGuideSteps, setGuideDemoMode } from '/js/seller-guide.js';
+import { photoStateLabel, tierHeadline } from '/js/shared/confidence-tier-view.js';
 
 const state = {
   session: null,
@@ -128,75 +129,212 @@ async function analyze(payload) {
 }
 
 function route(result) {
-  // 신뢰도와 무관하게 후보를 번호로 보여준다.
   // 후보가 하나여도 사용자가 직접 고르게 하는 이 한 번이 오등록을 막는 안전장치다.
+  // 단계(tier)는 서버가 실측 적중률로 정해 보내준다 — 화면은 임계값을 다시 계산하지 않는다.
   const candidates = result.candidates ?? [];
-  if (candidates.length === 0) {
-    renderManual();
+  const tier = result.tier?.tier ?? 'unknown';
+
+  // C — 맞힌 적이 거의 없는 품목에는 추측을 아예 내밀지 않는다.
+  // 틀릴 게 확실한 추측을 보여주는 건 도움이 아니라 해다.
+  if (tier === 'unknown' || candidates.length === 0) {
+    renderUnknown(result);
     show('stepManual');
-    speak('사진을 자동으로 확인하지 못했습니다. 무엇을 파실까요?');
+    const head = tierHeadline('unknown');
+    speak(`${head.title}. ${head.sub}.`, { force: true });
     return;
   }
   renderResult(result);
   show('stepResult');
-  speakCandidates(candidates);
+  speakCandidates(result, candidates);
 }
 
 /**
  * 후보를 번호와 함께 읽어준다. 화면을 못 보는 상황에서도 고를 수 있게.
  * 숫자를 그대로 넣으면 TTS 가 "1번"을 '한 번(once)'으로 읽어 횟수처럼 들린다.
  * 그래서 번호는 한자어 수사로 풀어 "일번, 이번, 삼번" 이라고 말하게 한다.
+ *
+ * 첫 문장은 화면 h1 과 글자 단위로 같아야 한다 — 화면과 음성이 다른 말을 하면 안 된다.
  */
-function speakCandidates(candidates) {
-  const list = candidates.map((c, i) => `${sinoNumber(i + 1)}번 ${c.name}`).join(', ');
-  speak(`사진을 확인했습니다. ${list} 중에 어느 것인가요?`, { force: true });
+function speakCandidates(result, candidates) {
+  const head = tierHeadline(result.tier?.tier ?? 'unsure', candidates[0]?.name ?? '');
+  const rest = candidates.slice(1);
+  const list = rest.map((c, i) => `${sinoNumber(i + 2)}번 ${c.name}`).join(', ');
+  const tail = list ? ` 아니면 ${list} 중에 골라 주세요.` : '';
+  speak(`${head.title} ${head.sub}.${tail}`, { force: true });
 }
 
 /* ───────── 각 화면 렌더 ───────── */
-function renderResult(result) {
+
+/** 배지·근거 블록처럼 A/B 공통으로 쓰는 부분. */
+function renderBadges(result) {
   const r = result.recognition;
-  const candidates = result.candidates ?? [];
-  $('#resultSub').textContent =
-    candidates.length > 1 ? '가장 비슷한 것부터 보여드립니다.' : '사진과 같으면 눌러 주세요.';
-
-  const grid = $('#candidateGrid');
-  grid.replaceChildren();
-  candidates.forEach((c, i) => {
-    const first = i === 0;
-    grid.append(
-      el(
-        'button',
-        {
-          type: 'button',
-          class: `cand${first ? ' on' : ''}`,
-          'aria-label': `${i + 1}번 ${c.name}${first ? ', 가장 비슷한 품목' : ''}`,
-          onclick: () => pickProduct(c.code),
-        },
-        [
-          el('span', { class: 'no', text: `${i + 1}` }),
-          el('span', {}, [
-            el('span', { class: 'nm', text: c.name }),
-            el('span', { class: 'cf', text: first ? '가장 비슷해요' : '비슷할 수 있어요' }),
-          ]),
-        ],
-      ),
-    );
-  });
-
   $('#badgeSource').textContent = result.ai.offline
     ? `${result.ai.label} · 사진 외부 전송 없음`
     : result.ai.label;
-  $('#badgeQuality').textContent = `AI 품질 참고: ${r.quality_hint}`;
-  $('#badgeConfidence').textContent = r.confidence
-    ? `1순위 신뢰도 ${Math.round(r.confidence * 100)}%`
-    : '';
+  // "AI 품질 참고" 는 폐기했다 — 어르신이 농산물 등급으로 읽어 "AI는 등급을 확정하지 않는다"와 충돌.
+  $('#badgePhoto').textContent = `사진 상태: ${photoStateLabel(r.quality_hint, r.detected_issues ?? [])}`;
+
   const basis = [...r.description_basis];
   if (r.detected_issues.length) basis.push(`확인 어려웠던 점: ${r.detected_issues.join(', ')}`);
   if (result.ai.degraded) basis.push(`※ ${result.ai.degraded}`);
   $('#resultBasis').textContent = basis.join(' / ');
+  renderBasisPanel(result);
+}
+
+/**
+ * '근거 보기' 안쪽. 접혀 있으므로 어르신 사용을 방해하지 않고, 펼치면 심사 답변이 된다.
+ * 한계 문구는 모든 단계에서 항상 넣는다 — 유리한 숫자만 고르지 않는다는 담보다.
+ */
+function renderBasisPanel(result) {
+  const r = result.recognition;
+  const t = result.tier ?? {};
+  const ev = t.evidence ?? {};
+  const panel = $('#basisPanel');
+  const blocks = [];
+
+  const seen = [...(r.description_basis ?? [])];
+  if (r.detected_issues?.length) seen.push(`확인 어려웠던 점: ${r.detected_issues.join(', ')}`);
+  blocks.push(basisBlock('이 사진에서 본 것', seen));
+
+  const hit = [];
+  if (t.reason) hit.push(t.reason);
+  if (ev.conditions?.length) hit.push(`시험 조건: ${ev.conditions.join(' · ')}`);
+  blocks.push(basisBlock('이 품목을 우리가 얼마나 맞혔나', hit));
+
+  blocks.push(basisBlock('시험의 한계 (숨기지 않습니다)', ev.caveats ?? []));
+
+  panel.replaceChildren(
+    ...blocks,
+    el('p', {
+      class: 'basis-foot',
+      text: ev.measured_at
+        ? `측정일 ${ev.measured_at} · 표본 ${(ev.sample_total ?? 0).toLocaleString('ko-KR')}장 (16품목 × 8변형 × 8조건)`
+        : '',
+    }),
+  );
+}
+
+function basisBlock(title, lines) {
+  return el('div', { class: 'basis-block' }, [
+    el('h3', { text: title }),
+    el(
+      'ul',
+      {},
+      (lines.length ? lines : ['-']).map((line) => el('li', { text: line })),
+    ),
+  ]);
+}
+
+/** 후보 한 칸. A 에서만 1순위를 시각적으로 키운다(B 는 말과 화면을 맞추려고 균등하게 둔다). */
+function candidateButton(c, i, emphasizeFirst) {
+  const first = i === 0;
+  const on = first && emphasizeFirst;
+  return el(
+    'button',
+    {
+      type: 'button',
+      class: `cand${on ? ' on' : ''}`,
+      'aria-label': `${i + 1}번 ${c.name}${on ? ', 가장 비슷한 품목' : ''}`,
+      onclick: () => pickProduct(c.code),
+    },
+    [
+      el('span', { class: 'no', text: `${i + 1}` }),
+      el('span', {}, [
+        el('span', { class: 'nm', text: c.name }),
+        ...(emphasizeFirst
+          ? [
+              el('span', {
+                class: 'cf',
+                text: first ? `이 사진에서는 ${c.name}로 보입니다` : '이것일 수도 있어요',
+              }),
+            ]
+          : []),
+      ]),
+    ],
+  );
+}
+
+function renderResult(result) {
+  const candidates = result.candidates ?? [];
+  const tier = result.tier?.tier ?? 'unsure';
+  const likely = tier === 'likely';
+  const head = tierHeadline(tier, candidates[0]?.name ?? '');
+
+  $('#resultTitle').textContent = head.title;
+  $('#resultSub').textContent = `${head.sub}.`;
+
+  const grid = $('#candidateGrid');
+  grid.className = `cands tier-${tier}`;
+  const cards = candidates.map((c, i) => candidateButton(c, i, likely));
+  // A: 1순위 카드와 나머지 사이에 작은 라벨을 끼운다. B: 후보가 동등하므로 라벨을 쓰지 않는다.
+  const label = $('#candsLabel');
+  label.hidden = !likely || candidates.length < 2;
+  if (!label.hidden) cards.splice(1, 0, label);
+  grid.replaceChildren(...cards);
+
+  // B 전용 — 왜 자신이 없는지, 그리고 전체 목록 승격
+  const unsure = tier === 'unsure';
+  const why = $('#whyUnsure');
+  why.hidden = !unsure;
+  why.open = false;
+  if (unsure) {
+    const reasons = [...(result.recognition.detected_issues ?? [])];
+    if (result.tier?.reason) reasons.push(result.tier.reason);
+    $('#whyUnsureList').replaceChildren(...reasons.map((r) => el('li', { text: r })));
+  }
+  $('#resultPickAll').hidden = !unsure;
+  // '여기 없어요' 는 B 에서 전체 목록 버튼과 겹치므로 감춘다(같은 일을 하는 버튼 둘 금지).
+  $('#resultNo').hidden = unsure;
+
+  // 안내 ON 에서만 B 한 줄을 얹는다(강조는 화면당 하나 — 펄스는 쓰지 않는다).
+  setGuideExtra('#stepResult', unsure && guideOn()
+    ? '천천히 보시고 고르세요. 없으면 아래 전체 목록을 눌러 주세요.'
+    : null);
+
+  renderBadges(result);
+  closeBasis();
+}
+
+/** C — stepResult 를 건너뛰고 전체 목록으로 직행한다. AI 후보는 한 칸도 내밀지 않는다. */
+function renderUnknown(result) {
+  renderManual();
+  const head = tierHeadline('unknown');
+  $('#manualTitle').textContent = head.title;
+  $('#manualSub').textContent = `${head.sub}.`;
+  $('#unknownNotice').hidden = false;
+  const why = $('#whyUnknown');
+  why.open = false;
+  // reason 안에 이미 품목명이 들어 있으므로 이름을 덧붙이지 않는다.
+  $('#whyUnknownText').textContent =
+    result.tier?.reason ?? '이 품목은 아직 사진으로 시험해 보지 못했습니다.';
+  setGuideExtra('#stepManual', guideOn()
+    ? '이건 AI가 어려워하는 품목이에요. 직접 골라 주시면 됩니다.'
+    : null);
+}
+
+/** 안내 ON 전용 한 줄. 없으면 지운다(이전 단계 문구가 남으면 안 된다). */
+function setGuideExtra(sectionSelector, text) {
+  const section = document.querySelector(sectionSelector);
+  if (!section) return;
+  section.querySelector('.guide-extra')?.remove();
+  if (!text) return;
+  const grid = section.querySelector('.cands, .manual-grid');
+  const line = el('p', { class: 'guide-extra', text });
+  grid?.parentNode.insertBefore(line, grid);
+}
+
+function closeBasis() {
+  $('#basisPanel').hidden = true;
+  $('#basisToggle').setAttribute('aria-expanded', 'false');
+  $('#basisToggle').textContent = '근거 보기 ›';
 }
 
 function renderManual() {
+  // C 로 들어온 게 아니면 기본 문구로 되돌린다(이전 화면의 '모르겠어요' 가 남으면 안 된다).
+  $('#unknownNotice').hidden = true;
+  $('#manualTitle').textContent = '무엇을 파실까요?';
+  $('#manualSub').textContent = '농산물 이름을 눌러 주세요.';
+  setGuideExtra('#stepManual', null);
   const grid = $('#manualGrid');
   grid.replaceChildren();
   for (const p of state.catalog) {
@@ -382,6 +520,18 @@ $('#resultNo').addEventListener('click', () => {
   renderManual();
   show('stepManual');
   speak('무엇을 파실까요?');
+});
+$('#resultPickAll').addEventListener('click', () => {
+  renderManual();
+  show('stepManual');
+  speak('전체 목록입니다. 무엇을 파실까요?');
+});
+$('#basisToggle').addEventListener('click', () => {
+  const panel = $('#basisPanel');
+  const open = panel.hidden;
+  panel.hidden = !open;
+  $('#basisToggle').setAttribute('aria-expanded', String(open));
+  $('#basisToggle').textContent = open ? '근거 접기 ˅' : '근거 보기 ›';
 });
 $('#resultRetake').addEventListener('click', () => show('stepPhoto'));
 $('#manualRetake').addEventListener('click', () => show('stepPhoto'));
