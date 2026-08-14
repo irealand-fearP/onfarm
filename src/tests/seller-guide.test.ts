@@ -6,7 +6,7 @@ import {
   resolveGuideState,
   shouldGraduate,
 } from '../lib/seller-guide-state.js';
-import { GUIDE_STEPS, STEP_PROGRESS, guideStepIndex } from '../lib/sell-steps.js';
+import { GUIDE_STEPS, STEP_PROGRESS, guideStepIndex, stepFocus } from '../lib/sell-steps.js';
 
 describe('안내 모드 상태 해석', () => {
   it('저장값이 없으면 켜짐이다(첫 방문 ON)', () => {
@@ -85,10 +85,63 @@ describe('단계 라벨 단일 출처', () => {
     assert.equal(STEP_PROGRESS.stepLoading.hintGuide, STEP_PROGRESS.stepLoading.hint);
   });
 
+  it('안내 ON 힌트는 행동 지시형으로 따로 있다 (진행 줄용)', () => {
+    assert.equal(STEP_PROGRESS.stepResult.hintGuide, '맞는 것을 눌러 주세요');
+  });
+
   it('저장 키 이름이 고정돼 있다', () => {
     assert.equal(GUIDE_KEYS.state, 'onfarm.seller.guide');
     assert.equal(GUIDE_KEYS.manual, 'onfarm.seller.guide.manual');
     assert.equal(GUIDE_KEYS.count, 'onfarm.seller.sellCount');
     assert.equal(GUIDE_KEYS.notice, 'onfarm.seller.guide.notice');
+  });
+});
+
+describe('등록 화면 단계별 강조 대상', () => {
+  const ACT_STEPS = ['stepPhoto', 'stepResult', 'stepManual', 'stepSku', 'stepDone'] as const;
+
+  it('사용자가 할 일이 있는 단계마다 강조 대상이 정확히 하나다', () => {
+    for (const step of ACT_STEPS) {
+      const focus = stepFocus(step);
+      assert.equal(typeof focus.target, 'string', `${step} 에 강조 대상이 없다`);
+      assert.ok(focus.target && focus.target.length > 0);
+    }
+  });
+
+  it('강조 대상은 단계마다 서로 다른 요소다(시선 경합 방지)', () => {
+    const targets = ACT_STEPS.map((s) => stepFocus(s).target);
+    assert.equal(new Set(targets).size, targets.length);
+  });
+
+  it('각 단계의 주 조작은 그 단계 안에 있는 요소를 가리킨다', () => {
+    assert.equal(stepFocus('stepPhoto').target, '#stepPhoto .photo-drop');
+    assert.equal(stepFocus('stepResult').target, '#candidateGrid');
+    assert.equal(stepFocus('stepManual').target, '#manualGrid');
+    // 수량은 '정하기'가 먼저다 — 확인 버튼(#submitBtn)이 아니라 스테퍼를 가리킨다.
+    assert.equal(stepFocus('stepSku').target, '#stepSku .stepper');
+    assert.equal(stepFocus('stepDone').target, '#doneAgain');
+  });
+
+  it('분석 중에는 할 일이 없으므로 강조하지 않는다', () => {
+    assert.equal(stepFocus('stepLoading').target, null);
+    assert.ok(stepFocus('stepLoading').hint.length > 0);
+  });
+
+  it('모든 단계에 행동 지시 한 줄이 있다', () => {
+    for (const step of [...ACT_STEPS, 'stepLoading']) {
+      assert.ok(stepFocus(step).hint.length > 0, `${step} 안내 문구 없음`);
+    }
+  });
+
+  it('강조가 있는 단계의 문구는 방향어와 함께 무엇을 누를지 말한다', () => {
+    for (const step of ACT_STEPS) {
+      const { hint } = stepFocus(step);
+      assert.match(hint, /위|아래/, `${step}: 방향어 없음 — ${hint}`);
+      assert.match(hint, /눌러|누르면/, `${step}: 조작 지시 없음 — ${hint}`);
+    }
+  });
+
+  it('모르는 단계는 아무것도 강조하지 않는다', () => {
+    assert.deepEqual(stepFocus('없는단계'), { target: null, hint: '' });
   });
 });

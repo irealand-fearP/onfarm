@@ -68,6 +68,9 @@
         </label>
         <input type="file" id="photoInput" accept="image/*" capture="environment" class="visually-hidden" />
 
+        <!-- 안내 ON 에서만 보이는 행동 지시 한 줄. 문구는 sell-steps.js 가 채운다. -->
+        <p class="guide-hint"></p>
+
         <div class="s-foot">
           <button class="btn ghost" id="sampleBtn" type="button">사진 없이 시연해 보기</button>
         </div>
@@ -80,6 +83,7 @@
           <h1 class="ask">사진을 살펴보고 있어요</h1>
           <p class="ask-sub">농산물 종류와 판매 단위를 확인하고 있습니다.</p>
           <img id="loadingPreview" class="photo-preview" alt="분석 중인 농산물 사진" hidden />
+          <p class="guide-hint"></p>
         </div>
       </section>
 
@@ -91,6 +95,7 @@
         </div>
 
         <div class="cands" id="candidateGrid"></div>
+        <p class="guide-hint"></p>
 
         <div class="badge-row">
           <span class="badge badge-ai" id="badgeSource">AI 확인</span>
@@ -118,6 +123,7 @@
           <p class="ask-sub">농산물 이름을 눌러 주세요.</p>
         </div>
         <div class="manual-grid" id="manualGrid"></div>
+        <p class="guide-hint"></p>
         <div class="s-foot">
           <button class="btn ghost" id="manualRetake" type="button">사진 다시 찍기</button>
         </div>
@@ -141,6 +147,8 @@
             </div>
             <button id="qtyPlus" type="button" aria-label="수량 늘리기">+</button>
           </div>
+
+          <p class="guide-hint"></p>
 
           <div class="boxes" id="quantityPack" role="img" aria-label="선택한 수량: 5상자"></div>
 
@@ -175,6 +183,7 @@
           <h1>다 됐습니다</h1>
           <p id="doneSummary"></p>
           <div class="sum"><span class="k">팔리면 받을 돈</span><span class="v" id="doneTotal">-</span></div>
+          <p class="guide-hint"></p>
         </div>
 
         <div class="s-foot">

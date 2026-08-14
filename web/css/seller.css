@@ -1211,6 +1211,34 @@ body[data-guide='on'] .now-badge {
   font-weight: 800;
 }
 
+/* 등록 화면 — 단계마다 주 조작 하나만 홈과 같은 초록 강조를 받는다.
+   진행 표시(①②③)는 '어디쯤'만 알려주므로 '어디를 누를지'는 이 링이 맡는다. */
+body[data-guide='on'] .is-guided {
+  border: calc(3px * var(--u)) solid var(--brand);
+  border-radius: calc(20px * var(--u));
+  box-shadow: 0 0 0 calc(4px * var(--u)) var(--brand-tint);
+}
+
+/* 목록·스테퍼는 원래 테두리가 없어 링이 내용에 붙는다. 숨 쉴 틈만 준다. */
+body[data-guide='on'] .cands.is-guided,
+body[data-guide='on'] .manual-grid.is-guided,
+body[data-guide='on'] .stepper.is-guided {
+  padding: calc(8px * var(--u));
+}
+
+/* 배지를 대상 안에 겹쳐 넣으면 목록 첫 칸을 가리므로 바로 앞줄에 세운다. */
+body[data-guide='on'] .now-badge.is-cue {
+  position: static;
+  /* 부모가 flex column 이라 그냥 두면 배지가 한 줄을 통째로 차지한다(칩으로 안 읽힌다). */
+  align-self: flex-start;
+  width: fit-content;
+  margin-bottom: calc(6px * var(--u));
+}
+
+body[data-guide='on'] .sell-step .guide-hint {
+  margin-top: calc(8px * var(--u));
+}
+
 /* 3단계 인디케이터 — 홈과 등록 화면이 같은 컴포넌트를 쓴다. */
 body[data-guide='on'] .guide-steps {
   display: flex;

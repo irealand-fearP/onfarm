@@ -7,7 +7,7 @@ import { canListen, explainListenResult, listenQuantity, repeatLast, speak } fro
 import { speakPrice, speakWeight, sinoNumber, nativeCount } from '/js/shared/korean.js';
 import { mountDensityToggle } from '/js/seller-density.js';
 import { mountDemoNav } from '/js/demo-nav.js';
-import { STEP_PROGRESS, guideStepIndex } from '/js/shared/sell-steps.js';
+import { STEP_PROGRESS, guideStepIndex, stepFocus } from '/js/shared/sell-steps.js';
 import { bumpSellCount, guideOn, renderGuideSteps, setGuideDemoMode } from '/js/seller-guide.js';
 
 const state = {
@@ -32,6 +32,30 @@ const STEPS = ['stepPhoto', 'stepLoading', 'stepResult', 'stepManual', 'stepSku'
 // 실제 단계는 사진·품목·수량 셋이다. 라벨·힌트는 /js/shared/sell-steps.js 한 곳에서만 온다
 // (홈의 안내 인디케이터와 같은 출처 — 두 곳에 따로 쓰면 반드시 어긋난다).
 
+/**
+ * 단계마다 '지금 할 일' 하나를 표시한다(홈에서 시작된 강조의 연속).
+ * 어디를 강조할지 판단은 순수 함수 stepFocus 가 하고, 여기서는 DOM 만 갈아 끼운다.
+ * 이전 단계의 강조는 반드시 먼저 지운다 — 두 곳이 동시에 빛나면 강조가 아니다.
+ */
+function applyStepFocus(step, guided) {
+  for (const node of document.querySelectorAll('.is-guided')) node.classList.remove('is-guided');
+  for (const node of document.querySelectorAll('.now-badge.is-cue')) node.remove();
+
+  const focus = stepFocus(step);
+  const hintNode = document.querySelector(`#${step} .guide-hint`);
+  if (hintNode) hintNode.textContent = focus.hint;
+  if (!guided || !focus.target) return;
+
+  const target = document.querySelector(focus.target);
+  if (!target) return;
+  target.classList.add('is-guided');
+  // 배지는 대상 '앞'에 둔다. 대상 안에 겹쳐 넣으면 목록·스테퍼 첫 칸을 가린다.
+  target.parentNode.insertBefore(
+    el('span', { class: 'now-badge is-cue', text: '지금 할 일' }),
+    target,
+  );
+}
+
 function show(step) {
   state.step = step;
   for (const id of STEPS) {
@@ -48,6 +72,7 @@ function show(step) {
   const guided = guideOn();
   $('#progressHint').textContent = guided ? progress.hintGuide : progress.hint;
   renderGuideSteps('#sellSteps', guideStepIndex(progress.value));
+  applyStepFocus(step, guided);
   $('#progressFill').style.width = `${progress.value}%`;
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
