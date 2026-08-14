@@ -1131,3 +1131,209 @@ body.seller p {
   color: var(--t3);
   font-size: var(--fs-xs);
 }
+
+/* ───────── 따라 하기 안내 모드 ─────────
+   기존 화면 위에 얹기만 한다. body[data-guide='on'] 이 없으면 아래 규칙은 전부 잠들고
+   화면은 안내 도입 전과 픽셀 단위로 같다. 치수는 모두 --u 비례라 밀도 토글을 그대로 따른다.
+   강조는 새 색(금색)을 만들지 않고 이미 행동색인 브랜드 그린의 대비만 키운다. */
+
+/* 토글 칩 — 상태가 곧 정보라 role="switch"(aria-checked)로 그린다. */
+.guide-toggle {
+  gap: calc(6px * var(--u));
+}
+
+.guide-toggle .sw {
+  width: calc(10px * var(--u));
+  height: calc(10px * var(--u));
+  border: calc(2px * var(--u)) solid currentcolor;
+  border-radius: 999px;
+}
+
+.guide-toggle.is-on {
+  border-color: var(--brand-strong);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+.guide-toggle.is-on .sw {
+  background: currentcolor;
+}
+
+/* 안내 요소는 기본이 '숨김' — OFF 회귀를 CSS 한 곳에서 보장한다. */
+.guide-lead,
+.guide-hint,
+.now-badge,
+.guide-steps {
+  display: none;
+}
+
+body[data-guide='on'] .guide-lead {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--u));
+}
+
+.guide-lead strong {
+  color: var(--t1);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+
+.guide-lead span {
+  color: var(--t2);
+  font-size: var(--fs-sm);
+}
+
+/* 사진 버튼 강조 — 정지한 링 하나. 애니메이션은 쓰지 않는다.
+   색맹 대비로 색뿐 아니라 테두리 두께(3px)로도 차이를 준다. */
+body[data-guide='on'] .shoot {
+  border: calc(3px * var(--u)) solid var(--brand);
+  box-shadow: 0 0 0 calc(4px * var(--u)) var(--brand-tint);
+}
+
+.shoot {
+  position: relative;
+}
+
+/* '지금 할 일' 배지 — 흰 카드 위 대비를 위해 tint 배경 + strong 글자로 반전한다
+   (brand 배경 + 흰 글자는 대비 2.1:1 로 AA 미달). */
+body[data-guide='on'] .now-badge {
+  display: inline-flex;
+  position: absolute;
+  top: calc(12px * var(--u));
+  left: calc(12px * var(--u));
+  align-items: center;
+  padding: calc(4px * var(--u)) calc(10px * var(--u));
+  border-radius: 999px;
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+
+/* 3단계 인디케이터 — 홈과 등록 화면이 같은 컴포넌트를 쓴다. */
+body[data-guide='on'] .guide-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6px * var(--u));
+  width: 100%;
+  margin-top: calc(4px * var(--u));
+  padding-top: calc(12px * var(--u));
+  border-top: 1px solid rgb(255 255 255 / 28%);
+}
+
+.guide-steps .gs {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(5px * var(--u));
+  color: var(--on-brand);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  opacity: 0.72;
+}
+
+.guide-steps .gs.is-now {
+  opacity: 1;
+}
+
+.guide-steps .gs i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  font-style: normal;
+  font-size: calc(12px * var(--u));
+  font-weight: 800;
+}
+
+.guide-steps .gs.is-now i {
+  background: var(--on-brand);
+  color: var(--brand-strong);
+}
+
+.guide-steps .gs-link {
+  flex: 0 1 calc(18px * var(--u));
+  height: 1px;
+  background: currentcolor;
+  opacity: 0.5;
+}
+
+/* 등록 화면(.prog) 위의 같은 컴포넌트 — 흰 배경이라 색만 갈아입힌다. */
+body[data-guide='on'] .prog .guide-steps {
+  justify-content: flex-start;
+  margin-bottom: calc(8px * var(--u));
+  padding-top: 0;
+  border-top: 0;
+}
+
+body[data-guide='on'] .prog .gs {
+  color: var(--t3);
+  opacity: 1;
+}
+
+body[data-guide='on'] .prog .gs i {
+  border-color: var(--line-strong);
+}
+
+body[data-guide='on'] .prog .gs.is-now {
+  color: var(--brand-strong);
+}
+
+body[data-guide='on'] .prog .gs.is-now i {
+  border-color: var(--brand-strong);
+  background: var(--brand-strong);
+  color: var(--on-brand);
+}
+
+/* 안내 ON 에서는 현재 단계 숫자를 키운다. */
+body[data-guide='on'] .prog .pt b {
+  font-size: var(--fs-lg);
+  font-weight: 900;
+}
+
+/* 밀도 '보통'에서는 라벨을 축약해 3칸이 한 줄에 들어가게 한다. */
+.guide-steps .gs .short {
+  display: none;
+}
+
+body[data-density='compact'] .guide-steps .gs .full {
+  display: none;
+}
+
+body[data-density='compact'] .guide-steps .gs .short {
+  display: inline;
+}
+
+body[data-guide='on'] .guide-hint {
+  display: block;
+  margin: 0;
+  color: var(--t2);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+/* 안내 중이어도 주문·정산은 감추지 않는다. 아주 약하게만 물러선다.
+   단 보낼 주문이 있으면(.has-urgent) 후퇴시키지 않는다 — 안내보다 실제 주문이 우선. */
+body[data-guide='on'] .s-menu {
+  opacity: 0.92;
+  transition: opacity 0.15s ease;
+}
+
+body[data-guide='on'] .s-menu.has-urgent {
+  opacity: 1;
+}
+
+/* 졸업 안내 줄 — 다음 진입 때 자동으로 사라진다(닫기 버튼 없음). */
+.guide-graduate {
+  margin: 0;
+  padding: var(--pad);
+  border-radius: var(--radius-card);
+  background: var(--butter);
+  color: var(--warn);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}

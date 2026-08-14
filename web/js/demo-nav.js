@@ -6,6 +6,9 @@
 // 소비자 세션으로 /seller 를 열면 requireRole 이 로그인 화면으로 튕겨 시연이 막혔다.
 // 세션 역할과 목적지가 어긋나는 경우를 메뉴가 스스로 없앤다.
 import { api, el, toast } from '/js/api.js';
+// 안내 모드 저장 키만 빌려 쓴다. seller-guide.js 를 통째로 import 하면
+// 소비자·거점 화면에도 판매자 전용 body 속성이 붙으므로 상수만 가져온다.
+import { GUIDE_KEYS } from '/js/shared/seller-guide-state.js';
 
 /** 시연 목적지. role 이 있으면 그 역할 계정으로 먼저 로그인한다. */
 const TARGETS = [
@@ -155,6 +158,14 @@ export function mountDemoNav(target) {
         localStorage.removeItem(CART_KEY);
       } catch {
         /* 저장소를 못 써도 서버 데이터는 이미 초기화됐다 */
+      }
+      // 안내 등록 횟수·졸업 대기 플래그는 브라우저에만 있어 서버 초기화로는 안 지워진다.
+      // 남겨두면 다음 시연 도중 3회째에 안내가 갑자기 꺼진다.
+      try {
+        localStorage.removeItem(GUIDE_KEYS.count);
+        localStorage.removeItem(GUIDE_KEYS.notice);
+      } catch {
+        /* 저장소를 못 쓰면 애초에 횟수도 쌓이지 않는다 */
       }
       toast(result?.message ?? '처음 상태로 되돌렸습니다. 시연 시작 화면으로 갑니다.');
       setTimeout(() => {

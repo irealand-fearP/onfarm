@@ -7,6 +7,8 @@ import { canListen, explainListenResult, listenQuantity, repeatLast, speak } fro
 import { speakPrice, speakWeight, sinoNumber, nativeCount } from '/js/shared/korean.js';
 import { mountDensityToggle } from '/js/seller-density.js';
 import { mountDemoNav } from '/js/demo-nav.js';
+import { STEP_PROGRESS, guideStepIndex } from '/js/shared/sell-steps.js';
+import { bumpSellCount, guideOn, renderGuideSteps, setGuideDemoMode } from '/js/seller-guide.js';
 
 const state = {
   session: null,
@@ -27,15 +29,8 @@ const state = {
 
 const STEPS = ['stepPhoto', 'stepLoading', 'stepResult', 'stepManual', 'stepSku', 'stepDone'];
 
-// 실제 단계는 사진·품목·수량 셋이다. 표기를 여기에 맞춘다(예전 1/4 표기 불일치 수정).
-const STEP_PROGRESS = {
-  stepPhoto: { step: '1 / 3', label: '사진 찍기', hint: '한 장이면 됩니다', value: 33 },
-  stepLoading: { step: '1 / 3', label: '사진 확인 중', hint: '잠시만요', value: 33 },
-  stepResult: { step: '2 / 3', label: '품목 고르기', hint: '거의 다 됐어요', value: 66 },
-  stepManual: { step: '2 / 3', label: '품목 고르기', hint: '거의 다 됐어요', value: 66 },
-  stepSku: { step: '3 / 3', label: '수량 확인', hint: '마지막이에요', value: 100 },
-  stepDone: { step: '완료', label: '판매 등록 완료', hint: '', value: 100 },
-};
+// 실제 단계는 사진·품목·수량 셋이다. 라벨·힌트는 /js/shared/sell-steps.js 한 곳에서만 온다
+// (홈의 안내 인디케이터와 같은 출처 — 두 곳에 따로 쓰면 반드시 어긋난다).
 
 function show(step) {
   state.step = step;
@@ -49,7 +44,10 @@ function show(step) {
   progressNode.setAttribute('aria-valuenow', String(progress.value));
   $('#progressStep').textContent = progress.step;
   $('#progressLabel').textContent = progress.label;
-  $('#progressHint').textContent = progress.hint;
+  // 안내 ON 에서는 같은 자리 문구를 행동 지시형으로 바꾼다(표시를 새로 만들지 않는다).
+  const guided = guideOn();
+  $('#progressHint').textContent = guided ? progress.hintGuide : progress.hint;
+  renderGuideSteps('#sellSteps', guideStepIndex(progress.value));
   $('#progressFill').style.width = `${progress.value}%`;
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
@@ -422,6 +420,8 @@ $('#submitBtn').addEventListener('click', async () => {
     $('#doneTotal').textContent = money((state.sku?.price ?? 0) * state.quantity);
     state.lastListingId = res.listing.id;
     show('stepDone');
+    // 등록 완료 횟수 +1 — 3회째면 다음 홈 진입에서 안내를 자동으로 내린다(시연 모드 제외).
+    bumpSellCount();
     speak('판매가 시작됐습니다.', { force: true });
   } catch (err) {
     toast(err.message ?? '등록에 실패했습니다.');
@@ -458,6 +458,8 @@ $('#backBtn').addEventListener('click', () => {
 mountDensityToggle('#densityBtn');
 mountDemoNav('#demoNavSlot');
 const cfg = await mountModeBanner('#modeBanner');
+// 시연 중 발표 도중 안내가 꺼지면 안 되므로 데모 모드에서는 자동 졸업을 막는다.
+setGuideDemoMode(cfg?.ai?.demoMode);
 state.catalog = cfg?.products ?? [];
 state.session = await requireRole('farmer');
 // 음성 인식은 Chrome·Edge + HTTPS 에서만 된다. 안 되면 버튼 안내를 대신 띄운다.
